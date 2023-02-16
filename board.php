@@ -9,92 +9,28 @@
   <body>
 
 <div id="chessboard">
-  <div class="row">
-    <div class="square white"></div>
-    <div class="square black"></div>
-    <div class="square white"></div>
-    <div class="square black"></div>
-    <div class="square white"></div>
-    <div class="square black"></div>
-    <div class="square white"></div>
-    <div class="square black"></div>
-  </div>
-  <div class="row">
-    <div class="square black"></div>
-    <div class="square white"></div>
-    <div class="square black"></div>
-    <div class="square white"></div>
-    <div class="square black"></div>
-    <div class="square white"></div>
-    <div class="square black"></div>
-    <div class="square white"></div>
-  </div>
-  <div class="row">
-    <div class="square white"></div>
-    <div class="square black"></div>
-    <div class="square white"></div>
-    <div class="square black"></div>
-    <div class="square white"></div>
-    <div class="square black"></div>
-    <div class="square white"></div>
-    <div class="square black"></div>
-  </div>
-  <div class="row">
-    <div class="square black"></div>
-    <div class="square white"></div>
-    <div class="square black"></div>
-    <div class="square white"></div>
-    <div class="square black"></div>
-    <div class="square white"></div>
-    <div class="square black"></div>
-    <div class="square white"></div>
-  </div>
-  <div class="row">
-    <div class="square white"></div>
-    <div class="square black"></div>
-    <div class="square white"></div>
-    <div class="square black"></div>
-    <div class="square white"></div>
-    <div class="square black"></div>
-    <div class="square white"></div>
-    <div class="square black"></div>
-  </div>
-  <div class="row">
-    <div class="square black"></div>
-    <div class="square white"></div>
-    <div class="square black"></div>
-    <div class="square white"></div>
-    <div class="square black"></div>
-    <div class="square white"></div>
-    <div class="square black"></div>
-    <div class="square white"></div>
-  </div>
-  <div class="row">
-    <div class="square white"></div>
-    <div class="square black">
-    <div draggable="true" class="square white rook white-rook"></div></div>
-    <div class="square white">
-      <div draggable="true" class="square white rook white-rook"></div>
-</div>
-    <div class="square black"></div>
-    <div class="square white"></div>
-    <div class="square black"></div>
-    <div class="square white"></div>
-    <div class="square black"></div>
-  </div>
-  <div class="row">
-    <div class="square black"></div>
-    <div class="square white"></div>
-    <div class="square black"></div>
-    <div class="square white"></div>
-    <div class="square black">
-      <img draggable="true" class="piece" src="rook.png" alt="rook" height="50px">
+    <?php
+        $isWhite = true;
+        for ($row = 8; $row>=1; $row--){
+            echo '<div class="row">
+            ';
+            for ($column = 1; $column<=8; $column++){
+                if($isWhite == true) {
+                    echo '<div id="',$column,$row,'"class="square white"></div>
+            ';
+                    $isWhite = false;
+                } else {
+                    echo '<div id="',$column,$row,'"class="square black"></div>
+            ';
+                    $isWhite = true;
+                }
+           }
+           $isWhite = !$isWhite;
+           echo '
     </div>
-    <div class="square white"></div>
-    <div class="square black"></div>
-    <div class="square white"></div>
-  </div>
-  <!-- Repeat the above row 8 times to complete the chess board -->
+    ';
+        }
+    ?>
 </div>
 
 </body>
