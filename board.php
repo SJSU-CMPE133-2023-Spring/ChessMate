@@ -71,7 +71,8 @@
   </div>
   <div class="row">
     <div class="square white"></div>
-    <div class="square black"></div>
+    <div class="square black">
+    <div draggable="true" class="square white rook white-rook"></div></div>
     <div class="square white">
       <div draggable="true" class="square white rook white-rook"></div>
 </div>
