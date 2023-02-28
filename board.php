@@ -4,34 +4,133 @@
     <meta charset="UTF-8">
     <title>My First Webpage</title>
     <link rel="stylesheet" href="chess.css">
+
+    <script type="text/javascript">
+
+    window.onload = function() {
+        document.getElementById('rook').addEventListener('click', function (e) {
+            var img = document.createElement('img');
+            img.setAttribute('src', 'http://blog.stackoverflow.com/wp-content/uploads/stackoverflow-logo-300.png');
+            e.target.appendChild(img);
+          });
+
+
+      });
+
+    };
+    function myFunction(){
+        var firstRow = document.getElementById("board").rows[2].cells.item(2);
+        firstRow.innerHTML="<img id="rook" src="green_circle.png">";
+    }
+
+    </script>
   </head>
 
   <body>
 
-<div id="chessboard">
-    <?php
-        $isWhite = true;
-        for ($row = 8; $row>=1; $row--){
-            echo '<div class="row">
-            ';
-            for ($column = 1; $column<=8; $column++){
-                if($isWhite == true) {
-                    echo '<div id="',$column,$row,'"class="square white"></div>
-            ';
-                    $isWhite = false;
-                } else {
-                    echo '<div id="',$column,$row,'"class="square black"></div>
-            ';
-                    $isWhite = true;
-                }
-           }
-           $isWhite = !$isWhite;
-           echo '
-    </div>
-    ';
-        }
-    ?>
-</div>
+    <table id ="board" class="chess-board">
+        <tbody>
+            <tr><th></th><th>a</th><th>b</th><th>c</th><th>d</th><th>e</th><th>f</th><th>g</th><th>h</th></tr><tr>
+                    <th>8</th>
+                    <th id="a8" class="light"></th>
+                    <th id="b8" class="dark"></th>
+                    <th id="c8" class="light"></th>
+                    <th id="d8" class="dark"></th>
+                    <th id="e8" class="light"></th>
+                    <th id="f8" class="dark"></th>
+                    <th id="g8" class="light"></th>
+                    <th id="h8" class="dark"></th>
+
+            </tr>
+            <tr>
+                    <th>7</th>
+                    <th id="a7" class="dark"></th>
+                    <th id="b7" class="light"></th>
+                    <th id="c7" class="dark"></th>
+                    <th id="d7" class="light"></th>
+                    <th id="e7" class="dark"></th>
+                    <th id="f7" class="light"></th>
+                    <th id="g7" class="dark"></th>
+                    <th id="h7" class="light"></th>
+
+            </tr>
+            <tr>
+                    <th>6</th>
+                    <th id="a6" class="light"></th>
+                    <th id="b6" class="dark"></th>
+                    <th id="c6" class="light"></th>
+                    <th id="d6" class="dark"></th>
+                    <th id="e6" class="light"></th>
+                    <th id="f6" class="dark"></th>
+                    <th id="g6" class="light"></th>
+                    <th id="h6" class="dark"></th>
+
+            </tr>
+            <tr>
+                    <th>5</th>
+                    <th id="a5" class="dark"></th>
+                    <th id="b5" class="light"></th>
+                    <th id="c5" class="dark"></th>
+                    <th id="d5" class="light"></th>
+                    <th id="e5" class="dark"></th>
+                    <th id="f5" class="light"></th>
+                    <th id="g5" class="dark"></th>
+                    <th id="h5" class="light"></th>
+
+            </tr>
+            <tr>
+                    <th>4</th>
+                    <th id="a4" class="light"></th>
+                    <th id="b4" class="dark"></th>
+                    <th id="c4" class="light"></th>
+                    <th id="d4" class="dark"></th>
+                    <th id="e4" class="light"></th>
+                    <th id="f4" class="dark"></th>
+                    <th id="h4" class="light"></th>
+                    <th id="g4" class="dark"></th>
+
+            </tr>
+            <tr>
+                    <th>3</th>
+                    <th id="a3" class="dark"></th>
+                    <th id="b3" class="light"></th>
+                    <th id="c3" class="dark"></th>
+                    <th id="d3" class="light"></th>
+                    <th id="e3" class="dark"></th>
+                    <th id="f3" class="light"></th>
+                    <th id="g3" class="dark"></th>
+                    <th id="h3" class="light"></th>
+
+            </tr>
+            <tr>
+                    <th>2</th>
+                    <th id="a2" class="light"></th>
+                    <th id="b2" class="dark"></th>
+                    <th id="c2" class="light"></th>
+                    <th id="d2" class="dark"></th>
+                    <th id="e2" class="light"></th>
+                    <th id="f2" class="dark"></th>
+                    <th id="g2" class="light"></th>
+                    <th id="h2" class="dark"></th>
+
+            </tr>
+            <tr>
+                    <th class= gameprefix>1</th>
+                    <th id="a1" class="dark"></th>
+                    <th id="b1" class="light"></th>
+                    <th id="c1" class="dark"></th>
+                    <th id="d1" class="light"></th>
+                    <th id="e1" class="dark"></th>
+                    <th id="f1" class="light"></th>
+                    <th id="g1" class="dark">
+                      <img onclick="myFunction()" clickable="true" id="rook" src="rook.png">
+                    </th>
+                    <th id="h1" class="light"></th>
+
+            </tr>
+        </tbody>
+
+    </table>
 
 </body>
 </html>
