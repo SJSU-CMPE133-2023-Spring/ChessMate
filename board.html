@@ -5,25 +5,8 @@
     <title>My First Webpage</title>
     <link rel="stylesheet" href="chess.css">
 
-    <script type="text/javascript">
-
-    window.onload = function() {
-        document.getElementById('rook').addEventListener('click', function (e) {
-            var img = document.createElement('img');
-            img.setAttribute('src', 'http://blog.stackoverflow.com/wp-content/uploads/stackoverflow-logo-300.png');
-            e.target.appendChild(img);
-          });
 
 
-      });
-
-    };
-    function myFunction(){
-        var firstRow = document.getElementById("board").rows[2].cells.item(2);
-        firstRow.innerHTML="<img id="rook" src="green_circle.png">";
-    }
-
-    </script>
   </head>
 
   <body>
@@ -121,9 +104,12 @@
                     <th id="c1" class="dark"></th>
                     <th id="d1" class="light"></th>
                     <th id="e1" class="dark"></th>
-                    <th id="f1" class="light"></th>
+                    <th id="f1" class="light">
+                      <img onclick="pieceClicked(this)" id="R_1" src="rook.png">
+                      </th>
                     <th id="g1" class="dark">
-                      <img onclick="myFunction()" clickable="true" id="rook" src="rook.png">
+
+
                     </th>
                     <th id="h1" class="light"></th>
 
@@ -131,6 +117,7 @@
         </tbody>
 
     </table>
-
+<script src="model.js">
+</script>
 </body>
 </html>
