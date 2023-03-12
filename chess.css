@@ -18,21 +18,31 @@ tr {
 .chess-board .light { background: #eee;
   width: 75px;
   height: 75px;
+  max-height: 75px;
  }
 
 .chess-board .dark { background: #000;
   width: 75px;
   height: 75px;
+  max-height: 75px;
 }
-.chess-board .selected { background: #41ff81; }
+.chess-board .selected { background: #fffc41; }
 .gameprefix {
   width: 75px;
   height: 75px;
 }
-img {
-  object-fit: contain;
+.piece-img {
+  object-fit: cover;
   width: 75px;
   height: 75px;
+}
+
+.legal-move-space-img{
+  position: relative;
+  top:0;
+  left: 0;
+  width: 99px;
+  height: 30px;
 }
 .rook {
   background-image: url(rook.png);
