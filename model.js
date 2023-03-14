@@ -3,10 +3,10 @@ let pieceSelected = false; //if true, then clicking on a highlighted square = mo
 
 
 // Model Variables
-var currentPosition = "8/1R5R/R7/8/7R/8/8/5R2";
+//var currentPosition = "8/1R5R/R7/8/7R/8/8/5R2";
 var board = new Array(8);
 //setBoard(currentPosition);
-setBoard("8/1R5R/R7/8/7R/8/8/5R2");
+setBoard("8/1R5R/R7/8/7R/8/8/2R2R2");
 var gameID = 0;
 // Controller Methods
 function pieceClicked(element){
@@ -84,7 +84,7 @@ function getLegalMoves(pieceType, x, y) {
 }
 
 function getRookMoves(x, y){
-  return [...checkNorth(x, y)];
+  return [...checkNorth(x, y), ...checkSouth(x,y)];
   //return [...checkNorth(x, y), ...checkEast(x, y), ...checkSouth(x, y), ...checkWest(x, y)];
 }
 
@@ -95,29 +95,61 @@ function checkNorth(x, y){
   while (squaresTillEdge > 0)// or > 0
   {
     squaresTillEdge--;
-    let nextChar = board[x][squaresTillEdge];
-    console.log("next char to check = " + nextChar+" at x = "+x+"; y = "+ squaresTillEdge);
+    let nextChar = board[squaresTillEdge][x]; //not exactly sure why, but there x and y are reversed or it does not work correctly.
+    //console.log("next char to check = " + nextChar+" at x = "+x+"; y = "+ squaresTillEdge);
 
     //if empty spot - add
     if (nextChar === " ") {
-      console.log("next square is empty! Adding it to the array");
+      //console.log("next square is empty! Adding it to the array");
       output.push(new Coordinate(x, squaresTillEdge));
     }
     //if enemy piece - add and break
     else if (nextChar >= 'a' && nextChar <= 'z') {
-      console.log("enemy detected! Stop the count!");
+      //console.log("enemy detected! Stop the count!");
       output.push(new Coordinate(x, squaresTillEdge));
       break;
     }
     //if friendly piece - break
     else if (nextChar >= 'A' && nextChar <= 'Z') {
-      console.log("ally detected at x="+x+", y="+squaresTillEdge+"! Stop the count!");
+      //console.log("ally detected at x="+x+", y="+squaresTillEdge+"! Stop the count!");
       break;
     }
   }
   console.log("North has " + output + " available positions. Size: " + output.length);
   return output;
 }
+
+function checkSouth(x, y){
+  console.log("Checking South... x = " + x + "; y = " + y);
+  let output = [];
+  let squaresTillEdge = y; //or just y
+  while (squaresTillEdge < 7)// or > 0
+  {
+    squaresTillEdge++;
+    let nextChar = board[squaresTillEdge][x]; //not exactly sure why, but there x and y are reversed or it does not work correctly.
+    //console.log("next char to check = " + nextChar+" at x = "+x+"; y = "+ squaresTillEdge);
+
+    //if empty spot - add
+    if (nextChar === " ") {
+      //console.log("next square is empty! Adding it to the array");
+      output.push(new Coordinate(x, squaresTillEdge));
+    }
+    //if enemy piece - add and break
+    else if (nextChar >= 'a' && nextChar <= 'z') {
+      //console.log("enemy detected! Stop the count!");
+      output.push(new Coordinate(x, squaresTillEdge));
+      break;
+    }
+    //if friendly piece - break
+    else if (nextChar >= 'A' && nextChar <= 'Z') {
+      //console.log("ally detected at x="+x+", y="+squaresTillEdge+"! Stop the count!");
+      break;
+    }
+  }
+  console.log("South has " + output + " available positions. Size: " + output.length);
+  return output;
+}
+
 
 function addLegalMove(coordinates){
   let img = document.createElement("img");
