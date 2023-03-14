@@ -1,5 +1,5 @@
 // Controller Variables
-let pieceSelected = false; //if true, then clicking on a highlighted square = move;
+let squareSelected = null; //if true, then clicking on a highlighted square = move;
 
 
 // Model Variables
@@ -7,10 +7,11 @@ let pieceSelected = false; //if true, then clicking on a highlighted square = mo
 var board = new Array(8);
 //setBoard(currentPosition);
 setBoard("8/1R5R/R7/8/7R/8/8/2R2R2");
-var gameID = 0;
+let gameID = 0;
 // Controller Methods
 function pieceClicked(element){
-  if(!pieceSelected){
+  if((squareSelected === null) || (element.parentElement.id !==squareSelected)){
+    hideLegalMoves();
     element.parentElement.style.background="#ffd500";
     //cut the piece from the potential id (ex. P_6 -> P);
     let piece = element.id.slice(0,1);
@@ -21,10 +22,20 @@ function pieceClicked(element){
     console.log("clickedPiece(piece = "+ piece+", x = "+x+"; y = "+y+";");
     displayLegalMoves(getLegalMoves(piece, x, y));
     console.log("pieceClicked is finished!");
+    squareSelected = element.parentElement.id;
   } else {
     hideLegalMoves();
+    squareSelected = null;
   }
-  pieceSelected = !pieceSelected;
+}
+
+function legalMoveClicked(element){
+  //remove the piece from its current position
+
+  
+  //remove the piece from the final position (if there is)
+  //add the piece to the new position (potential special action - castle, promotion, en passant)
+  //hideLegalMoves();
 }
 
 function displayLegalMoves(legalMoves){
