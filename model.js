@@ -1,12 +1,12 @@
 // Controller Variables
 let squareSelected = null; //if true, then clicking on a highlighted square = move;
-
+let pieceSelected = null;
 
 // Model Variables
 //var currentPosition = "8/1R5R/R7/8/7R/8/8/5R2";
 var board = new Array(8);
 //setBoard(currentPosition);
-setBoard("8/1R5R/R7/8/7R/8/8/2R2R2");
+setBoard("8/1R5R/R7/8/7R/8/7b/2R2R2");
 let gameID = 0;
 // Controller Methods
 function pieceClicked(element){
@@ -23,6 +23,7 @@ function pieceClicked(element){
     displayLegalMoves(getLegalMoves(piece, x, y));
     console.log("pieceClicked is finished!");
     squareSelected = element.parentElement.id;
+    pieceSelected = element.id;
   } else {
     hideLegalMoves();
     squareSelected = null;
@@ -30,12 +31,20 @@ function pieceClicked(element){
 }
 
 function legalMoveClicked(element){
-  //remove the piece from its current position
 
-  
+  //save the current piece
+  let piece = document.getElementById(squareSelected).innerHTML;
+  //remove the piece from its current position
+  document.getElementById(squareSelected).innerHTML="";
+
   //remove the piece from the final position (if there is)
+  //document.getElementById(element.parentElement).innerHTML="";
+
+
   //add the piece to the new position (potential special action - castle, promotion, en passant)
-  //hideLegalMoves();
+  //document.getElementById(element.parentElement.id).innerHTML=piece;
+  hideLegalMoves();
+  pieceSelected = null;
 }
 
 function displayLegalMoves(legalMoves){
@@ -96,8 +105,10 @@ function getLegalMoves(pieceType, x, y) {
 
 function getRookMoves(x, y){
   return [...checkNorth(x, y), ...checkSouth(x,y)];
+  // TODO:
   //return [...checkNorth(x, y), ...checkEast(x, y), ...checkSouth(x, y), ...checkWest(x, y)];
 }
+
 
 function checkNorth(x, y){
   console.log("Checking North... x = " + x + "; y = " + y);
@@ -166,6 +177,8 @@ function addLegalMove(coordinates){
   let img = document.createElement("img");
   img.src = "green_circle.png";
   img.className = "legal-move-space-img";
+  img.setAttribute ("onclick", "legalMoveClicked(this)");
+
   let src = document.getElementById(coordinates.getSquareName());
   console.log("AddLegalMove: attempting to add a move at parentID = "+coordinates.getSquareName());
   src.appendChild(img);
