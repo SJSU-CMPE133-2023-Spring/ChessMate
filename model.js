@@ -60,6 +60,17 @@ function displayLegalMoves(legalMoves){
   }
 }
 
+/* TODO: make a method that will check if one of the legal moves allows opponent to capture the King
+      * if there is such a move, it should be removed from the legal moves.
+      * (this method can be only focused on the player from the bottom (ex. enemy pawns only move down))
+      * Idea: the capture can be made only from specific positions: pawns can attack a king only from NW or NE,
+           rooks only on the same x or y, and so on.
+           one of the ways to do it is by creating a list of pieces that can attack the king if there is no one around,
+           and then check if one of this attacks is blocked by a piece that is about to move. If after that move the king
+           is in danger - the move should be removed from the legalMoves.
+
+ */
+
 function hideLegalMoves(){
   let i, elements = document.getElementsByClassName('legal-move-space-img');
   for (i = elements.length; i--;) {
@@ -82,7 +93,7 @@ function setBoard(newPosition){
           newBoard[column][row] = nextChar;
           row++;
         }  else {
-          for (var i = 0; i < nextChar; i++) {
+          for (let i = 0; i < nextChar; i++) {
             newBoard[column][row] = " ";
             row++;
           }
@@ -94,11 +105,18 @@ function setBoard(newPosition){
   logBoard();
 }
 
+/* TODO: complete the getLegalMoves function:
+    * add checkEast and West for the Rook
+    * make similar methods for a Bishop and a Knight
+    * getQueenMoves should simply have both getRookMoves and getBishopMoves
+    * you can try to make King or Pawn, but keep in mind that King can step only on safe squares
+       and pawn movement is pretty tricky (can be done partially)
+   */
 function getLegalMoves(pieceType, x, y) {
   let legalMoves = [];
 
   switch (pieceType) {
-    case "R": //for Rook
+    case "R": //for white Rook "r" for black later
       legalMoves=(getRookMoves(x, y));
       break;
     case "P":
@@ -111,8 +129,8 @@ function getLegalMoves(pieceType, x, y) {
 
 function getRookMoves(x, y){
   return [...checkNorth(x, y), ...checkSouth(x,y)];
-  // TODO:
   //return [...checkNorth(x, y), ...checkEast(x, y), ...checkSouth(x, y), ...checkWest(x, y)];
+
 }
 
 

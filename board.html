@@ -10,7 +10,42 @@
   </head>
 
   <body>
+  <!-- TODO: make a prototype for this page (on a separate branch):
+        Stage 1:
+        * The page should have the board on the left and a some kind of menu on the right
+        * The menu should have tabs (around 3) with buttons and text on them
+        * The page should be scalable and the tab menu should hide if the page is too narrow
+        * There also should be a button to hide the menu manually
+        * The top and the bottom should have footers with some temporary buttons/fields
+        * An example of the page look is something like this:
+        ___________________________________________________________
+        |                      [top footer]                       |
+        ___________________________________________________________
+        |                                     |[tab1]|[tab2]|[tab3|
+        |                                     |      |------|-----|
+        |                                     |                   |
+        |                                     |     [button]      |
+        |               [board]               |                   |
+        |                                     |     [button]      |
+        |                                     |                   |
+        |                                     |     [button]      |
+        |                                     |                   |
+        |                                     |                   |
+        |_________________________________________________________|
+        |                       [bottom footer]                   |
+        |_________________________________________________________|
 
+        -->
+  <!-- TODO: replace the table below with a structure of divs (on a separate branch).
+        Stage 1:
+        * Every div should be a class of "square" or something like that,
+        * they should have fixed sizes or scale
+        * they should display an image of class "piece" in the center, "legal-move" above anything else,
+        * the board coloring should be made with a js function color() that takes 1 boolean argument
+            where 1 is white and 0 is black (something like "boolean drawFromWhitePerspective").
+        (Later at Stage 2: there should be also a way to highlight the square for a hint,
+            and an image of class "comment" must be shown in the right top corner of the square)
+            -->
     <table id ="board" class="chess-board">
         <tbody>
             <tr><th></th><th>a</th><th>b</th><th>c</th><th>d</th><th>e</th><th>f</th><th>g</th><th>h</th></tr><tr>
