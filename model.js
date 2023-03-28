@@ -113,26 +113,102 @@ function setBoard(newPosition){
        and pawn movement is pretty tricky (can be done partially)
    */
 function getLegalMoves(pieceType, x, y) {
-  let legalMoves = [];
+    let legalMoves = [];
 
-  switch (pieceType) {
-    case "R": //for white Rook "r" for black later
-      legalMoves=(getRookMoves(x, y));
-      break;
-    case "P":
-      console.log("Pawn");
-
-  }
-  console.log("GetLegalMoves: total number of moves =  " + legalMoves.length);
-  return legalMoves;
+    switch (pieceType) {
+        case "R":
+            legalMoves = getPawnMoves(x, y);
+            break;
+        case "B":
+            legalMoves = getBishopMoves(x, y);
+            break;
+        case "N":
+            legalMoves = getKnightMoves(x, y);
+            break;
+        case "Q":
+            legalMoves = getQueenMoves(x, y);
+            break;
+        case "K":
+            legalMoves = getKingMoves(x, y);
+            break;
+        case "P":
+            legalMoves = getPawnMoves(x, y);
+            break;
+        case "r":
+            legalMoves = getRookMoves(x, y);
+            break;
+        case "b":
+            legalMoves = getBishopMoves(x, y);
+            break;
+        case "n":
+            legalMoves = getKnightMoves(x, y);
+            break;
+        case "q":
+            legalMoves = getQueenMoves(x, y);
+            break;
+        case "k":
+            legalMoves = getKingMoves(x, y);
+            break;
+        case "p":
+            legalMoves = getPawnMoves(x, y);
+            break;
+    }
+    console.log("GetLegalMoves: total number of moves =  " + legalMoves.length);
+    return legalMoves;
 }
 
 function getRookMoves(x, y){
-  return [...checkNorth(x, y), ...checkSouth(x,y)];
-  //return [...checkNorth(x, y), ...checkEast(x, y), ...checkSouth(x, y), ...checkWest(x, y)];
-
+    return [...checkNorth(x, y), ...checkEast(x, y), ...checkSouth(x, y), ...checkWest(x, y)];
 }
-
+function getBishopMoves(x, y) {
+    return [...checkNE(x, y), ...checkSE(x, y), ...checkSW(x, y), ...checkNW(x, y)];
+}
+function getQueenMoves(x, y) {
+    return [...getRookMoves(x, y), ...getBishopMoves(x, y)];
+}
+function getKingMoves(x, y) {
+    let output = [];
+    if (confirmSqr(x, y, x+1, y+1)) output.push(new Coordinate(x+1, y+1));
+    if (confirmSqr(x, y, x+1, y)) output.push(new Coordinate(x+1, y));
+    if (confirmSqr(x, y, x+1, y-1)) output.push(new Coordinate(x+1, y-1));
+    if (confirmSqr(x, y, x, y-1)) output.push(new Coordinate(x, y-1));
+    if (confirmSqr(x, y, x-1, y-1)) output.push(new Coordinate(x-1, y-1));
+    if (confirmSqr(x, y, x-1, y)) output.push(new Coordinate(x-1, y));
+    if (confirmSqr(x, y, x-1, y+1)) output.push(new Coordinate(x-1, y+1));
+    if (confirmSqr(x, y, x, y+1)) output.push(new Coordinate(x, y+1));
+    return output;
+}
+function getKnightMoves(x, y) {
+    let output = [];
+    if (confirmSqr(x, y, x+1, y+2)) output.push(new Coordinate(x+1, y+2));
+    if (confirmSqr(x, y, x+2, y+1)) output.push(new Coordinate(x+2, y+1));
+    if (confirmSqr(x, y, x+1, y-2)) output.push(new Coordinate(x+1, y-2));
+    if (confirmSqr(x, y, x+2, y-1)) output.push(new Coordinate(x+2, y-1));
+    if (confirmSqr(x, y, x-1, y-2)) output.push(new Coordinate(x-1, y-2));
+    if (confirmSqr(x, y, x-2, y-1)) output.push(new Coordinate(x-2, y-1));
+    if (confirmSqr(x, y, x-1, y+2)) output.push(new Coordinate(x-1, y+2));
+    if (confirmSqr(x, y, x-2, y+1)) output.push(new Coordinate(x-2, y+1));
+    return output;
+}
+function getPawnMoves(x, y) {
+    let output = [];
+    //to determine color of mover (i feel checking if its uppercase is more concise but risky and im too lazy)
+    daPiece = board[y][x];
+    daColor = 'white';
+    if (daPiece >= 'a' && daPiece <= 'z') {
+        daColor = 'black';
+    }
+    //determine direction based on color
+    if (daColor == 'white' && confirmSqr(x, y, x, y-1)) {
+        output.push(new Coordinate(x, y-1));
+        if (y == 6) output.push(new Coordinate(x, y-2));
+    }
+    if (daColor == 'black' && confirmSqr(x, y, x, y+1)) {
+        output.push(new Coordinate(x, y+1));
+        if (y == 1) output.push(new Coordinate(x, y+2));
+    }
+    return output;
+}
 
 function checkNorth(x, y){
   //console.log("Checking North... x = " + x + "; y = " + y);
@@ -144,22 +220,9 @@ function checkNorth(x, y){
     let nextChar = board[squaresTillEdge][x]; //not exactly sure why, but there x and y are reversed or it does not work correctly.
     //console.log("next char to check = " + nextChar+" at x = "+x+"; y = "+ squaresTillEdge);
 
-    //if empty spot - add
-    if (nextChar === " ") {
-      //console.log("next square is empty! Adding it to the array");
-      output.push(new Coordinate(x, squaresTillEdge));
-    }
-    //if enemy piece - add and break
-    else if (nextChar >= 'a' && nextChar <= 'z') {
-      //console.log("enemy detected! Stop the count!");
-      output.push(new Coordinate(x, squaresTillEdge));
-      break;
-    }
-    //if friendly piece - break
-    else if (nextChar >= 'A' && nextChar <= 'Z') {
-      //console.log("ally detected at x="+x+", y="+squaresTillEdge+"! Stop the count!");
-      break;
-    }
+    valid = confirmSqr(x, y, x, yTillEdge);
+    if (!valid) break;
+    else output.push(new Coordinate(x, squaresTillEdge));
   }
   //console.log("North has " + output + " available positions. Size: " + output.length);
   return output;
@@ -174,26 +237,139 @@ function checkSouth(x, y){
     let nextChar = board[squaresTillEdge][x]; //not exactly sure why, but there x and y are reversed or it does not work correctly.
     //console.log("next char to check = " + nextChar+" at x = "+x+"; y = "+ squaresTillEdge);
 
-    //if empty spot - add
-    if (nextChar === " ") {
-      //console.log("next square is empty! Adding it to the array");
-      output.push(new Coordinate(x, squaresTillEdge));
-    }
-    //if enemy piece - add and break
-    else if (nextChar >= 'a' && nextChar <= 'z') {
-      //console.log("enemy detected! Stop the count!");
-      output.push(new Coordinate(x, squaresTillEdge));
-      break;
-    }
-    //if friendly piece - break
-    else if (nextChar >= 'A' && nextChar <= 'Z') {
-      //console.log("ally detected at x="+x+", y="+squaresTillEdge+"! Stop the count!");
-      break;
-    }
+    valid = confirmSqr(x, y, x, yTillEdge);
+    if (!valid) break;
+    else output.push(new Coordinate(x, squaresTillEdge));
   }
   return output;
 }
 
+function checkEast(x, y) {
+    let output = []
+    let squaresTillEdge = x;
+    while (squaresTillEdge < 7)
+    {
+        squaresTillEdge++;
+        let nextChar = board[y][squaresTillEdge]; //wtf
+        //console.log("next char to check = " + nextChar+" at x = "+x+"; y = "+ squaresTillEdge);
+
+        valid = confirmSqr(x, y, xTillEdge, y);
+        if (!valid) break;
+        else output.push(new Coordinate(squaresTillEdge, y));
+    }
+    return output;
+}
+
+function checkWest(x, y) {
+    let output = []
+    let squaresTillEdge = x;
+    while (squaresTillEdge > 0)
+    {
+        squaresTillEdge--;
+        let nextChar = board[y][squaresTillEdge];
+        //console.log("next char to check = " + nextChar+" at x = "+x+"; y = "+ squaresTillEdge);
+
+        valid = confirmSqr(x, y, xTillEdge, y);
+        if (!valid) break;
+        else output.push(new Coordinate(squaresTillEdge, y));
+    }
+    return output;
+}
+
+function checkNE(x, y) {
+    let output = []
+    let xTillEdge = x;
+    let yTillEdge = y;
+    while (xTillEdge < 7 && yTillEdge > 0)
+    {
+        xTillEdge++;
+        yTillEdge--;
+        valid = confirmSqr(x, y, xTillEdge, yTillEdge);
+        if (!valid) break;
+        else output.push(new Coordinate(xTillEdge, yTillEdge));
+    }
+    return output;
+}
+
+function checkSE(x, y) {
+    let output = []
+    let xTillEdge = x;
+    let yTillEdge = y;
+    while (xTillEdge < 7 && yTillEdge < 7)
+    {
+        xTillEdge++;
+        yTillEdge++;
+        valid = confirmSqr(x, y, xTillEdge, yTillEdge);
+        if (!valid) break;
+        else output.push(new Coordinate(xTillEdge, yTillEdge));
+    }
+    return output;
+}
+
+function checkSW(x, y) {
+    let output = []
+    let xTillEdge = x;
+    let yTillEdge = y;
+    while (xTillEdge > 0 && yTillEdge < 7)
+    {
+        xTillEdge--;
+        yTillEdge++;
+        valid = confirmSqr(x, y, xTillEdge, yTillEdge);
+        if (!valid) break;
+        else output.push(new Coordinate(xTillEdge, yTillEdge));
+    }
+    return output;
+}
+
+function checkNW(x, y) {
+    let output = []
+    let xTillEdge = x;
+    let yTillEdge = y;
+    while (xTillEdge > 0 && yTillEdge > 0)
+    {
+        xTillEdge--;
+        yTillEdge--;
+        valid = confirmSqr(x, y, xTillEdge, yTillEdge);
+        if (!valid) break;
+        else output.push(new Coordinate(xTillEdge, yTillEdge));
+    }
+    return output;
+}
+
+// returns true if the given square(x1,y1) is one that can generally be moved onto, otherwise false
+// (x0,y0) is location of the moving piece
+function confirmSqr(x0, y0, x1, y1) {
+    //confirm if position is still on the board
+    if (x1 < 0 || x1 > 7 || y1 < 0 || y1 > 7) return false;
+
+    //to determine color of mover (i feel checking if its uppercase is more concise but risky and im too lazy)
+    daPiece = board[y0][x0];
+    daColor = 'white';
+    if (daPiece >= 'a' && daPiece <= 'z') {
+        daColor = 'black';
+    }
+    // determine color of piece in next space
+    udaPiece = board[y1][x1];
+    udaColor = 'white';
+    if (udaPiece >= 'a' && udaPiece <= 'z') {
+        udaColor = 'black';
+    }
+
+    //if empty spot - add
+    if (udaPiece === " ") {
+        //console.log("next square is empty! Adding it to the array");
+        return true;
+    }
+    //if enemies
+    else if (daColor == 'white' && udaColor == 'black' || daColor == 'black' && udaColor == 'white') {
+        //console.log("enemy detected! Stop the count!");
+        return false;
+    } //if teammates
+    else if (daColor == 'white' && udaColor == 'white' || daColor == 'black' && udaColor == 'black') {
+        //console.log("ally detected at x="+x+", y="+squaresTillEdge+"! Stop the count!");
+        return false;
+    }
+}
 
 function addLegalMove(coordinates){
   let img = document.createElement("img");
@@ -212,6 +388,7 @@ function logBoard(){
     console.log(board[y]);
   }
 }
+
 class Coordinate {
   constructor(x, y) {
     this.x = x;
