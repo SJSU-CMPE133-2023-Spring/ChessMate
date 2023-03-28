@@ -215,7 +215,7 @@ function getPawnMoves(x, y) {
     if (daColor === 'white') {
         if (confirmSqr(x, y, x, y - 1) === EMPTY) {
             output.push(new Coordinate(x, y - 1));
-            if (y == 6 && confirmSqr(x, y, x, y - 2) == EMPTY) output.push(new Coordinate(x, y - 2));
+            if (y == 6 && confirmSqr(x, y, x, y - 2) === EMPTY) output.push(new Coordinate(x, y - 2));
         }
         if (confirmSqr(x, y, x-1, y - 1) === ENEMY) {
             output.push(new Coordinate(x-1, y - 1));
@@ -232,7 +232,7 @@ function getPawnMoves(x, y) {
     if (daColor === 'black') {
         if (confirmSqr(x, y, x, y + 1) === EMPTY) {
             output.push(new Coordinate(x, y + 1));
-            if (y == 1 && confirmSqr(x, y, x, y + 2) == EMPTY) output.push(new Coordinate(x, y + 2));
+            if (y == 1 && confirmSqr(x, y, x, y + 2) === EMPTY) output.push(new Coordinate(x, y + 2));
         }
         if (confirmSqr(x, y, x-1, y + 1) === ENEMY) {
             output.push(new Coordinate(x-1, y + 1));
