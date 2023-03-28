@@ -117,7 +117,7 @@ function getLegalMoves(pieceType, x, y) {
 
     switch (pieceType) {
         case "R":
-            legalMoves = getPawnMoves(x, y);
+            legalMoves = getRookMoves(x, y);
             break;
         case "B":
             legalMoves = getBishopMoves(x, y);
