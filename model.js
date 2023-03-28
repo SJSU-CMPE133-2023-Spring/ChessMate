@@ -1,5 +1,6 @@
 //kinda static variables for the model
-let EMPTY = 0, ENEMY = 1, ALLY = 2;
+const EMPTY = 0, ENEMY = 1, ALLY = 2;
+const WHITE = 'white', BLACK = 'black'
 
 
 // Controller Variables
@@ -7,14 +8,20 @@ let squareSelected = null; //if true, then clicking on a highlighted square = mo
 let pieceSelected = null;
 
 // Model Variables
+
+let turn = true;
+
+let opponent = "id of an opponent / or AI id (if we have multiple: simple/medium/pro)";
 let currentPosition = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR";
 let board = new Array(8);
 //setBoard(currentPosition);
 setBoard("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR");
-let gameID = 0;
+let gameID = 3;
+
 
 // Controller Methods
 function pieceClicked(element) {
+    if (!turn) return; //uncomment this line to get turns
     if ((squareSelected === null) || (element.parentElement.id !== squareSelected)) {
         hideLegalMoves();
         //element.parentElement.style.background="#ffd500";
@@ -24,9 +31,9 @@ function pieceClicked(element) {
         let x = parseInt(element.parentElement.id.slice(0, 1), 36) - 10;
         let y = 8 - element.parentElement.id.slice(1, 2);
 
-        console.log("clickedPiece(piece = " + piece + ", x = " + x + "; y = " + y + ";");
+        //console.log("clickedPiece(piece = " + piece + ", x = " + x + "; y = " + y + ";");
         displayLegalMoves(getLegalMoves(piece, x, y));
-        console.log("pieceClicked is finished!");
+        //console.log("pieceClicked is finished!");
         squareSelected = element.parentElement.id;
         pieceSelected = element.id;
     } else {
@@ -36,6 +43,9 @@ function pieceClicked(element) {
 }
 
 function legalMoveClicked(element) {
+    //save for the ajax call:
+    let lastMove = squareSelected+element.parentElement.id;
+
     let oldX = parseInt(squareSelected.slice(0, 1), 36) - 10;
     let oldY = 8 - squareSelected.slice(1, 2);
     let newX = parseInt(element.parentElement.id.slice(0, 1), 36) - 10;
@@ -47,9 +57,27 @@ function legalMoveClicked(element) {
     document.getElementById(squareSelected).innerHTML = "";
 
 
+
     //update the board model:
     changePieceLocationOnBoard(oldX, oldY, newX, newY);
     hideLegalMoves();
+
+    //part of waiting for opponent's move
+    turn = !turn;
+
+    console.log("Move completed: attempt to make an ajax call with gameID = %d, current position = %s, and last move = %s", gameID, currentPosition, lastMove);
+    //ajaxCall(gameID, currentPosition, lastMove);
+    ajaxCall(gameID, currentPosition, lastMove)
+        .then(response => {
+            console.log("received response: " + response);
+            // TODO: handle the DB response here
+            turn = !turn;
+        })
+        .catch(error => {
+            console.error(error);
+            // handle the error
+        });
+    squareSelected = null;
     pieceSelected = null;
 }
 
@@ -57,15 +85,17 @@ function changePieceLocationOnBoard(oldX, oldY, newX, newY) {
     board[newY][newX] = board[oldY][oldX];
     board[oldY][oldX] = " ";
     updateBoardPosition();
-    console.log("ChangePieceLocationOnBoard: piece moved from " + oldX + ", " + oldY + " to " + newX + ", " + newY);
+    //console.log("ChangePieceLocationOnBoard: piece moved from " + oldX + ", " + oldY + " to " + newX + ", " + newY);
 }
 
-function updateBoardPosition() {
+
+function updateBoardPosition(){
+    //TODO: add code that refreshes the currentPosition string based on the board position
 
 }
 
 function displayLegalMoves(legalMoves) {
-    console.log("displaying n = " + legalMoves.length + " moves...");
+    //console.log("displaying n = " + legalMoves.length + " moves...");
     for (let i = 0; i < legalMoves.length; i++) {
         addLegalMove(new Coordinate(legalMoves[i].x, legalMoves[i].y));
     }
@@ -79,6 +109,10 @@ function displayLegalMoves(legalMoves) {
            one of the ways to do it is by creating a list of pieces that can attack the king if there is no one around,
            and then check if one of this attacks is blocked by a piece that is about to move. If after that move the king
            is in danger - the move should be removed from the legalMoves.
+           LMAO
+           too smart
+           ima BRUTE FORCE instead
+
 
  */
 
@@ -102,6 +136,7 @@ function setBoard(newPosition) {
             for (let charRead = 0; charRead < line.length; charRead++) {
                 let nextChar = line.slice(charRead, charRead + 1);
                 if (!(nextChar >= '0' && nextChar <= '9')) {
+                    /* TODO: not switch column and row every damn time */
                     newBoard[column][row] = nextChar;
                     row++;
                 } else {
@@ -117,11 +152,9 @@ function setBoard(newPosition) {
     logBoard();
 }
 
-function getLegalMoves(pieceType, x, y) {
+function getLegalMoves(piece, x, y) {
     let legalMoves = [];
-
-    switch (pieceType) {
-
+    switch (piece) {
         case "R":
             legalMoves = getRookMoves(x, y);
             break;
@@ -158,12 +191,62 @@ function getLegalMoves(pieceType, x, y) {
         case "p":
             legalMoves = getPawnMoves(x, y);
             break;
-
     }
+
+    legalMoves = remSelfChecks(piece, x, y, legalMoves)
+
     console.log("GetLegalMoves: total number of moves =  " + legalMoves.length);
+
     return legalMoves;
 }
 
+function remSelfChecks(piece, x, y, moves) {
+    let newMoves = [];
+    //determine whose move it is
+    let myColor = getPieceColor(piece);
+    let opponent = BLACK;
+    if (myColor === BLACK) opponent = WHITE;
+
+    //check if moves has a move that gets their King checked
+    for (let move of moves) {
+        let originalBoard = board.map(innerArray => [...innerArray]);
+        let checks = false;
+//        board = originalBoard.map(innerArray => [...innerArray]);
+        let checkBoard = board;
+        checkBoard[y][x] = ' ';
+        checkBoard[move.y][move.x] = piece;
+
+        for (let checkY = 0; checkY < checkBoard.length; checkY++) {
+            for (let checkX = 0; checkX < checkBoard.length; checkX++) {
+                if (getPieceColor(checkBoard[checkY][checkX]) === opponent) {
+                    let oppMoves = []
+                    switch (checkBoard[checkY][checkX]) {
+                        case "R": oppMoves = getRookMoves(checkX, checkY); break;
+                        case "B": oppMoves = getBishopMoves(checkX, checkY); break;
+                        case "N": oppMoves = getKnightMoves(checkX, checkY); break;
+                        case "Q": oppMoves = getQueenMoves(checkX, checkY); break;
+                        case "K": oppMoves = getKingMoves(checkX, checkY); break;
+                        case "P": oppMoves = getPawnMoves(checkX, checkY); break;
+                        case "r": oppMoves = getRookMoves(checkX, checkY); break;
+                        case "b": oppMoves = getBishopMoves(checkX, checkY); break;
+                        case "n": oppMoves = getKnightMoves(checkX, checkY); break;
+                        case "q": oppMoves = getQueenMoves(checkX, checkY); break;
+                        case "k": oppMoves = getKingMoves(checkX, checkY); break;
+                        case "p": oppMoves = getPawnMoves(checkX, checkY); break;
+                    }
+                    for (let oppMove of oppMoves) {
+                        if (checkBoard[oppMove.y][oppMove.x] == 'K' || checkBoard[oppMove.y][oppMove.x] == 'k') {
+                            checks = true;
+                        }
+                    }
+                }
+            }
+        }
+        if (!checks) newMoves.push(move);
+        board = originalBoard.map(innerArray => [...innerArray]);
+    }
+    return newMoves;
+}
 
 function getRookMoves(x, y) {
     return [...checkNorth(x, y), ...checkEast(x, y), ...checkSouth(x, y), ...checkWest(x, y)];
@@ -181,7 +264,7 @@ function getKingMoves(x, y) {
     let output = [];
     if (confirmSqr(x, y, x + 1, y + 1)===ENEMY ||confirmSqr(x, y, x + 1, y + 1)===EMPTY) output.push(new Coordinate(x + 1, y + 1));
     if (confirmSqr(x, y, x + 1, y)===ENEMY || confirmSqr(x, y, x + 1, y)=== EMPTY) output.push(new Coordinate(x + 1, y));
-    if (confirmSqr(x, y, x + 1, y - 1)===ENEMY ||confirmSqr(x, y, x + 1, y - 1)===EMPTY) output.push(new Coordinate(x + 1, y - 1));
+    if (confirmSqr(x, y, x + 1, y - 1)===ENEMY || confirmSqr(x, y, x + 1, y - 1)===EMPTY) output.push(new Coordinate(x + 1, y - 1));
     if (confirmSqr(x, y, x, y - 1) === ENEMY || confirmSqr(x, y, x, y - 1) === EMPTY) output.push(new Coordinate(x, y - 1));
     if (confirmSqr(x, y, x - 1, y - 1) === ENEMY || confirmSqr(x, y, x - 1, y - 1) === EMPTY) output.push(new Coordinate(x - 1, y - 1));
     if (confirmSqr(x, y, x - 1, y) === ENEMY || confirmSqr(x, y, x - 1, y) === EMPTY) output.push(new Coordinate(x - 1, y));
@@ -206,31 +289,30 @@ function getKnightMoves(x, y) {
 function getPawnMoves(x, y) {
     let output = [];
     //to determine color of mover (i feel checking if its uppercase is more concise but risky and im too lazy)
-    daPiece = board[y][x];
-    daColor = 'white';
-    if (daPiece >= 'a' && daPiece <= 'z') {
-        daColor = 'black';
-    }
+    let daColor = getPieceColor(board[y][x]);
+
     //determine direction based on color
     if (daColor === 'white') {
         if (confirmSqr(x, y, x, y - 1) === EMPTY) {
             output.push(new Coordinate(x, y - 1));
-            if (y == 6) output.push(new Coordinate(x, y - 2));
+            if (y == 6 && confirmSqr(x, y, x, y - 2) === EMPTY) output.push(new Coordinate(x, y - 2));
         }
         if (confirmSqr(x, y, x-1, y - 1) === ENEMY) {
             output.push(new Coordinate(x-1, y - 1));
             //Here is the place for en passant - if (something)
+            // when
         }
         if (confirmSqr(x, y, x+1, y - 1) === ENEMY) {
             output.push(new Coordinate(x+1, y - 1));
             //Here is the place for en passant - if (something)
         }
+
     }
 
     if (daColor === 'black') {
         if (confirmSqr(x, y, x, y + 1) === EMPTY) {
             output.push(new Coordinate(x, y + 1));
-            if (y == 1) output.push(new Coordinate(x, y + 2));
+            if (y == 1 && confirmSqr(x, y, x, y + 2) === EMPTY) output.push(new Coordinate(x, y + 2));
         }
         if (confirmSqr(x, y, x-1, y + 1) === ENEMY) {
             output.push(new Coordinate(x-1, y + 1));
@@ -426,17 +508,11 @@ function confirmSqr(x0, y0, x1, y1) {
     if (x1 < 0 || x1 > 7 || y1 < 0 || y1 > 7) return false;
 
     //to determine color of mover (i feel checking if its uppercase is more concise but risky and im too lazy)
-    daPiece = board[y0][x0];
-    daColor = 'white';
-    if (daPiece >= 'a' && daPiece <= 'z') {
-        daColor = 'black';
-    }
+    let daPiece = board[y0][x0];
+    let daColor = getPieceColor(daPiece);
     // determine color of piece in next space
-    udaPiece = board[y1][x1];
-    udaColor = 'white';
-    if (udaPiece >= 'a' && udaPiece <= 'z') {
-        udaColor = 'black';
-    }
+    let udaPiece = board[y1][x1];
+    let udaColor = getPieceColor(udaPiece)
 
     //if empty spot - add
     if (udaPiece === " ") {
@@ -452,6 +528,20 @@ function confirmSqr(x0, y0, x1, y1) {
         //console.log("ally detected at x="+x+", y="+squaresTillEdge+"! Stop the count!");
         return ALLY;
     }
+}
+
+//given a string (ex: 'r', 'P', 'q', or 'B') returns 'white' or 'black'
+function getPieceColor(pieceType) {
+    if (pieceType == ' ') {
+        color = EMPTY;
+    }
+    if (pieceType >= 'A' && pieceType <= 'Z') {
+        color = WHITE;
+    }
+    if (pieceType >= 'a' && pieceType <= 'z') {
+        color = BLACK;
+    }
+    return color;
 }
 
 function addLegalMove(coordinates) {
@@ -471,6 +561,39 @@ function logBoard() {
         console.log(board[y]);
     }
 }
+function logBoard2(board) {
+    console.log("Current board position is:")
+    for (let y = 0; y < 8; y++) {
+        console.log(board[y]);
+    }
+}
+
+// mySQL connection:
+/*
+Our goal is to send the changes of the model to the DB and get the response (that we are to display later)
+ */
+//this method makes a db call with the following arguments:
+function ajaxCall(gameID, position, lastMove){ //rename to something like notifyDB()
+    //console.log("entered ajax call");
+    return new Promise((resolve, reject) => {
+        let xhr = new XMLHttpRequest();
+        //xhr.open("GET", "DBActions/test.php")
+        xhr.open("GET", "DBActions/makeMove.php?id=" + gameID + "&position=" + position + "&lastMove=" + lastMove);
+        xhr.onload = function () {
+            if (xhr.status === 200) {
+                resolve(xhr.response);
+            } else {
+                reject(xhr.statusText);
+            }
+        };
+        xhr.onerror = function () {
+            reject("Network Error");
+        };
+        xhr.send();
+    });
+
+}
+
 
 class Coordinate {
     constructor(x, y) {
@@ -482,6 +605,10 @@ class Coordinate {
         //let letterX = String.fromCharCode(this.x+97);
         //console.log("GetSquareName: squareName = "+ ""+String.fromCharCode(this.x+97)+(8-this.y));
         return "" + String.fromCharCode(this.x + 97) + (8 - this.y);
+    }
+
+    toString() {
+        return `(${this.x}, ${this.y})`;
     }
 
 }
