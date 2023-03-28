@@ -8,14 +8,20 @@ let squareSelected = null; //if true, then clicking on a highlighted square = mo
 let pieceSelected = null;
 
 // Model Variables
+
+let turn = true;
+
+let opponent = "id of an opponent / or AI id (if we have multiple: simple/medium/pro)";
 let currentPosition = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR";
 let board = new Array(8);
 //setBoard(currentPosition);
 setBoard("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR");
-let gameID = 0;
+let gameID = 3;
+
 
 // Controller Methods
 function pieceClicked(element) {
+    if (!turn) return; //uncomment this line to get turns
     if ((squareSelected === null) || (element.parentElement.id !== squareSelected)) {
         hideLegalMoves();
         //element.parentElement.style.background="#ffd500";
@@ -25,9 +31,9 @@ function pieceClicked(element) {
         let x = parseInt(element.parentElement.id.slice(0, 1), 36) - 10;
         let y = 8 - element.parentElement.id.slice(1, 2);
 
-        console.log("clickedPiece(piece = " + piece + ", x = " + x + "; y = " + y + ";");
+        //console.log("clickedPiece(piece = " + piece + ", x = " + x + "; y = " + y + ";");
         displayLegalMoves(getLegalMoves(piece, x, y));
-        console.log("pieceClicked is finished!");
+        //console.log("pieceClicked is finished!");
         squareSelected = element.parentElement.id;
         pieceSelected = element.id;
     } else {
@@ -37,6 +43,9 @@ function pieceClicked(element) {
 }
 
 function legalMoveClicked(element) {
+    //save for the ajax call:
+    let lastMove = squareSelected+element.parentElement.id;
+
     let oldX = parseInt(squareSelected.slice(0, 1), 36) - 10;
     let oldY = 8 - squareSelected.slice(1, 2);
     let newX = parseInt(element.parentElement.id.slice(0, 1), 36) - 10;
@@ -48,9 +57,27 @@ function legalMoveClicked(element) {
     document.getElementById(squareSelected).innerHTML = "";
 
 
+
     //update the board model:
     changePieceLocationOnBoard(oldX, oldY, newX, newY);
     hideLegalMoves();
+
+    //part of waiting for opponent's move
+    turn = !turn;
+
+    console.log("Move completed: attempt to make an ajax call with gameID = %d, current position = %s, and last move = %s", gameID, currentPosition, lastMove);
+    //ajaxCall(gameID, currentPosition, lastMove);
+    ajaxCall(gameID, currentPosition, lastMove)
+        .then(response => {
+            console.log("received response: " + response);
+            // TODO: handle the DB response here
+            turn = !turn;
+        })
+        .catch(error => {
+            console.error(error);
+            // handle the error
+        });
+    squareSelected = null;
     pieceSelected = null;
 }
 
@@ -58,15 +85,17 @@ function changePieceLocationOnBoard(oldX, oldY, newX, newY) {
     board[newY][newX] = board[oldY][oldX];
     board[oldY][oldX] = " ";
     updateBoardPosition();
-    console.log("ChangePieceLocationOnBoard: piece moved from " + oldX + ", " + oldY + " to " + newX + ", " + newY);
+    //console.log("ChangePieceLocationOnBoard: piece moved from " + oldX + ", " + oldY + " to " + newX + ", " + newY);
 }
 
-function updateBoardPosition() {
+
+function updateBoardPosition(){
+    //TODO: add code that refreshes the currentPosition string based on the board position
 
 }
 
 function displayLegalMoves(legalMoves) {
-    console.log("displaying n = " + legalMoves.length + " moves...");
+    //console.log("displaying n = " + legalMoves.length + " moves...");
     for (let i = 0; i < legalMoves.length; i++) {
         addLegalMove(new Coordinate(legalMoves[i].x, legalMoves[i].y));
     }
@@ -167,6 +196,7 @@ function getLegalMoves(piece, x, y) {
     legalMoves = remSelfChecks(piece, x, y, legalMoves)
 
     console.log("GetLegalMoves: total number of moves =  " + legalMoves.length);
+
     return legalMoves;
 }
 
@@ -537,6 +567,33 @@ function logBoard2(board) {
         console.log(board[y]);
     }
 }
+
+// mySQL connection:
+/*
+Our goal is to send the changes of the model to the DB and get the response (that we are to display later)
+ */
+//this method makes a db call with the following arguments:
+function ajaxCall(gameID, position, lastMove){ //rename to something like notifyDB()
+    //console.log("entered ajax call");
+    return new Promise((resolve, reject) => {
+        let xhr = new XMLHttpRequest();
+        //xhr.open("GET", "DBActions/test.php")
+        xhr.open("GET", "DBActions/makeMove.php?id=" + gameID + "&position=" + position + "&lastMove=" + lastMove);
+        xhr.onload = function () {
+            if (xhr.status === 200) {
+                resolve(xhr.response);
+            } else {
+                reject(xhr.statusText);
+            }
+        };
+        xhr.onerror = function () {
+            reject("Network Error");
+        };
+        xhr.send();
+    });
+
+}
+
 
 class Coordinate {
     constructor(x, y) {
