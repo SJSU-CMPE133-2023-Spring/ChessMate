@@ -15,14 +15,14 @@ tr {
 .chess-board tr:last-child td { border-bottom: 1px solid; }
 .chess-board th:empty { border: none;}
 .chess-board td { width: 1.5em; height: 1.5em; text-align: center; font-size: 32px; line-height: 0;}
-.chess-board .light { background: #eee;
+.chess-board .light { background: #a6a2a2;
   position: relative;
   width: 75px;
   height: 75px;
   max-height: 75px;
  }
 
-.chess-board .dark { background: #000;
+.chess-board .dark { background: #3c3c42;
   position: relative;
   width: 75px;
   height: 75px;

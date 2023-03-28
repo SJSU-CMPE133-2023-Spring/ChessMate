@@ -10,7 +10,7 @@ let pieceSelected = null;
 let currentPosition = "8/1Q5B/R7/8/r7/8/8/2N2r2";
 let board = new Array(8);
 //setBoard(currentPosition);
-setBoard("8/1Q5B/R7/8/r7/8/8/2N2r2");
+setBoard("p7/1Q5B/R7/8/r7/8/8/2N1Pr2");
 let gameID = 0;
 
 // Controller Methods
@@ -219,14 +219,36 @@ function getPawnMoves(x, y) {
         daColor = 'black';
     }
     //determine direction based on color
-    if (daColor == 'white' && confirmSqr(x, y, x, y - 1)) {
-        output.push(new Coordinate(x, y - 1));
-        if (y == 6) output.push(new Coordinate(x, y - 2));
+    if (daColor === 'white') {
+        if (confirmSqr(x, y, x, y - 1) === EMPTY) {
+            output.push(new Coordinate(x, y - 1));
+            if (y == 6) output.push(new Coordinate(x, y - 2));
+        }
+        if (confirmSqr(x, y, x-1, y - 1) === ENEMY) {
+            output.push(new Coordinate(x-1, y - 1));
+            //Here is the place for en passant - if (something)
+        }
+        if (confirmSqr(x, y, x+1, y - 1) === ENEMY) {
+            output.push(new Coordinate(x+1, y - 1));
+            //Here is the place for en passant - if (something)
+        }
     }
-    if (daColor == 'black' && confirmSqr(x, y, x, y + 1)) {
-        output.push(new Coordinate(x, y + 1));
-        if (y == 1) output.push(new Coordinate(x, y + 2));
+
+    if (daColor === 'black') {
+        if (confirmSqr(x, y, x, y + 1) === EMPTY) {
+            output.push(new Coordinate(x, y + 1));
+            if (y == 1) output.push(new Coordinate(x, y + 2));
+        }
+        if (confirmSqr(x, y, x-1, y + 1) === ENEMY) {
+            output.push(new Coordinate(x-1, y + 1));
+            //Here is the place for en passant - if (something)
+        }
+        if (confirmSqr(x, y, x+1, y + 1) === ENEMY) {
+            output.push(new Coordinate(x+1, y + 1));
+            //Here is the place for en passant - if (something)
+        }
     }
+
     return output;
 
 }
