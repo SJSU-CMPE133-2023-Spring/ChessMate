@@ -1,12 +1,16 @@
+//kinda static variables for the model
+let EMPTY = 0, ENEMY = 1, ALLY = 2;
+
+
 // Controller Variables
 let squareSelected = null; //if true, then clicking on a highlighted square = move;
 let pieceSelected = null;
 
 // Model Variables
-let currentPosition = "8/1Q5B/R7/8/r7/8/8/2K2r2";
+let currentPosition = "8/1Q5B/R7/8/r7/8/8/2N2r2";
 let board = new Array(8);
 //setBoard(currentPosition);
-setBoard("8/1Q5B/R7/8/r7/8/8/2K2r2");
+setBoard("8/1Q5B/R7/8/r7/8/8/2N2r2");
 let gameID = 0;
 
 // Controller Methods
@@ -56,9 +60,10 @@ function changePieceLocationOnBoard(oldX, oldY, newX, newY) {
     console.log("ChangePieceLocationOnBoard: piece moved from " + oldX + ", " + oldY + " to " + newX + ", " + newY);
 }
 
-function updateBoardPosition(){
+function updateBoardPosition() {
 
 }
+
 function displayLegalMoves(legalMoves) {
     console.log("displaying n = " + legalMoves.length + " moves...");
     for (let i = 0; i < legalMoves.length; i++) {
@@ -167,39 +172,44 @@ function getLegalMoves(pieceType, x, y) {
 }
 
 
-function getRookMoves(x, y){
+function getRookMoves(x, y) {
     return [...checkNorth(x, y), ...checkEast(x, y), ...checkSouth(x, y), ...checkWest(x, y)];
 }
+
 function getBishopMoves(x, y) {
     return [...checkNE(x, y), ...checkSE(x, y), ...checkSW(x, y), ...checkNW(x, y)];
 }
+
 function getQueenMoves(x, y) {
     return [...getRookMoves(x, y), ...getBishopMoves(x, y)];
 }
+
 function getKingMoves(x, y) {
     let output = [];
-    if (confirmSqr(x, y, x+1, y+1)) output.push(new Coordinate(x+1, y+1));
-    if (confirmSqr(x, y, x+1, y)) output.push(new Coordinate(x+1, y));
-    if (confirmSqr(x, y, x+1, y-1)) output.push(new Coordinate(x+1, y-1));
-    if (confirmSqr(x, y, x, y-1)) output.push(new Coordinate(x, y-1));
-    if (confirmSqr(x, y, x-1, y-1)) output.push(new Coordinate(x-1, y-1));
-    if (confirmSqr(x, y, x-1, y)) output.push(new Coordinate(x-1, y));
-    if (confirmSqr(x, y, x-1, y+1)) output.push(new Coordinate(x-1, y+1));
-    if (confirmSqr(x, y, x, y+1)) output.push(new Coordinate(x, y+1));
+    if (confirmSqr(x, y, x + 1, y + 1)===ENEMY ||confirmSqr(x, y, x + 1, y + 1)===EMPTY) output.push(new Coordinate(x + 1, y + 1));
+    if (confirmSqr(x, y, x + 1, y)===ENEMY || confirmSqr(x, y, x + 1, y)=== EMPTY) output.push(new Coordinate(x + 1, y));
+    if (confirmSqr(x, y, x + 1, y - 1)===ENEMY ||confirmSqr(x, y, x + 1, y - 1)===EMPTY) output.push(new Coordinate(x + 1, y - 1));
+    if (confirmSqr(x, y, x, y - 1) === ENEMY || confirmSqr(x, y, x, y - 1) === EMPTY) output.push(new Coordinate(x, y - 1));
+    if (confirmSqr(x, y, x - 1, y - 1) === ENEMY || confirmSqr(x, y, x - 1, y - 1) === EMPTY) output.push(new Coordinate(x - 1, y - 1));
+    if (confirmSqr(x, y, x - 1, y) === ENEMY || confirmSqr(x, y, x - 1, y) === EMPTY) output.push(new Coordinate(x - 1, y));
+    if (confirmSqr(x, y, x - 1, y + 1) === ENEMY || confirmSqr(x, y, x - 1, y + 1) === EMPTY) output.push(new Coordinate(x - 1, y + 1));
+    if (confirmSqr(x, y, x, y + 1) === ENEMY || confirmSqr(x, y, x, y + 1) === EMPTY) output.push(new Coordinate(x, y + 1));
     return output;
 }
+
 function getKnightMoves(x, y) {
     let output = [];
-    if (confirmSqr(x, y, x+1, y+2)) output.push(new Coordinate(x+1, y+2));
-    if (confirmSqr(x, y, x+2, y+1)) output.push(new Coordinate(x+2, y+1));
-    if (confirmSqr(x, y, x+1, y-2)) output.push(new Coordinate(x+1, y-2));
-    if (confirmSqr(x, y, x+2, y-1)) output.push(new Coordinate(x+2, y-1));
-    if (confirmSqr(x, y, x-1, y-2)) output.push(new Coordinate(x-1, y-2));
-    if (confirmSqr(x, y, x-2, y-1)) output.push(new Coordinate(x-2, y-1));
-    if (confirmSqr(x, y, x-1, y+2)) output.push(new Coordinate(x-1, y+2));
-    if (confirmSqr(x, y, x-2, y+1)) output.push(new Coordinate(x-2, y+1));
+    if (confirmSqr(x, y, x + 1, y + 2)===ENEMY ||confirmSqr(x, y, x + 1, y + 2)===EMPTY) output.push(new Coordinate(x + 1, y + 2));
+    if (confirmSqr(x, y, x + 2, y + 1)===ENEMY ||confirmSqr(x, y, x + 2, y + 1)===EMPTY) output.push(new Coordinate(x + 2, y + 1));
+    if (confirmSqr(x, y, x + 1, y - 2)===ENEMY ||confirmSqr(x, y, x + 1, y - 2)===EMPTY) output.push(new Coordinate(x + 1, y - 2));
+    if (confirmSqr(x, y, x + 2, y - 1)===ENEMY ||confirmSqr(x, y, x + 2, y - 1)===EMPTY) output.push(new Coordinate(x + 2, y - 1));
+    if (confirmSqr(x, y, x - 1, y - 2)===ENEMY ||confirmSqr(x, y, x - 1, y - 2)===EMPTY) output.push(new Coordinate(x - 1, y - 2));
+    if (confirmSqr(x, y, x - 2, y - 1)===ENEMY ||confirmSqr(x, y, x - 2, y - 1)===EMPTY) output.push(new Coordinate(x - 2, y - 1));
+    if (confirmSqr(x, y, x - 1, y + 2)===ENEMY ||confirmSqr(x, y, x - 1, y + 2)===EMPTY) output.push(new Coordinate(x - 1, y + 2));
+    if (confirmSqr(x, y, x - 2, y + 1)===ENEMY ||confirmSqr(x, y, x - 2, y + 1)===EMPTY) output.push(new Coordinate(x - 2, y + 1));
     return output;
 }
+
 function getPawnMoves(x, y) {
     let output = [];
     //to determine color of mover (i feel checking if its uppercase is more concise but risky and im too lazy)
@@ -209,55 +219,78 @@ function getPawnMoves(x, y) {
         daColor = 'black';
     }
     //determine direction based on color
-    if (daColor == 'white' && confirmSqr(x, y, x, y-1)) {
-        output.push(new Coordinate(x, y-1));
-        if (y == 6) output.push(new Coordinate(x, y-2));
+    if (daColor == 'white' && confirmSqr(x, y, x, y - 1)) {
+        output.push(new Coordinate(x, y - 1));
+        if (y == 6) output.push(new Coordinate(x, y - 2));
     }
-    if (daColor == 'black' && confirmSqr(x, y, x, y+1)) {
-        output.push(new Coordinate(x, y+1));
-        if (y == 1) output.push(new Coordinate(x, y+2));
+    if (daColor == 'black' && confirmSqr(x, y, x, y + 1)) {
+        output.push(new Coordinate(x, y + 1));
+        if (y == 1) output.push(new Coordinate(x, y + 2));
     }
     return output;
 
 }
 
-function checkNorth(x, y){
-  //console.log("Checking North... x = " + x + "; y = " + y);
-  let output = [];
-  let squaresTillEdge = y; //or just y
-  while (squaresTillEdge > 0)// or > 0
-  {
-    squaresTillEdge--;
-    valid = confirmSqr(x, y, x, squaresTillEdge);
-    if (!valid) break;
-    else output.push(new Coordinate(x, squaresTillEdge));
-  }
-  //console.log("North has " + output + " available positions. Size: " + output.length);
-  return output;
+function checkNorth(x, y) {
+    //console.log("Checking North... x = " + x + "; y = " + y);
+    let output = [];
+    let squaresTillEdge = y; //or just y
+    while (squaresTillEdge > 0)// or > 0
+    {
+        squaresTillEdge--;
+        let valid = confirmSqr(x, y, x, squaresTillEdge);
+        switch (valid) {
+            case EMPTY:
+                output.push(new Coordinate(x, squaresTillEdge));
+                break;
+            case ENEMY:
+                output.push(new Coordinate(x, squaresTillEdge));
+                return output;
+            case ALLY:
+                return output;
+        }
+    }
+    //console.log("North has " + output + " available positions. Size: " + output.length);
+    return output;
 }
 
-function checkSouth(x, y){
-  let output = [];
-  let squaresTillEdge = y; //or just y
-  while (squaresTillEdge < 7)// or > 0
-  {
-    squaresTillEdge++;
-    valid = confirmSqr(x, y, x, squaresTillEdge);
-    if (!valid) break;
-    else output.push(new Coordinate(x, squaresTillEdge));
-  }
-  return output;
+function checkSouth(x, y) {
+    let output = [];
+    let squaresTillEdge = y; //or just y
+    while (squaresTillEdge < 7)// or > 0
+    {
+        squaresTillEdge++;
+        let valid = confirmSqr(x, y, x, squaresTillEdge);
+        switch (valid) {
+            case EMPTY:
+                output.push(new Coordinate(x, squaresTillEdge));
+                break;
+            case ENEMY:
+                output.push(new Coordinate(x, squaresTillEdge));
+                return output;
+            case ALLY:
+                return output;
+        }
+    }
+    return output;
 }
 
 function checkEast(x, y) {
     let output = []
     let squaresTillEdge = x;
-    while (squaresTillEdge < 7)
-    {
+    while (squaresTillEdge < 7) {
         squaresTillEdge++;
-        valid = confirmSqr(x, y, squaresTillEdge, y);
-        if (!valid) break;
-        else output.push(new Coordinate(squaresTillEdge, y));
+        let valid = confirmSqr(x, y, squaresTillEdge, y);
+        switch (valid) {
+            case EMPTY:
+                output.push(new Coordinate(squaresTillEdge, y));
+                break;
+            case ENEMY:
+                output.push(new Coordinate(squaresTillEdge, y));
+                return output;
+            case ALLY:
+                return output;
+        }
     }
     return output;
 }
@@ -265,12 +298,19 @@ function checkEast(x, y) {
 function checkWest(x, y) {
     let output = []
     let squaresTillEdge = x;
-    while (squaresTillEdge > 0)
-    {
+    while (squaresTillEdge > 0) {
         squaresTillEdge--;
-        valid = confirmSqr(x, y, squaresTillEdge, y);
-        if (!valid) break;
-        else output.push(new Coordinate(squaresTillEdge, y));
+        let valid = confirmSqr(x, y, squaresTillEdge, y);
+        switch (valid) {
+            case EMPTY:
+                output.push(new Coordinate(squaresTillEdge, y));
+                break;
+            case ENEMY:
+                output.push(new Coordinate(squaresTillEdge, y));
+                return output;
+            case ALLY:
+                return output;
+        }
     }
     return output;
 }
@@ -279,13 +319,20 @@ function checkNE(x, y) {
     let output = []
     let xTillEdge = x;
     let yTillEdge = y;
-    while (xTillEdge < 7 && yTillEdge > 0)
-    {
+    while (xTillEdge < 7 && yTillEdge > 0) {
         xTillEdge++;
         yTillEdge--;
-        valid = confirmSqr(x, y, xTillEdge, yTillEdge);
-        if (!valid) break;
-        else output.push(new Coordinate(xTillEdge, yTillEdge));
+        let valid = confirmSqr(x, y, xTillEdge, yTillEdge);
+        switch (valid) {
+            case EMPTY:
+                output.push(new Coordinate(xTillEdge, yTillEdge));
+                break;
+            case ENEMY:
+                output.push(new Coordinate(xTillEdge, yTillEdge));
+                return output;
+            case ALLY:
+                return output;
+        }
     }
     return output;
 }
@@ -294,13 +341,20 @@ function checkSE(x, y) {
     let output = []
     let xTillEdge = x;
     let yTillEdge = y;
-    while (xTillEdge < 7 && yTillEdge < 7)
-    {
+    while (xTillEdge < 7 && yTillEdge < 7) {
         xTillEdge++;
         yTillEdge++;
-        valid = confirmSqr(x, y, xTillEdge, yTillEdge);
-        if (!valid) break;
-        else output.push(new Coordinate(xTillEdge, yTillEdge));
+        let valid = confirmSqr(x, y, xTillEdge, yTillEdge);
+        switch (valid) {
+            case EMPTY:
+                output.push(new Coordinate(xTillEdge, yTillEdge));
+                break;
+            case ENEMY:
+                output.push(new Coordinate(xTillEdge, yTillEdge));
+                return output;
+            case ALLY:
+                return output;
+        }
 
     }
     return output;
@@ -310,13 +364,20 @@ function checkSW(x, y) {
     let output = []
     let xTillEdge = x;
     let yTillEdge = y;
-    while (xTillEdge > 0 && yTillEdge < 7)
-    {
+    while (xTillEdge > 0 && yTillEdge < 7) {
         xTillEdge--;
         yTillEdge++;
-        valid = confirmSqr(x, y, xTillEdge, yTillEdge);
-        if (!valid) break;
-        else output.push(new Coordinate(xTillEdge, yTillEdge));
+        let valid = confirmSqr(x, y, xTillEdge, yTillEdge);
+        switch (valid) {
+            case EMPTY:
+                output.push(new Coordinate(xTillEdge, yTillEdge));
+                break;
+            case ENEMY:
+                output.push(new Coordinate(xTillEdge, yTillEdge));
+                return output;
+            case ALLY:
+                return output;
+        }
     }
     return output;
 }
@@ -325,13 +386,20 @@ function checkNW(x, y) {
     let output = []
     let xTillEdge = x;
     let yTillEdge = y;
-    while (xTillEdge > 0 && yTillEdge > 0)
-    {
+    while (xTillEdge > 0 && yTillEdge > 0) {
         xTillEdge--;
         yTillEdge--;
-        valid = confirmSqr(x, y, xTillEdge, yTillEdge);
-        if (!valid) break;
-        else output.push(new Coordinate(xTillEdge, yTillEdge));
+        let valid = confirmSqr(x, y, xTillEdge, yTillEdge);
+        switch (valid) {
+            case EMPTY:
+                output.push(new Coordinate(xTillEdge, yTillEdge));
+                break;
+            case ENEMY:
+                output.push(new Coordinate(xTillEdge, yTillEdge));
+                return output;
+            case ALLY:
+                return output;
+        }
     }
     return output;
 }
@@ -358,16 +426,16 @@ function confirmSqr(x0, y0, x1, y1) {
     //if empty spot - add
     if (udaPiece === " ") {
         //console.log("next square is empty! Adding it to the array");
-        return true;
+        return EMPTY;
     }
     //if enemies
     else if (daColor == 'white' && udaColor == 'black' || daColor == 'black' && udaColor == 'white') {
         //console.log("enemy detected! Stop the count!");
-        return false;
+        return ENEMY;
     } //if teammates
     else if (daColor == 'white' && udaColor == 'white' || daColor == 'black' && udaColor == 'black') {
         //console.log("ally detected at x="+x+", y="+squaresTillEdge+"! Stop the count!");
-        return false;
+        return ALLY;
     }
 }
 
