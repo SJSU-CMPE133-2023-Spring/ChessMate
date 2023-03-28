@@ -3,10 +3,10 @@ let squareSelected = null; //if true, then clicking on a highlighted square = mo
 let pieceSelected = null;
 
 // Model Variables
-//var currentPosition = "8/1R5R/R7/8/7R/8/8/5R2";
+let currentPosition = "8/1Q5B/R7/8/r7/8/8/2K2r2";
 let board = new Array(8);
 //setBoard(currentPosition);
-setBoard("8/1R5R/R7/8/7R/8/8/2R2R2");
+setBoard("8/1Q5B/R7/8/r7/8/8/2K2r2");
 let gameID = 0;
 
 // Controller Methods
@@ -52,9 +52,13 @@ function legalMoveClicked(element) {
 function changePieceLocationOnBoard(oldX, oldY, newX, newY) {
     board[newY][newX] = board[oldY][oldX];
     board[oldY][oldX] = " ";
+    updateBoardPosition();
     console.log("ChangePieceLocationOnBoard: piece moved from " + oldX + ", " + oldY + " to " + newX + ", " + newY);
 }
 
+function updateBoardPosition(){
+
+}
 function displayLegalMoves(legalMoves) {
     console.log("displaying n = " + legalMoves.length + " moves...");
     for (let i = 0; i < legalMoves.length; i++) {
