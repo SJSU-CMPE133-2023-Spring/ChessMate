@@ -217,10 +217,7 @@ function checkNorth(x, y){
   while (squaresTillEdge > 0)// or > 0
   {
     squaresTillEdge--;
-    let nextChar = board[squaresTillEdge][x]; //not exactly sure why, but there x and y are reversed or it does not work correctly.
-    //console.log("next char to check = " + nextChar+" at x = "+x+"; y = "+ squaresTillEdge);
-
-    valid = confirmSqr(x, y, x, yTillEdge);
+    valid = confirmSqr(x, y, x, squaresTillEdge);
     if (!valid) break;
     else output.push(new Coordinate(x, squaresTillEdge));
   }
@@ -234,10 +231,7 @@ function checkSouth(x, y){
   while (squaresTillEdge < 7)// or > 0
   {
     squaresTillEdge++;
-    let nextChar = board[squaresTillEdge][x]; //not exactly sure why, but there x and y are reversed or it does not work correctly.
-    //console.log("next char to check = " + nextChar+" at x = "+x+"; y = "+ squaresTillEdge);
-
-    valid = confirmSqr(x, y, x, yTillEdge);
+    valid = confirmSqr(x, y, x, squaresTillEdge);
     if (!valid) break;
     else output.push(new Coordinate(x, squaresTillEdge));
   }
@@ -250,10 +244,7 @@ function checkEast(x, y) {
     while (squaresTillEdge < 7)
     {
         squaresTillEdge++;
-        let nextChar = board[y][squaresTillEdge]; //wtf
-        //console.log("next char to check = " + nextChar+" at x = "+x+"; y = "+ squaresTillEdge);
-
-        valid = confirmSqr(x, y, xTillEdge, y);
+        valid = confirmSqr(x, y, squaresTillEdge, y);
         if (!valid) break;
         else output.push(new Coordinate(squaresTillEdge, y));
     }
@@ -266,10 +257,7 @@ function checkWest(x, y) {
     while (squaresTillEdge > 0)
     {
         squaresTillEdge--;
-        let nextChar = board[y][squaresTillEdge];
-        //console.log("next char to check = " + nextChar+" at x = "+x+"; y = "+ squaresTillEdge);
-
-        valid = confirmSqr(x, y, xTillEdge, y);
+        valid = confirmSqr(x, y, squaresTillEdge, y);
         if (!valid) break;
         else output.push(new Coordinate(squaresTillEdge, y));
     }
