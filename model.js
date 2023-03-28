@@ -63,7 +63,7 @@ function legalMoveClicked(element) {
     ajaxCall(gameID, currentPosition, lastMove)
         .then(response => {
             console.log("received response: " + response);
-            // update your HTML elements here
+            // TODO: handle the DB response here
         })
         .catch(error => {
             console.error(error);
@@ -253,7 +253,7 @@ function ajaxCall(gameID, position, lastMove){ //rename to something like notify
     console.log("entered ajax call");
     return new Promise((resolve, reject) => {
         let xhr = new XMLHttpRequest();
-        xhr.open("POST", "DBActions/makeMove.php?id=" + gameID + "&position=" + position + "&lastMove=" + lastMove);
+        xhr.open("GET", "DBActions/makeMove.php?id=" + gameID + "&position=" + position + "&lastMove=" + lastMove);
         xhr.onload = function () {
             if (xhr.status === 200) {
                 resolve(xhr.response);
