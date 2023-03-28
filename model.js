@@ -7,10 +7,10 @@ let squareSelected = null; //if true, then clicking on a highlighted square = mo
 let pieceSelected = null;
 
 // Model Variables
-let currentPosition = "8/1Q5B/R7/8/r7/8/8/2N2r2";
+let currentPosition = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR";
 let board = new Array(8);
 //setBoard(currentPosition);
-setBoard("p7/1Q5B/R7/8/r7/8/8/2N1Pr2");
+setBoard("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR");
 let gameID = 0;
 
 // Controller Methods
@@ -117,13 +117,6 @@ function setBoard(newPosition) {
     logBoard();
 }
 
-/* TODO: complete the getLegalMoves function:
-    * add checkEast and West for the Rook
-    * make similar methods for a Bishop and a Knight
-    * getQueenMoves should simply have both getRookMoves and getBishopMoves
-    * you can try to make King or Pawn, but keep in mind that King can step only on safe squares
-       and pawn movement is pretty tricky (can be done partially)
-   */
 function getLegalMoves(pieceType, x, y) {
     let legalMoves = [];
 
