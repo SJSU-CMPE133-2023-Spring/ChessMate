@@ -1,8 +1,13 @@
+<?php
+require_once("DBActions/DataBaseActions.php");
+if ($_GET and $_GET["gameid"] and $_GET["color"]);
+
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>My First Webpage</title>
+    <title>Board</title>
     <link rel="stylesheet" href="chess.css">
 
 
@@ -190,8 +195,15 @@
       </tr>
   </tbody>
 </table>
+<?php
+    if($_GET){
+        echo '<h2>Your color is: <div id="color">'.$_GET["color"].'</div></h2>
+<h2>Game ID: <div id="gameID">'.$_GET["gameid"].'</div></h2>';
+    }
+?>
 
 <script src="model.js">
 </script>
 </body>
 </html>
+

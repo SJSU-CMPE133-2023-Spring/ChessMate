@@ -2,4 +2,6 @@
 require_once('DataBaseActions.php');
 $db = new DataBaseActions();
 
-$db->startMatch(0, 1, "classic");
+if($_GET){
+
+} else $db->startMatch(0, 1, "classic");

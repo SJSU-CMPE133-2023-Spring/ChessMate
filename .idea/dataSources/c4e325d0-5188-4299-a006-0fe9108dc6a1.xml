@@ -1268,7 +1268,7 @@ test\\_%|schema||&apos;&apos;||UPDATE|G</Grants>
       <Position>6</Position>
     </column>
     <column id="355" parent="339" name="id">
-      <AutoIncrement>1</AutoIncrement>
+      <AutoIncrement>4</AutoIncrement>
       <DasType>int(11)|0s</DasType>
       <NotNull>1</NotNull>
       <Position>1</Position>
@@ -1283,7 +1283,7 @@ test\\_%|schema||&apos;&apos;||UPDATE|G</Grants>
       <NotNull>1</NotNull>
       <Position>3</Position>
     </column>
-    <column id="358" parent="339" name="type">
+    <column id="358" parent="339" name="status">
       <DasType>varchar(255)|0s</DasType>
       <NotNull>1</NotNull>
       <Position>4</Position>

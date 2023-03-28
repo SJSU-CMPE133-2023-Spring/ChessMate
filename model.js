@@ -1,6 +1,7 @@
 //kinda static variables for the model
 const EMPTY = 0, ENEMY = 1, ALLY = 2;
-const WHITE = 'white', BLACK = 'black'
+const WHITE = 'white', BLACK = 'black';
+
 
 
 // Controller Variables
@@ -9,14 +10,34 @@ let pieceSelected = null;
 
 // Model Variables
 
-let turn = true;
+
 
 let opponent = "id of an opponent / or AI id (if we have multiple: simple/medium/pro)";
 let currentPosition = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR";
 let board = new Array(8);
 //setBoard(currentPosition);
 setBoard("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR");
-let gameID = 3;
+
+let gameID = document.getElementById("gameID").innerHTML;
+let playerColor = document.getElementById("color").innerHTML;
+
+//if white is first to move
+let turn = (playerColor==WHITE);
+
+//if black we have to wait for opponents move:
+if (playerColor==BLACK){
+    ajaxCall(gameID, currentPosition, "")
+        .then(response => {
+            console.log("received response: " + response);
+            // TODO: handle the DB response here
+            displayOpponentMove(response);
+            turn = !turn;
+        })
+        .catch(error => {
+            console.error(error);
+            // handle the error
+        });
+}
 
 
 // Controller Methods
@@ -71,6 +92,7 @@ function legalMoveClicked(element) {
         .then(response => {
             console.log("received response: " + response);
             // TODO: handle the DB response here
+            displayOpponentMove(response);
             turn = !turn;
         })
         .catch(error => {
@@ -88,7 +110,19 @@ function changePieceLocationOnBoard(oldX, oldY, newX, newY) {
     //console.log("ChangePieceLocationOnBoard: piece moved from " + oldX + ", " + oldY + " to " + newX + ", " + newY);
 }
 
+function displayOpponentMove(response){
+    let oldX = parseInt(response.slice(0, 1), 36) - 10;
+    let oldY = 8 - response.slice(1, 2);
+    let newX = parseInt(response.slice(2, 3), 36) - 10;
+    let newY = 8 - response.slice(3, 4);
+    changePieceLocationOnBoard(oldX, oldY, newX, newY);
 
+    document.getElementById(response.slice(2,4)).innerHTML = document.getElementById(response.slice(0,2)).innerHTML;
+
+    //remove the piece from its current position
+    document.getElementById(response.slice(0,2)).innerHTML = "";
+
+}
 function updateBoardPosition(){
     //TODO: add code that refreshes the currentPosition string based on the board position
 
@@ -154,44 +188,50 @@ function setBoard(newPosition) {
 
 function getLegalMoves(piece, x, y) {
     let legalMoves = [];
-    switch (piece) {
-        case "R":
-            legalMoves = getRookMoves(x, y);
-            break;
-        case "B":
-            legalMoves = getBishopMoves(x, y);
-            break;
-        case "N":
-            legalMoves = getKnightMoves(x, y);
-            break;
-        case "Q":
-            legalMoves = getQueenMoves(x, y);
-            break;
-        case "K":
-            legalMoves = getKingMoves(x, y);
-            break;
-        case "P":
-            legalMoves = getPawnMoves(x, y);
-            break;
-        case "r":
-            legalMoves = getRookMoves(x, y);
-            break;
-        case "b":
-            legalMoves = getBishopMoves(x, y);
-            break;
-        case "n":
-            legalMoves = getKnightMoves(x, y);
-            break;
-        case "q":
-            legalMoves = getQueenMoves(x, y);
-            break;
-        case "k":
-            legalMoves = getKingMoves(x, y);
-            break;
-        case "p":
-            legalMoves = getPawnMoves(x, y);
-            break;
+    if (playerColor==WHITE){
+        switch (piece) {
+            case "R":
+                legalMoves = getRookMoves(x, y);
+                break;
+            case "B":
+                legalMoves = getBishopMoves(x, y);
+                break;
+            case "N":
+                legalMoves = getKnightMoves(x, y);
+                break;
+            case "Q":
+                legalMoves = getQueenMoves(x, y);
+                break;
+            case "K":
+                legalMoves = getKingMoves(x, y);
+                break;
+            case "P":
+                legalMoves = getPawnMoves(x, y);
+                break;
+        }
+    } else {
+        switch (piece) {
+            case "r":
+                legalMoves = getRookMoves(x, y);
+                break;
+            case "b":
+                legalMoves = getBishopMoves(x, y);
+                break;
+            case "n":
+                legalMoves = getKnightMoves(x, y);
+                break;
+            case "q":
+                legalMoves = getQueenMoves(x, y);
+                break;
+            case "k":
+                legalMoves = getKingMoves(x, y);
+                break;
+            case "p":
+                legalMoves = getPawnMoves(x, y);
+                break;
+        }
     }
+
 
     legalMoves = remSelfChecks(piece, x, y, legalMoves)
 
@@ -593,6 +633,7 @@ function ajaxCall(gameID, position, lastMove){ //rename to something like notify
     });
 
 }
+
 
 
 class Coordinate {

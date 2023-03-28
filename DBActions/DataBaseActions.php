@@ -49,7 +49,7 @@ class DataBaseActions extends Exception
             `id` INT AUTO_INCREMENT PRIMARY KEY,
             `white` varchar(255) NOT NULL,
             `black` varchar(255) NOT NULL,
-            `type` varchar(255) NOT NULL,
+            `status` varchar(255) NOT NULL,
             `position` varchar(255) NOT NULL, 
             `move_history` varchar(255) NOT NULL, 
             `date` varchar(255) NOT NULL) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;";
@@ -79,14 +79,12 @@ class DataBaseActions extends Exception
 
     }
 
-    public function startMatch($player1_id, $player2_id, $gameType){
+    public function startMatch($player1_id, $player2_id, $gameStatus){
         $date = date("Y-m-d h:i:sa");
-        //randomly assign the colors
 
-        //$randBool = (bool) mt_rand(0, 1);
-        if (mt_rand(0, 1))
-        $sql = "INSERT INTO `matches` (`white`, `black`, `type`,`position`, `move_history`, `date`) 
-VALUES ('$player1_id', '$player2_id', '$gameType', '$this->INITIAL_POSITION', '', '$date');";
+
+        $sql = "INSERT INTO `matches` (`white`, `black`, status,`position`, `move_history`, `date`) 
+VALUES ('$player1_id', '$player2_id', '$gameStatus', '$this->INITIAL_POSITION', '', '$date');";
         $results = mysqli_query($this->conn, $sql);
     }
 
@@ -122,7 +120,47 @@ VALUES ('$player1_id', '$player2_id', '$gameType', '$this->INITIAL_POSITION', ''
         return end($movesArr);
     }
 
+    public function enterOrStartGame($playerID){
+        $sql = "SELECT * FROM matches WHERE status='waiting_opponent'";
+        $result = mysqli_query($this->conn, $sql);
+        $row = mysqli_fetch_object($result);
+        if ($row == null){
+            //no waiting lobbies - create one
+            $this->startMatch($playerID, "", "waiting_opponent");
+            $result = mysqli_query($this->conn, $sql);
+            $row = mysqli_fetch_object($result);
+        } else {
+            //there is a lobby with one player - join
+            //randomly assign the colors
+            $randBool = (bool) mt_rand(0, 1);
+            $player1 = $playerID;
+            $player2 = $row->white;
 
-    
+            $gameID = $row->id;
+            if ($randBool) $this->updateGame($gameID, $player1, $player2);
+            else  $this->updateGame($gameID, $player2, $player1);
+        }
+        return $row->id;
+    }
 
+    public function getGameStatus($id){
+        $sql = "SELECT * FROM matches WHERE id=$id";
+        $result = mysqli_query($this->conn, $sql);
+        $row = mysqli_fetch_object($result);
+        return $row->status;
+    }
+
+    private function updateGame($id, $player1, $player2){
+        $sql = "UPDATE matches SET white = '$player1', black = '$player2', status = 'started' WHERE id=$id";
+        $result = mysqli_query($this->conn, $sql);
+    }
+
+    public function getPlayerColor($id, $playerID){
+        $sql = "SELECT * FROM matches WHERE id=$id";
+        $result = mysqli_query($this->conn, $sql);
+        $row = mysqli_fetch_object($result);
+        if ($row->white==$playerID) return "white";
+        if ($row->black==$playerID) return "black";
+        //return -1;
+    }
 }
