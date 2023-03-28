@@ -3,61 +3,67 @@ let squareSelected = null; //if true, then clicking on a highlighted square = mo
 let pieceSelected = null;
 
 // Model Variables
-//var currentPosition = "8/1R5R/R7/8/7R/8/8/5R2";
+let currentPosition = "8/1Q5B/R7/8/r7/8/8/2K2r2";
 let board = new Array(8);
 //setBoard(currentPosition);
-setBoard("8/1R5R/R7/8/7R/8/8/2R2R2");
+setBoard("8/1Q5B/R7/8/r7/8/8/2K2r2");
 let gameID = 0;
+
 // Controller Methods
-function pieceClicked(element){
-  if((squareSelected === null) || (element.parentElement.id !==squareSelected)){
+function pieceClicked(element) {
+    if ((squareSelected === null) || (element.parentElement.id !== squareSelected)) {
+        hideLegalMoves();
+        //element.parentElement.style.background="#ffd500";
+        //cut the piece from the potential id (ex. P_6 -> P);
+        let piece = element.id.slice(0, 1);
+        //cut the letter from the coordinates and transform into a number (ex. "b4" -> 1)
+        let x = parseInt(element.parentElement.id.slice(0, 1), 36) - 10;
+        let y = 8 - element.parentElement.id.slice(1, 2);
+
+        console.log("clickedPiece(piece = " + piece + ", x = " + x + "; y = " + y + ";");
+        displayLegalMoves(getLegalMoves(piece, x, y));
+        console.log("pieceClicked is finished!");
+        squareSelected = element.parentElement.id;
+        pieceSelected = element.id;
+    } else {
+        hideLegalMoves();
+        squareSelected = null;
+    }
+}
+
+function legalMoveClicked(element) {
+    let oldX = parseInt(squareSelected.slice(0, 1), 36) - 10;
+    let oldY = 8 - squareSelected.slice(1, 2);
+    let newX = parseInt(element.parentElement.id.slice(0, 1), 36) - 10;
+    let newY = 8 - element.parentElement.id.slice(1, 2)
+    //move the current piece to a new place
+    document.getElementById(element.parentElement.id).innerHTML = document.getElementById(squareSelected).innerHTML;
+
+    //remove the piece from its current position
+    document.getElementById(squareSelected).innerHTML = "";
+
+
+    //update the board model:
+    changePieceLocationOnBoard(oldX, oldY, newX, newY);
     hideLegalMoves();
-    //element.parentElement.style.background="#ffd500";
-    //cut the piece from the potential id (ex. P_6 -> P);
-    let piece = element.id.slice(0,1);
-    //cut the letter from the coordinates and transform into a number (ex. "b4" -> 1)
-    let x = parseInt(element.parentElement.id.slice(0,1), 36)-10;
-    let y = 8-element.parentElement.id.slice(1,2);
-
-    console.log("clickedPiece(piece = "+ piece+", x = "+x+"; y = "+y+";");
-    displayLegalMoves(getLegalMoves(piece, x, y));
-    console.log("pieceClicked is finished!");
-    squareSelected = element.parentElement.id;
-    pieceSelected = element.id;
-  } else {
-    hideLegalMoves();
-    squareSelected = null;
-  }
+    pieceSelected = null;
 }
 
-function legalMoveClicked(element){
-  let oldX = parseInt(squareSelected.slice(0,1), 36)-10;
-  let oldY = 8-squareSelected.slice(1,2);
-  let newX = parseInt(element.parentElement.id.slice(0,1), 36)-10;
-  let newY = 8-element.parentElement.id.slice(1,2)
-  //move the current piece to a new place
-  document.getElementById(element.parentElement.id).innerHTML=document.getElementById(squareSelected).innerHTML;
-
-  //remove the piece from its current position
-  document.getElementById(squareSelected).innerHTML="";
-
-
-  //update the board model:
-  changePieceLocationOnBoard(oldX,oldY,newX,newY);
-  hideLegalMoves();
-  pieceSelected = null;
+function changePieceLocationOnBoard(oldX, oldY, newX, newY) {
+    board[newY][newX] = board[oldY][oldX];
+    board[oldY][oldX] = " ";
+    updateBoardPosition();
+    console.log("ChangePieceLocationOnBoard: piece moved from " + oldX + ", " + oldY + " to " + newX + ", " + newY);
 }
 
-function changePieceLocationOnBoard(oldX,oldY,newX,newY){
-  board[newY][newX] = board[oldY][oldX];
-  board[oldY][oldX] = " ";
-  console.log("ChangePieceLocationOnBoard: piece moved from "+oldX+", "+oldY+ " to " + newX + ", " + newY);
+function updateBoardPosition(){
+
 }
-function displayLegalMoves(legalMoves){
-  console.log("displaying n = "+legalMoves.length+" moves...");
-  for (let i = 0; i < legalMoves.length; i++) {
-    addLegalMove(new Coordinate(legalMoves[i].x,legalMoves[i].y));
-  }
+function displayLegalMoves(legalMoves) {
+    console.log("displaying n = " + legalMoves.length + " moves...");
+    for (let i = 0; i < legalMoves.length; i++) {
+        addLegalMove(new Coordinate(legalMoves[i].x, legalMoves[i].y));
+    }
 }
 
 /* TODO: make a method that will check if one of the legal moves allows opponent to capture the King
@@ -71,38 +77,39 @@ function displayLegalMoves(legalMoves){
 
  */
 
-function hideLegalMoves(){
-  let i, elements = document.getElementsByClassName('legal-move-space-img');
-  for (i = elements.length; i--;) {
-    elements[i].parentNode.removeChild(elements[i]);
-  }
-}
-// Model methods
-function setBoard(newPosition){
-  //newPosition = "R7/PP4PP/8/8/R5R1/8/8/RPR5";
-  let position = newPosition.split("/");
-  let newBoard = new Array(8);
-  for (let column = 0; column < 8; column++){
-    newBoard[column] = new Array(8);
-    let line = position[column];
-    for (let row = 0; row < 8;row++){
-
-      for (let charRead = 0; charRead<line.length; charRead++) {
-        let nextChar = line.slice(charRead, charRead+1);
-        if (!(nextChar >= '0' && nextChar <= '9')) {
-          newBoard[column][row] = nextChar;
-          row++;
-        }  else {
-          for (let i = 0; i < nextChar; i++) {
-            newBoard[column][row] = " ";
-            row++;
-          }
-        }
-      }
+function hideLegalMoves() {
+    let i, elements = document.getElementsByClassName('legal-move-space-img');
+    for (i = elements.length; i--;) {
+        elements[i].parentNode.removeChild(elements[i]);
     }
-  }
-  board = newBoard;
-  logBoard();
+}
+
+// Model methods
+function setBoard(newPosition) {
+    //newPosition = "R7/PP4PP/8/8/R5R1/8/8/RPR5";
+    let position = newPosition.split("/");
+    let newBoard = new Array(8);
+    for (let column = 0; column < 8; column++) {
+        newBoard[column] = new Array(8);
+        let line = position[column];
+        for (let row = 0; row < 8; row++) {
+
+            for (let charRead = 0; charRead < line.length; charRead++) {
+                let nextChar = line.slice(charRead, charRead + 1);
+                if (!(nextChar >= '0' && nextChar <= '9')) {
+                    newBoard[column][row] = nextChar;
+                    row++;
+                } else {
+                    for (let i = 0; i < nextChar; i++) {
+                        newBoard[column][row] = " ";
+                        row++;
+                    }
+                }
+            }
+        }
+    }
+    board = newBoard;
+    logBoard();
 }
 
 /* TODO: complete the getLegalMoves function:
@@ -116,6 +123,7 @@ function getLegalMoves(pieceType, x, y) {
     let legalMoves = [];
 
     switch (pieceType) {
+
         case "R":
             legalMoves = getRookMoves(x, y);
             break;
@@ -152,10 +160,12 @@ function getLegalMoves(pieceType, x, y) {
         case "p":
             legalMoves = getPawnMoves(x, y);
             break;
+
     }
     console.log("GetLegalMoves: total number of moves =  " + legalMoves.length);
     return legalMoves;
 }
+
 
 function getRookMoves(x, y){
     return [...checkNorth(x, y), ...checkEast(x, y), ...checkSouth(x, y), ...checkWest(x, y)];
@@ -208,6 +218,7 @@ function getPawnMoves(x, y) {
         if (y == 1) output.push(new Coordinate(x, y+2));
     }
     return output;
+
 }
 
 function checkNorth(x, y){
@@ -290,6 +301,7 @@ function checkSE(x, y) {
         valid = confirmSqr(x, y, xTillEdge, yTillEdge);
         if (!valid) break;
         else output.push(new Coordinate(xTillEdge, yTillEdge));
+
     }
     return output;
 }
@@ -359,34 +371,34 @@ function confirmSqr(x0, y0, x1, y1) {
     }
 }
 
-function addLegalMove(coordinates){
-  let img = document.createElement("img");
-  img.src = "green_circle.png";
-  img.className = "legal-move-space-img";
-  img.setAttribute ("onclick", "legalMoveClicked(this)");
+function addLegalMove(coordinates) {
+    let img = document.createElement("img");
+    img.src = "green_circle.png";
+    img.className = "legal-move-space-img";
+    img.setAttribute("onclick", "legalMoveClicked(this)");
 
-  let src = document.getElementById(coordinates.getSquareName());
-  //console.log("AddLegalMove: attempting to add a move at parentID = "+coordinates.getSquareName());
-  src.appendChild(img);
+    let src = document.getElementById(coordinates.getSquareName());
+    //console.log("AddLegalMove: attempting to add a move at parentID = "+coordinates.getSquareName());
+    src.appendChild(img);
 }
 
-function logBoard(){
-  console.log("Current board position is:")
-  for (let y = 0; y < 8; y++) {
-    console.log(board[y]);
-  }
+function logBoard() {
+    console.log("Current board position is:")
+    for (let y = 0; y < 8; y++) {
+        console.log(board[y]);
+    }
 }
 
 class Coordinate {
-  constructor(x, y) {
-    this.x = x;
-    this.y = y;
-  }
+    constructor(x, y) {
+        this.x = x;
+        this.y = y;
+    }
 
-  getSquareName(){
-    //let letterX = String.fromCharCode(this.x+97);
-    //console.log("GetSquareName: squareName = "+ ""+String.fromCharCode(this.x+97)+(8-this.y));
-    return ""+String.fromCharCode(this.x+97)+(8-this.y);
-  }
+    getSquareName() {
+        //let letterX = String.fromCharCode(this.x+97);
+        //console.log("GetSquareName: squareName = "+ ""+String.fromCharCode(this.x+97)+(8-this.y));
+        return "" + String.fromCharCode(this.x + 97) + (8 - this.y);
+    }
 
 }
