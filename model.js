@@ -14,7 +14,7 @@ let gameID = 3;
 
 // Controller Methods
 function pieceClicked(element) {
-    //if (!turn) return; uncomment this line to get turns
+    if (!turn) return; //uncomment this line to get turns
     if ((squareSelected === null) || (element.parentElement.id !== squareSelected)) {
         hideLegalMoves();
         //element.parentElement.style.background="#ffd500";
@@ -64,6 +64,7 @@ function legalMoveClicked(element) {
         .then(response => {
             console.log("received response: " + response);
             // TODO: handle the DB response here
+            turn = !turn;
         })
         .catch(error => {
             console.error(error);
@@ -250,9 +251,10 @@ Our goal is to send the changes of the model to the DB and get the response (tha
  */
 //this method makes a db call with the following arguments:
 function ajaxCall(gameID, position, lastMove){ //rename to something like notifyDB()
-    console.log("entered ajax call");
+    //console.log("entered ajax call");
     return new Promise((resolve, reject) => {
         let xhr = new XMLHttpRequest();
+        //xhr.open("GET", "DBActions/test.php")
         xhr.open("GET", "DBActions/makeMove.php?id=" + gameID + "&position=" + position + "&lastMove=" + lastMove);
         xhr.onload = function () {
             if (xhr.status === 200) {

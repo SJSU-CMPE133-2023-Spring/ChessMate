@@ -110,11 +110,17 @@ VALUES ('$player1_id', '$player2_id', '$gameType', '$this->INITIAL_POSITION', ''
     }
 
     public function getPosition($id){
-            $sql = "SELECT * FROM matches WHERE id=$id";
-            $result = mysqli_query($this->conn, $sql);
-            $row = mysqli_fetch_object($result);
-            return $row->position;
-        }
+        $sql = "SELECT * FROM matches WHERE id=$id";
+        $result = mysqli_query($this->conn, $sql);
+        $row = mysqli_fetch_object($result);
+        return $row->position;
+    }
+
+    public function getLastMove($id): string
+    {
+        $movesArr = explode(" ", $this->getMoveHistory($id));
+        return end($movesArr);
+    }
 
 
     

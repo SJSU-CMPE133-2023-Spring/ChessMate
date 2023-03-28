@@ -11,9 +11,9 @@ if($_GET){
 
     $db->makeMove($gameID, $newPosition, $lastMove);
 
-    while($newPosition == $db->getPosition($gameID)) usleep(500);
+    while($lastMove == $db->getLastMove($gameID)) usleep(500);
 
-    echo $db->getPosition($gameID);
+    echo $db->getLastMove($gameID);
 
     //this method can be upgraded later with request id: 1 for make a move, 2 for give a hint, 3 for estimation of the position and so on
     /*
