@@ -89,6 +89,7 @@ function legalMoveClicked(element) {
 
     //part of waiting for opponent's move
     turn = !turn;
+    // TODO: CHECK FOR MATE
 
     console.log("Move completed: attempt to make an ajax call with gameID = %d, current position = %s, and last move = %s", gameID, currentPosition, lastMove);
     //ajaxCall(gameID, currentPosition, lastMove);
@@ -98,6 +99,7 @@ function legalMoveClicked(element) {
             // TODO: handle the DB response here
             displayOpponentMove(response);
             turn = !turn;
+            // TODO: CHECK FOR MATE -
         })
         .catch(error => {
             console.error(error);
@@ -113,20 +115,37 @@ function displayOpponentMove(response) {
     let newX = parseInt(response.slice(2, 3), 36) - 10;
     let newY = 8 - response.slice(3, 4);
     changePieceLocationOnBoard(oldX, oldY, newX, newY);
-
     document.getElementById(response.slice(2,4)).innerHTML = document.getElementById(response.slice(0,2)).innerHTML;
 
     //remove the piece from its current position
     document.getElementById(response.slice(0,2)).innerHTML = "";
 }
 
+//changes the board array given a moved piece, also handles promotion, castling, and en passant
 function changePieceLocationOnBoard(oldX, oldY, newX, newY) {
     let oldBoard = board.map(innerArray => [...innerArray]);
     board[newY][newX] = board[oldY][oldX];
     board[oldY][oldX] = " ";
+
+    // eat pawn if en passant was chosen
+    const fenPassant = currentPosition.split(' ')[3];
+    if (fenPassant != '-') {
+        fenX = parseInt(fenPassant.split(',')[0]);
+        fenY = parseInt(fenPassant.split(',')[1]);
+        if (oldBoard[oldY][oldX] == 'P' && newX == fenX && newY == fenY) {
+            board[newY+1][newX] = ' ';
+            //update html
+            const nothingPersonalKid = new Coordinate(newX, oldY);
+            document.getElementById(nothingPersonalKid.getSquareName()).innerHTML = '';
+        }
+        if (oldBoard[oldY][oldX] == 'p' && newX == fenX && newY == fenY) {
+            board[newY-1][newX] = ' ';
+            const nothingPersonalKid = new Coordinate(newX, oldY);
+            document.getElementById(nothingPersonalKid.getSquareName()).innerHTML = '';
+        }
+    }
     let newBoard = board.map(innerArray => [...innerArray]);
     currentPosition = generateFen(oldBoard, newBoard, oldX, oldY, newX, newY);
-    //console.log("ChangePieceLocationOnBoard: piece moved from " + oldX + ", " + oldY + " to " + newX + ", " + newY);
 }
 
 
@@ -295,6 +314,8 @@ function getKingMoves(x, y) {
     if (confirmSqr(x, y, x - 1, y) === ENEMY || confirmSqr(x, y, x - 1, y) === EMPTY) output.push(new Coordinate(x - 1, y));
     if (confirmSqr(x, y, x - 1, y + 1) === ENEMY || confirmSqr(x, y, x - 1, y + 1) === EMPTY) output.push(new Coordinate(x - 1, y + 1));
     if (confirmSqr(x, y, x, y + 1) === ENEMY || confirmSqr(x, y, x, y + 1) === EMPTY) output.push(new Coordinate(x, y + 1));
+    // TODO: get castle moves if they are allowed (check fen and whether opponent is targeting any relevent squares and if spaces are empty)
+
     return output;
 }
 
@@ -314,7 +335,8 @@ function getKnightMoves(x, y) {
 function getPawnMoves(x, y) {
     let output = [];
     //to determine color of mover (i feel checking if its uppercase is more concise but risky and im too lazy)
-    let daColor = getPieceColor(board[y][x]);
+    const daColor = getPieceColor(board[y][x]);
+    const fenPassant = currentPosition.split(' ')[3];
 
     //determine direction based on color
     if (daColor === 'white') {
@@ -331,7 +353,13 @@ function getPawnMoves(x, y) {
             output.push(new Coordinate(x+1, y - 1));
             //Here is the place for en passant - if (something)
         }
-
+        // en passant
+        if (fenPassant != '-') {
+            fenX = parseInt(fenPassant.split(',')[0]);
+            fenY = parseInt(fenPassant.split(',')[1]);
+            if (x == fenX - 1 && y == fenY + 1) output.push(new Coordinate(fenX, fenY));
+            if (x == fenX + 1 && y == fenY + 1) output.push(new Coordinate(fenX, fenY));
+        }
     }
 
     if (daColor === 'black') {
@@ -347,10 +375,15 @@ function getPawnMoves(x, y) {
             output.push(new Coordinate(x+1, y + 1));
             //Here is the place for en passant - if (something)
         }
+        // en passant
+        if (fenPassant != '-') {
+            fenX = parseInt(fenPassant.split(',')[0]);
+            fenY = parseInt(fenPassant.split(',')[1]);
+            if (x == fenX - 1 && y == fenY - 1) output.push(new Coordinate(fenX, fenY));
+            if (x == fenX + 1 && y == fenY - 1) output.push(new Coordinate(fenX, fenY));
+        }
     }
-
     return output;
-
 }
 
 function checkNorth(x, y) {
@@ -659,7 +692,7 @@ function addLegalMove(coordinates) {
     img.setAttribute("onclick", "legalMoveClicked(this)");
 
     let src = document.getElementById(coordinates.getSquareName());
-    //console.log("AddLegalMove: attempting to add a move at parentID = "+coordinates.getSquareName());
+//    console.log("AddLegalMove: attempting to add a move at parentID = "+coordinates.getSquareName());
     src.appendChild(img);
 }
 
@@ -702,12 +735,26 @@ function ajaxCall(gameID, position, lastMove){ //rename to something like notify
 
 }
 
-
-
+// new Coordinate(3,5);  -  holds boardId: d3, only x and y stored as an int
+// new Coordinate(undefined, undefined, d3);  -  holds x=3 and y=5
+//i think, avoid passing more than those two arguments
 class Coordinate {
-    constructor(x, y) {
-        this.x = x;
-        this.y = y;
+    constructor(x, y, square = 'a0') {
+        if (x !== undefined && y !== undefined) {
+            this.x = x;
+            this.y = y;
+            this.square = this.getSquareName();
+            this.rank = square.charAt(0);
+            this.file = square.substring(1);
+        }
+        else { //square was given
+            this.square = square;
+            this.rank = square.charAt(0);
+            this.file = square.substring(1);
+            indices = this.getArrayId().split(',');
+            this.x = indices[0];
+            this.y = indices[1];
+        }
     }
 
     getSquareName() {
@@ -716,8 +763,12 @@ class Coordinate {
         return "" + String.fromCharCode(this.x + 97) + (8 - this.y);
     }
 
+    getArrayId() {
+        return "" + String.fromCharCode(this.rank - 97) + "," (8 + this.file);
+    }
+
     toString() {
-        return `(${this.x}, ${this.y})`;
+        return `(${this.rank}, ${this.file})`;
     }
 
 }
