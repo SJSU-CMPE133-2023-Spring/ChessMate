@@ -2,6 +2,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Objects;
+import java.util.Random;
 
 public class StockfishManager {
     // it will not create a connection
@@ -54,8 +55,8 @@ public class StockfishManager {
     }
 
     private static String getRandomStartingMove() {
+        Random random = new Random(System.currentTimeMillis());
         String[] moves = {"e2e4", "d2d4", "c2c4", "g2g3", "g1f3"};
-        int randomIndex = (int) (Math.random() * moves.length);
-        return moves[randomIndex];
+        return moves[random.nextInt(5)];
     }
 }

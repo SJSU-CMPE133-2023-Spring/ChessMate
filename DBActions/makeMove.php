@@ -9,7 +9,7 @@ if($_GET){
 
     $lastMove = $_GET['lastMove'];
 
-    $db->makeMove($gameID, $newPosition, $lastMove);
+    if($lastMove!="") $db->makeMove($gameID, $newPosition, $lastMove);
 
     while($lastMove == $db->getLastMove($gameID)) usleep(500);
 

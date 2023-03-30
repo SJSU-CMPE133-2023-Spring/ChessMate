@@ -751,7 +751,7 @@ class Coordinate {
             this.square = square;
             this.rank = square.charAt(0);
             this.file = square.substring(1);
-            indices = this.getArrayId().split(',');
+            let indices = this.getArrayId().split(',');
             this.x = indices[0];
             this.y = indices[1];
         }
@@ -764,7 +764,7 @@ class Coordinate {
     }
 
     getArrayId() {
-        return "" + String.fromCharCode(this.rank - 97) + "," (8 + this.file);
+        return "" + String.fromCharCode(this.rank - 97) + ","+ (8 + this.file);
     }
 
     toString() {
