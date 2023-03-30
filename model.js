@@ -13,7 +13,7 @@ let pieceSelected = null;
 
 
 let opponent = "id of an opponent / or AI id (if we have multiple: simple/medium/pro)";
-let currentPosition = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR";
+let currentPosition = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 0";
 let board = new Array(8);
 //setBoard(currentPosition);
 setBoard("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR");
@@ -39,7 +39,6 @@ if (playerColor==BLACK){
         });
 }
 
-
 // Controller Methods
 function pieceClicked(element) {
     if (!turn) return; //uncomment this line to get turns
@@ -63,6 +62,13 @@ function pieceClicked(element) {
     }
 }
 
+function displayLegalMoves(legalMoves) {
+    //console.log("displaying n = " + legalMoves.length + " moves...");
+    for (let i = 0; i < legalMoves.length; i++) {
+        addLegalMove(new Coordinate(legalMoves[i].x, legalMoves[i].y));
+    }
+}
+
 function legalMoveClicked(element) {
     //save for the ajax call:
     let lastMove = squareSelected+element.parentElement.id;
@@ -76,8 +82,6 @@ function legalMoveClicked(element) {
 
     //remove the piece from its current position
     document.getElementById(squareSelected).innerHTML = "";
-
-
 
     //update the board model:
     changePieceLocationOnBoard(oldX, oldY, newX, newY);
@@ -103,14 +107,7 @@ function legalMoveClicked(element) {
     pieceSelected = null;
 }
 
-function changePieceLocationOnBoard(oldX, oldY, newX, newY) {
-    board[newY][newX] = board[oldY][oldX];
-    board[oldY][oldX] = " ";
-    updateBoardPosition();
-    //console.log("ChangePieceLocationOnBoard: piece moved from " + oldX + ", " + oldY + " to " + newX + ", " + newY);
-}
-
-function displayOpponentMove(response){
+function displayOpponentMove(response) {
     let oldX = parseInt(response.slice(0, 1), 36) - 10;
     let oldY = 8 - response.slice(1, 2);
     let newX = parseInt(response.slice(2, 3), 36) - 10;
@@ -121,19 +118,17 @@ function displayOpponentMove(response){
 
     //remove the piece from its current position
     document.getElementById(response.slice(0,2)).innerHTML = "";
-
-}
-function updateBoardPosition(){
-    //TODO: add code that refreshes the currentPosition string based on the board position
-
 }
 
-function displayLegalMoves(legalMoves) {
-    //console.log("displaying n = " + legalMoves.length + " moves...");
-    for (let i = 0; i < legalMoves.length; i++) {
-        addLegalMove(new Coordinate(legalMoves[i].x, legalMoves[i].y));
-    }
+function changePieceLocationOnBoard(oldX, oldY, newX, newY) {
+    let oldBoard = board.map(innerArray => [...innerArray]);
+    board[newY][newX] = board[oldY][oldX];
+    board[oldY][oldX] = " ";
+    let newBoard = board.map(innerArray => [...innerArray]);
+    currentPosition = generateFen(oldBoard, newBoard, oldX, oldY, newX, newY);
+    //console.log("ChangePieceLocationOnBoard: piece moved from " + oldX + ", " + oldY + " to " + newX + ", " + newY);
 }
+
 
 /* TODO: make a method that will check if one of the legal moves allows opponent to capture the King
       * if there is such a move, it should be removed from the legal moves.
@@ -143,11 +138,6 @@ function displayLegalMoves(legalMoves) {
            one of the ways to do it is by creating a list of pieces that can attack the king if there is no one around,
            and then check if one of this attacks is blocked by a piece that is about to move. If after that move the king
            is in danger - the move should be removed from the legalMoves.
-           LMAO
-           too smart
-           ima BRUTE FORCE instead
-
-
  */
 
 function hideLegalMoves() {
@@ -170,7 +160,6 @@ function setBoard(newPosition) {
             for (let charRead = 0; charRead < line.length; charRead++) {
                 let nextChar = line.slice(charRead, charRead + 1);
                 if (!(nextChar >= '0' && nextChar <= '9')) {
-                    /* TODO: not switch column and row every damn time */
                     newBoard[column][row] = nextChar;
                     row++;
                 } else {
@@ -231,12 +220,8 @@ function getLegalMoves(piece, x, y) {
                 break;
         }
     }
-
-
     legalMoves = remSelfChecks(piece, x, y, legalMoves)
-
     console.log("GetLegalMoves: total number of moves =  " + legalMoves.length);
-
     return legalMoves;
 }
 
@@ -568,6 +553,89 @@ function confirmSqr(x0, y0, x1, y1) {
         //console.log("ally detected at x="+x+", y="+squaresTillEdge+"! Stop the count!");
         return ALLY;
     }
+}
+
+// returns a fen given the changes from the old board to the new board array
+// NOTE: enpassant part is stored as 'x,y' ranging from 0-7, otherwise '-'
+function generateFen(oldBoard, newBoard, oldX, oldY, newX, newY){
+    // https://gbud.in/blog/game/chess/chess-fen-forsyth-edwards-notation.html#halfmove-clock
+    // constants are old values
+    const fenArr = currentPosition.split(" ");
+    const color = fenArr[1]
+    const castle = fenArr[2]
+    const passant = fenArr[3]
+    const halfClk = fenArr[4]
+    const movNum = fenArr[5]
+    const pieceMoved = oldBoard[oldY][oldX];
+
+    //begin new fen
+    let newFen = genFenPieces(newBoard);
+    // active color
+    if (color == 'w') newFen += ' b ';
+    else newFen += ' w ';
+
+    // castle (does color matter or previous fen for castle?
+    let whiteCastle = castle.match(/[A-Z]/g);
+    let blackCastle = castle.match(/[a-z]/g);
+    let newCastle = '';
+    if (castle == '-') newCastle += '-';
+    else if (color == 'w') {
+        if (pieceMoved == 'K') newCastle += '';
+        else if (pieceMoved == 'R' && oldX == 0 && oldY == 7 && whiteCastle != null) newCastle += whiteCastle.filter(letter => letter !== 'Q').join('');
+        else if (pieceMoved == 'R' && oldX == 7 && oldY == 7 && whiteCastle != null) newCastle += whiteCastle.filter(letter => letter !== 'K').join('');
+        else if (whiteCastle != null) newCastle += whiteCastle.join('');
+        if (blackCastle != null) newCastle += blackCastle.join('');
+    }
+    else if (color == 'b') {
+        if (whiteCastle != null) newCastle += whiteCastle.join('');
+        if (pieceMoved == 'k') newCastle += '';
+        else if (pieceMoved == 'r' && oldX == 0 && oldY == 0 && blackCastle != null) newCastle += blackCastle.filter(letter => letter !== 'q').join('');
+        else if (pieceMoved == 'r' && oldX == 7 && oldY == 0 && blackCastle != null) newCastle += blackCastle.filter(letter => letter !== 'k').join('');
+        else if (blackCastle != null) newCastle += blackCastle.join('');
+    }
+    if (newCastle == '') newCastle = '-';
+    newFen += newCastle;
+
+    // en passant
+    if (pieceMoved == 'P' && oldY == 6 && newY == 4) newFen += ' ' + newX + ',' + (newY+1);
+    else if (pieceMoved == 'p' && oldY == 1 && newY == 3) newFen += ' ' + newX + ',' + (newY-1);
+    else newFen += ' -';
+
+    // half move clock
+    if (pieceMoved == 'P' || pieceMoved == 'p' || oldBoard[newY][newX] != ' ') newFen += ' 0';
+    else newFen += ' ' + (parseInt(halfClk) + 1);
+
+    // full move number
+    if (color == 'b') newFen += ' ' + (parseInt(movNum) + 1);
+    else newFen += ' ' + movNum;
+
+    return newFen;
+}
+
+// creates the first part of the fen string given a board array
+function genFenPieces(arr) {
+    let boardFen = '';
+    for (let rank = 0; rank < arr.length; rank++) {
+        countEmpty = 0;
+        for (let file = 0; file < arr.length; file++) {
+            piece = arr[rank][file];
+            if (piece != ' ') {
+                if (countEmpty != 0) {
+                    boardFen += countEmpty;
+                    countEmpty = 0;
+                }
+                boardFen += piece;
+            } else {
+                countEmpty++;
+            }
+        }
+        if (countEmpty != 0) {
+            boardFen += countEmpty;
+            countEmpty = 0;
+        }
+        if (rank < arr.length - 1) boardFen += '/';
+    }
+    return boardFen;
 }
 
 //given a string (ex: 'r', 'P', 'q', or 'B') returns 'white' or 'black'
