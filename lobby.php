@@ -4,11 +4,12 @@ $db = new DataBaseActions();
 
 if ($_GET and $_GET["id"] and $_GET["login"]){
 
-    echo '';
-
-    $gameID = $db->enterOrStartGame($_GET["id"]);
-    while ($db->getGameStatus($gameID) == "waiting_opponent") sleep(1);
+    $opponent = $_GET["opponent"];
+    echo $opponent;
+    $gameID = $db->enterOrStartGame($_GET["id"],$_GET["opponent"]);
+    while ($db->getGameStatus($gameID) == "waiting") sleep(1);
     $color = $db->getPlayerColor($gameID, $_GET["id"]);
+
     if ($color == -1) {
         echo "error with the lobby";
         die();
@@ -16,8 +17,6 @@ if ($_GET and $_GET["id"] and $_GET["login"]){
     header("location: board.php?gameid=$gameID&color=$color");
     die();
 
-} else {
-    echo '';
 }
 
 ?>
@@ -30,15 +29,18 @@ if ($_GET and $_GET["id"] and $_GET["login"]){
         body {
             background-color: #f2f2f2;
             font-family: Arial, sans-serif;
+
         }
         form {
             background-color: #fff;
-            padding: 20px;
+            justify-content: center;
+            padding: 30px;
             border-radius: 10px;
             box-shadow: 0px 0px 10px rgba(0,0,0,0.1);
             margin: auto;
             width: 50%;
             margin-top: 50px;
+
         }
         h1 {
             text-align: center;
@@ -76,6 +78,10 @@ if ($_GET and $_GET["id"] and $_GET["login"]){
             position:relative;
             z-index:-1
         }
+        label {
+            margin-right: 10px;
+        }
+
     </style>
 </head>
 <body>
@@ -88,7 +94,11 @@ if ($_GET and $_GET["id"] and $_GET["login"]){
     <label for="lname">ID</label>
     <input type="text" id="lname" name="id" placeholder="Your id..">
 
-    <input onclick="displayWait()" type="submit" value="Submit">
+
+    <input type="radio" name="opponent" value="online">Online
+    <input type="radio" name="opponent" value="engine">With a bot
+    <br>
+    <input class="center" onclick="displayWait()" type="submit" value="Submit">
 </form>
 
 <h1 id="wait-label" style="display: none"> Waiting for an opponent</h1>

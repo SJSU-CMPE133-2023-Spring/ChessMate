@@ -120,7 +120,26 @@ VALUES ('$player1_id', '$player2_id', '$gameStatus', '$this->INITIAL_POSITION', 
         return end($movesArr);
     }
 
-    public function enterOrStartGame($playerID){
+    public function enterOrStartGame($playerID, $opponent){
+
+        $randBool = (bool) mt_rand(0, 1);
+        if ($opponent == "online"){
+            //online opponent
+            return $this->enterOrStartOnlineGame($playerID);
+        } else {
+            // engine opponent
+
+            if ($randBool) $this->startMatch($playerID, "engine", "waiting_engine");
+            else  $this->startMatch("engine", $playerID, "waiting_engine");
+            $sql = "SELECT * FROM matches WHERE status='waiting_engine' AND (white = $playerID OR black = $playerID)";
+            $result = mysqli_query($this->conn, $sql);
+            $row = mysqli_fetch_object($result);
+            return $row->id;
+        }
+
+    }
+    public function enterOrStartOnlineGame($playerID){
+        $randBool = (bool) mt_rand(0, 1);
         $sql = "SELECT * FROM matches WHERE status='waiting_opponent'";
         $result = mysqli_query($this->conn, $sql);
         $row = mysqli_fetch_object($result);
@@ -132,7 +151,7 @@ VALUES ('$player1_id', '$player2_id', '$gameStatus', '$this->INITIAL_POSITION', 
         } else {
             //there is a lobby with one player - join
             //randomly assign the colors
-            $randBool = (bool) mt_rand(0, 1);
+
             $player1 = $playerID;
             $player2 = $row->white;
 
@@ -147,7 +166,8 @@ VALUES ('$player1_id', '$player2_id', '$gameStatus', '$this->INITIAL_POSITION', 
         $sql = "SELECT * FROM matches WHERE id=$id";
         $result = mysqli_query($this->conn, $sql);
         $row = mysqli_fetch_object($result);
-        return $row->status;
+        if ($row->status == "waiting_opponent" or $row->status == "waiting_engine") return "waiting";
+        else return "ready";
     }
 
     private function updateGame($id, $player1, $player2){
