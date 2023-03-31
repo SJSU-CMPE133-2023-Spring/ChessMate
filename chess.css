@@ -1,11 +1,12 @@
 th {
-  width: 75px;
-  height: 75px;
-  max-width: 75px;
+  width: 100px;
+  height: 100px;
+  max-width: 20%;
+  max-height: 20%;
 }
 tr {
-  width: 75px;
-  height: 75px;
+  width: 20%;
+  height: 20%;
 }
 .chess-board { border-spacing: 0; border-collapse: collapse;}
 .chess-board th { padding: .5em; }
@@ -15,23 +16,28 @@ tr {
 .chess-board tr:last-child td { border-bottom: 1px solid; }
 .chess-board th:empty { border: none;}
 .chess-board td { width: 1.5em; height: 1.5em; text-align: center; font-size: 32px; line-height: 0;}
+
 .chess-board .light { background: #a6a2a2;
   position: relative;
-  width: 75px;
+  /*width: 75px;
   height: 75px;
-  max-height: 75px;
+  max-height: 75px;*/
  }
 
 .chess-board .dark { background: #3c3c42;
   position: relative;
-  width: 75px;
+  /*width: 75px;
   height: 75px;
-  max-height: 75px;
+  max-height: 75px;*/
 }
 .chess-board .selected { background: #fffc41; }
 .gameprefix {
   width: 75px;
   height: 75px;
+}
+
+.chess-board {
+  background-color: black;
 }
 
 .piece-img {
@@ -62,4 +68,124 @@ tr {
 
 .white-rook {
   background-color: white;
+}
+
+#topFooter{
+  background-color: #2B2929;
+}
+
+#topFooter .logo{
+  width: 20%;
+  height: 20%;
+  max-width: 250px;
+  max-height: 250px;
+}
+
+
+
+.flex-container1{
+  display:flex;
+  height:100%;
+}
+
+.column {
+  flex:1;
+}
+
+.left {
+  margin: 24px;
+  flex-grow: 1;
+}
+
+.right{
+  margin:24px;
+  background-color:rgb(216, 211, 211);
+  flex-grow: .5;
+}
+
+.row:after{
+  content: "";
+  display:table;
+  clear:both;
+}
+
+#board{
+  background-color:#3b3939;
+}
+
+.right{
+  border-radius: 5px;
+}
+
+.flex-container2 {
+  display:flex;
+
+}
+
+.flex-container2 > div {
+  border-radius: 5px;
+  background-color: white;
+  margin: 10px;
+  padding:20px;
+  flex:1;
+  font-family: "Arial";
+  font-size: auto;
+
+}
+
+
+.dropbtn {
+  background-color: #3498DB;
+  color: white;
+  padding: 16px;
+  font-size: 16px;
+  border: none;
+  cursor: pointer;
+  align-self: flex-end;
+}
+
+.dropbtn:hover, .dropbtn:focus {
+  background-color: #2980B9;
+}
+
+.dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.dropdown-content {
+  display: none;
+  position: absolute;
+  background-color: #f1f1f1;
+  min-width: 160px;
+  overflow: auto;
+  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+  z-index: 1;
+}
+
+.dropdown-content a {
+  color: black;
+  padding: 12px 16px;
+  text-decoration: none;
+  display: block;
+}
+
+.dropdown a:hover {
+  background-color: #ddd;
+}
+
+.show {
+  display: block;
+}
+
+footer{
+  display:flex;
+  width:100%;
+  height:100px;
+  margin-top: 100px;
+  background-color: #2B2929;
+  color: white;
+  justify-content: center;
+  align-items:center;
+  font-family: Arial, Helvetica, sans-serif;
 }
