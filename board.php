@@ -238,12 +238,12 @@ if ($_GET and $_GET["gameid"] and $_GET["color"])
         </div>
     </div>
 
-    <!--      <?php
+        <?php
     if ($_GET) {
         echo '<h2>Your color is: <div id="color">' . $_GET["color"] . '</div></h2>
                 <h2>Game ID: <div id="gameID">' . $_GET["gameid"] . '</div></h2>';
     }
-    ?> -->
+    ?>
 
     <script>
         function myFunction1() {
@@ -272,7 +272,8 @@ if ($_GET and $_GET["gameid"] and $_GET["color"])
             }
         }
     </script>
-
+<script src="model.js">
+</script>
 </body>
 
 <footer>
