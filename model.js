@@ -78,10 +78,10 @@ function legalMoveClicked(element) {
     let newX = parseInt(element.parentElement.id.slice(0, 1), 36) - 10;
     let newY = 8 - element.parentElement.id.slice(1, 2)
 
-    //move the current piece to a new place
-    document.getElementById(element.parentElement.id).innerHTML = document.getElementById(squareSelected).innerHTML;
-    //remove the piece from its current position
-    document.getElementById(squareSelected).innerHTML = "";
+//    //move the current piece to a new place
+//    document.getElementById(element.parentElement.id).innerHTML = document.getElementById(squareSelected).innerHTML;
+//    //remove the piece from its current position
+//    document.getElementById(squareSelected).innerHTML = "";
 
     //update the board model, comes after updating html for some reason
     board = changePieceLocationOnBoard(board, oldX, oldY, newX, newY);
@@ -114,10 +114,10 @@ function displayOpponentMove(response) {
     let oldY = 8 - response.slice(1, 2);
     let newX = parseInt(response.slice(2, 3), 36) - 10;
     let newY = 8 - response.slice(3, 4);
+//    document.getElementById(response.slice(2,4)).innerHTML = document.getElementById(response.slice(0,2)).innerHTML;
+//    //remove the piece from its current position
+//    document.getElementById(response.slice(0,2)).innerHTML = "";
     board = changePieceLocationOnBoard(board, oldX, oldY, newX, newY);
-    document.getElementById(response.slice(2,4)).innerHTML = document.getElementById(response.slice(0,2)).innerHTML;
-    //remove the piece from its current position
-    document.getElementById(response.slice(0,2)).innerHTML = "";
 }
 
 //changes and returns a given board array given a moving piece, also handles promotion, castling, and en passant
@@ -126,6 +126,10 @@ function changePieceLocationOnBoard(board, oldX, oldY, newX, newY, affectGlobal 
     let oldBoard = board.map(innerArray => [...innerArray]);
     board[newY][newX] = board[oldY][oldX];
     board[oldY][oldX] = " ";
+    if (affectGlobal) {
+        document.getElementById(new Coordinate(newX, newY).getSquareName()).innerHTML = document.getElementById(new Coordinate(oldX, oldY).getSquareName()).innerHTML;
+        document.getElementById(new Coordinate(oldX, oldY).getSquareName()).innerHTML = '';
+    }
 
     // eat pawn if en passant was chosen
     const fenPassant = currentPosition.split(' ')[3];
@@ -176,6 +180,17 @@ function changePieceLocationOnBoard(board, oldX, oldY, newX, newY, affectGlobal 
             }
         }
     }
+
+    // promote a pawn to a queen TODO: promote to other pieces
+    if (oldBoard[oldY][oldX] == 'P' && newY == 0) {
+        board[newY][newX] = 'Q';
+        if (affectGlobal) document.getElementById(new Coordinate(newX, newY).getSquareName()).innerHTML = '<img class="piece-img" onclick="pieceClicked(this)" id="Q_3" src="pieces/white-queen.png">';
+    }
+    if (oldBoard[oldY][oldX] == 'p' && newY == 7) {
+        board[newY][newX] = 'q';
+        if (affectGlobal) document.getElementById(new Coordinate(newX, newY).getSquareName()).innerHTML = '<img class="piece-img" onclick="pieceClicked(this)" id="q_3" src="pieces/black-queen.png">';
+    }
+
 
     // finish up
     let newBoard = board.map(innerArray => [...innerArray]);
