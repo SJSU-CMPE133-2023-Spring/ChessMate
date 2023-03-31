@@ -77,19 +77,19 @@ function legalMoveClicked(element) {
     let oldY = 8 - squareSelected.slice(1, 2);
     let newX = parseInt(element.parentElement.id.slice(0, 1), 36) - 10;
     let newY = 8 - element.parentElement.id.slice(1, 2)
+
     //move the current piece to a new place
     document.getElementById(element.parentElement.id).innerHTML = document.getElementById(squareSelected).innerHTML;
-
     //remove the piece from its current position
     document.getElementById(squareSelected).innerHTML = "";
 
-    //update the board model:
-    changePieceLocationOnBoard(oldX, oldY, newX, newY);
-    hideLegalMoves();
+    //update the board model, comes after updating html for some reason
+    board = changePieceLocationOnBoard(board, oldX, oldY, newX, newY);
 
     //part of waiting for opponent's move
+    hideLegalMoves();
     turn = !turn;
-    // TODO: CHECK FOR MATE
+    // TODO: CHECK FOR MATE OR STALEMATE
 
     console.log("Move completed: attempt to make an ajax call with gameID = %d, current position = %s, and last move = %s", gameID, currentPosition, lastMove);
     //ajaxCall(gameID, currentPosition, lastMove);
@@ -98,8 +98,8 @@ function legalMoveClicked(element) {
             console.log("received response: " + response);
             // TODO: handle the DB response here
             displayOpponentMove(response);
+            // TODO: CHECK FOR MATE OR STALEMATE
             turn = !turn;
-            // TODO: CHECK FOR MATE -
         })
         .catch(error => {
             console.error(error);
@@ -114,15 +114,15 @@ function displayOpponentMove(response) {
     let oldY = 8 - response.slice(1, 2);
     let newX = parseInt(response.slice(2, 3), 36) - 10;
     let newY = 8 - response.slice(3, 4);
-    changePieceLocationOnBoard(oldX, oldY, newX, newY);
+    board = changePieceLocationOnBoard(board, oldX, oldY, newX, newY);
     document.getElementById(response.slice(2,4)).innerHTML = document.getElementById(response.slice(0,2)).innerHTML;
-
     //remove the piece from its current position
     document.getElementById(response.slice(0,2)).innerHTML = "";
 }
 
-//changes the board array given a moved piece, also handles promotion, castling, and en passant
-function changePieceLocationOnBoard(oldX, oldY, newX, newY) {
+//changes and returns a given board array given a moving piece, also handles promotion, castling, and en passant
+// affectGlobal is false for when I need this method without changing the real board array and HTML
+function changePieceLocationOnBoard(board, oldX, oldY, newX, newY, affectGlobal = true) {
     let oldBoard = board.map(innerArray => [...innerArray]);
     board[newY][newX] = board[oldY][oldX];
     board[oldY][oldX] = " ";
@@ -136,16 +136,51 @@ function changePieceLocationOnBoard(oldX, oldY, newX, newY) {
             board[newY+1][newX] = ' ';
             //update html
             const nothingPersonalKid = new Coordinate(newX, oldY);
-            document.getElementById(nothingPersonalKid.getSquareName()).innerHTML = '';
+            if (affectGlobal) document.getElementById(nothingPersonalKid.getSquareName()).innerHTML = '';
         }
         if (oldBoard[oldY][oldX] == 'p' && newX == fenX && newY == fenY) {
             board[newY-1][newX] = ' ';
             const nothingPersonalKid = new Coordinate(newX, oldY);
-            document.getElementById(nothingPersonalKid.getSquareName()).innerHTML = '';
+            if (affectGlobal) document.getElementById(nothingPersonalKid.getSquareName()).innerHTML = '';
         }
     }
+
+    // move rook if king made a castle move
+    const color = getPieceColor(oldBoard[oldY][oldX]);
+    const wKPos = new Coordinate(4, 7);
+    const bKPos = new Coordinate(4, 0);
+    let kPos = wKPos;
+    if (color == BLACK) kPos = bKPos;
+
+    if (oldBoard[oldY][oldX] == 'K' || oldBoard[oldY][oldX] == 'k' && oldX == kPos.x && oldY == kPos.y) {
+        if (newX == kPos.x + 2) {
+            const newCastlePos = new Coordinate(kPos.x+1, kPos.y);
+            const oldCastlePos = new Coordinate(kPos.x+3, kPos.y);
+            board[newCastlePos.y][newCastlePos.x] = board[oldCastlePos.y][oldCastlePos.x];
+            board[oldCastlePos.y][oldCastlePos.x] = ' ';
+            //change HTML
+            if (affectGlobal) {
+                document.getElementById(newCastlePos.getSquareName()).innerHTML = document.getElementById(oldCastlePos.getSquareName()).innerHTML;
+                document.getElementById(oldCastlePos.getSquareName()).innerHTML = '';
+            }
+        }
+        if (newX == kPos.x - 2) {
+            const newCastlePos = new Coordinate(kPos.x-1, kPos.y);
+            const oldCastlePos = new Coordinate(kPos.x-4, kPos.y);
+            board[newCastlePos.y][newCastlePos.x] = board[oldCastlePos.y][oldCastlePos.x];
+            board[oldCastlePos.y][oldCastlePos.x] = ' ';
+            //change HTML
+            if (affectGlobal) {
+                document.getElementById(newCastlePos.getSquareName()).innerHTML = document.getElementById(oldCastlePos.getSquareName()).innerHTML;
+                document.getElementById(oldCastlePos.getSquareName()).innerHTML = '';
+            }
+        }
+    }
+
+    // finish up
     let newBoard = board.map(innerArray => [...innerArray]);
-    currentPosition = generateFen(oldBoard, newBoard, oldX, oldY, newX, newY);
+    if (affectGlobal) currentPosition = generateFen(oldBoard, newBoard, oldX, oldY, newX, newY);
+    return board;
 }
 
 
@@ -196,47 +231,23 @@ function setBoard(newPosition) {
 
 function getLegalMoves(piece, x, y) {
     let legalMoves = [];
-    if (playerColor==WHITE){
+    if (playerColor == WHITE) {
         switch (piece) {
-            case "R":
-                legalMoves = getRookMoves(x, y);
-                break;
-            case "B":
-                legalMoves = getBishopMoves(x, y);
-                break;
-            case "N":
-                legalMoves = getKnightMoves(x, y);
-                break;
-            case "Q":
-                legalMoves = getQueenMoves(x, y);
-                break;
-            case "K":
-                legalMoves = getKingMoves(x, y);
-                break;
-            case "P":
-                legalMoves = getPawnMoves(x, y);
-                break;
+            case "R": legalMoves = getRookMoves(x, y); break;
+            case "B": legalMoves = getBishopMoves(x, y); break;
+            case "N": legalMoves = getKnightMoves(x, y); break;
+            case "Q": legalMoves = getQueenMoves(x, y); break;
+            case "K": legalMoves = getKingMoves(x, y); break;
+            case "P": legalMoves = getPawnMoves(x, y); break;
         }
     } else {
         switch (piece) {
-            case "r":
-                legalMoves = getRookMoves(x, y);
-                break;
-            case "b":
-                legalMoves = getBishopMoves(x, y);
-                break;
-            case "n":
-                legalMoves = getKnightMoves(x, y);
-                break;
-            case "q":
-                legalMoves = getQueenMoves(x, y);
-                break;
-            case "k":
-                legalMoves = getKingMoves(x, y);
-                break;
-            case "p":
-                legalMoves = getPawnMoves(x, y);
-                break;
+            case "r": legalMoves = getRookMoves(x, y); break;
+            case "b": legalMoves = getBishopMoves(x, y); break;
+            case "n": legalMoves = getKnightMoves(x, y); break;
+            case "q": legalMoves = getQueenMoves(x, y); break;
+            case "k": legalMoves = getKingMoves(x, y); break;
+            case "p": legalMoves = getPawnMoves(x, y); break;
         }
     }
     legalMoves = remSelfChecks(piece, x, y, legalMoves)
@@ -247,50 +258,74 @@ function getLegalMoves(piece, x, y) {
 function remSelfChecks(piece, x, y, moves) {
     let newMoves = [];
     //determine whose move it is
-    let myColor = getPieceColor(piece);
+    const myColor = getPieceColor(piece);
     let opponent = BLACK;
     if (myColor === BLACK) opponent = WHITE;
 
     //check if moves has a move that gets their King checked
     for (let move of moves) {
         let originalBoard = board.map(innerArray => [...innerArray]);
-        let checks = false;
-//        board = originalBoard.map(innerArray => [...innerArray]);
-        let checkBoard = board;
-        checkBoard[y][x] = ' ';
-        checkBoard[move.y][move.x] = piece;
+        let selfCheck = false;
+        board = changePieceLocationOnBoard(board, x, y, move.x, move.y, false);
 
-        for (let checkY = 0; checkY < checkBoard.length; checkY++) {
-            for (let checkX = 0; checkX < checkBoard.length; checkX++) {
-                if (getPieceColor(checkBoard[checkY][checkX]) === opponent) {
-                    let oppMoves = []
-                    switch (checkBoard[checkY][checkX]) {
-                        case "R": oppMoves = getRookMoves(checkX, checkY); break;
-                        case "B": oppMoves = getBishopMoves(checkX, checkY); break;
-                        case "N": oppMoves = getKnightMoves(checkX, checkY); break;
-                        case "Q": oppMoves = getQueenMoves(checkX, checkY); break;
-                        case "K": oppMoves = getKingMoves(checkX, checkY); break;
-                        case "P": oppMoves = getPawnMoves(checkX, checkY); break;
-                        case "r": oppMoves = getRookMoves(checkX, checkY); break;
-                        case "b": oppMoves = getBishopMoves(checkX, checkY); break;
-                        case "n": oppMoves = getKnightMoves(checkX, checkY); break;
-                        case "q": oppMoves = getQueenMoves(checkX, checkY); break;
-                        case "k": oppMoves = getKingMoves(checkX, checkY); break;
-                        case "p": oppMoves = getPawnMoves(checkX, checkY); break;
-                    }
-                    for (let oppMove of oppMoves) {
-                        if (checkBoard[oppMove.y][oppMove.x] == 'K' || checkBoard[oppMove.y][oppMove.x] == 'k') {
-                            checks = true;
-                        }
-                    }
-                }
+        for (let oppMove of getColorMoves(opponent)) {
+            if (board[oppMove.y][oppMove.x] == 'K' || board[oppMove.y][oppMove.x] == 'k') {
+                selfCheck = true;
             }
         }
-        if (!checks) newMoves.push(move);
+
+        if (!selfCheck) newMoves.push(move);
         board = originalBoard.map(innerArray => [...innerArray]);
     }
     return newMoves;
 }
+
+//returns boolean whether a targetSqr (a coordinate) is covered by a given colors attack, needs to know the color that could attack that square
+function squareUnderFire(targetSqr, color) {
+    let underFire = false;
+    for (let move of getColorMoves(color)) {
+        if (move.x == targetSqr.x && move.y == targetSqr.y) {
+            underFire = true;
+        }
+    }
+    return underFire;
+}
+
+// returns array of all moves a color can make - INCLUDES SELF CHECKS
+function getColorMoves(color) {
+    let moves = [];
+    for (let checkY = 0; checkY < board.length; checkY++) {
+        for (let checkX = 0; checkX < board.length; checkX++) {
+            if (getPieceColor(board[checkY][checkX]) === color) {
+                let pieceMoves = [];
+                if (color == WHITE) {
+                    switch (board[checkY][checkX]) {
+                        case "R": pieceMoves = getRookMoves(checkX, checkY); break;
+                        case "B": pieceMoves = getBishopMoves(checkX, checkY); break;
+                        case "N": pieceMoves = getKnightMoves(checkX, checkY); break;
+                        case "Q": pieceMoves = getQueenMoves(checkX, checkY); break;
+                        case "K": pieceMoves = getKingMoves(checkX, checkY, false); break;
+                        case "P": pieceMoves = getPawnMoves(checkX, checkY); break;
+                    }
+                } else {
+                    switch (board[checkY][checkX]) {
+                        case "r": pieceMoves = getRookMoves(checkX, checkY); break;
+                        case "b": pieceMoves = getBishopMoves(checkX, checkY); break;
+                        case "n": pieceMoves = getKnightMoves(checkX, checkY); break;
+                        case "q": pieceMoves = getQueenMoves(checkX, checkY); break;
+                        case "k": pieceMoves = getKingMoves(checkX, checkY, false); break;
+                        case "p": pieceMoves = getPawnMoves(checkX, checkY); break;
+                    }
+                }
+                for (let move of pieceMoves) {
+                    moves.push(move);
+                }
+            }
+        }
+    }
+    return moves;
+}
+
 
 function getRookMoves(x, y) {
     return [...checkNorth(x, y), ...checkEast(x, y), ...checkSouth(x, y), ...checkWest(x, y)];
@@ -304,21 +339,6 @@ function getQueenMoves(x, y) {
     return [...getRookMoves(x, y), ...getBishopMoves(x, y)];
 }
 
-function getKingMoves(x, y) {
-    let output = [];
-    if (confirmSqr(x, y, x + 1, y + 1)===ENEMY ||confirmSqr(x, y, x + 1, y + 1)===EMPTY) output.push(new Coordinate(x + 1, y + 1));
-    if (confirmSqr(x, y, x + 1, y)===ENEMY || confirmSqr(x, y, x + 1, y)=== EMPTY) output.push(new Coordinate(x + 1, y));
-    if (confirmSqr(x, y, x + 1, y - 1)===ENEMY || confirmSqr(x, y, x + 1, y - 1)===EMPTY) output.push(new Coordinate(x + 1, y - 1));
-    if (confirmSqr(x, y, x, y - 1) === ENEMY || confirmSqr(x, y, x, y - 1) === EMPTY) output.push(new Coordinate(x, y - 1));
-    if (confirmSqr(x, y, x - 1, y - 1) === ENEMY || confirmSqr(x, y, x - 1, y - 1) === EMPTY) output.push(new Coordinate(x - 1, y - 1));
-    if (confirmSqr(x, y, x - 1, y) === ENEMY || confirmSqr(x, y, x - 1, y) === EMPTY) output.push(new Coordinate(x - 1, y));
-    if (confirmSqr(x, y, x - 1, y + 1) === ENEMY || confirmSqr(x, y, x - 1, y + 1) === EMPTY) output.push(new Coordinate(x - 1, y + 1));
-    if (confirmSqr(x, y, x, y + 1) === ENEMY || confirmSqr(x, y, x, y + 1) === EMPTY) output.push(new Coordinate(x, y + 1));
-    // TODO: get castle moves if they are allowed (check fen and whether opponent is targeting any relevent squares and if spaces are empty)
-
-    return output;
-}
-
 function getKnightMoves(x, y) {
     let output = [];
     if (confirmSqr(x, y, x + 1, y + 2)===ENEMY ||confirmSqr(x, y, x + 1, y + 2)===EMPTY) output.push(new Coordinate(x + 1, y + 2));
@@ -329,6 +349,62 @@ function getKnightMoves(x, y) {
     if (confirmSqr(x, y, x - 2, y - 1)===ENEMY ||confirmSqr(x, y, x - 2, y - 1)===EMPTY) output.push(new Coordinate(x - 2, y - 1));
     if (confirmSqr(x, y, x - 1, y + 2)===ENEMY ||confirmSqr(x, y, x - 1, y + 2)===EMPTY) output.push(new Coordinate(x - 1, y + 2));
     if (confirmSqr(x, y, x - 2, y + 1)===ENEMY ||confirmSqr(x, y, x - 2, y + 1)===EMPTY) output.push(new Coordinate(x - 2, y + 1));
+    return output;
+}
+
+function getKingMoves(x, y, getCastleMoves = true) {
+    let output = [];
+    if (confirmSqr(x, y, x + 1, y + 1)===ENEMY ||confirmSqr(x, y, x + 1, y + 1)===EMPTY) output.push(new Coordinate(x + 1, y + 1));
+    if (confirmSqr(x, y, x + 1, y)===ENEMY || confirmSqr(x, y, x + 1, y)=== EMPTY) output.push(new Coordinate(x + 1, y));
+    if (confirmSqr(x, y, x + 1, y - 1)===ENEMY || confirmSqr(x, y, x + 1, y - 1)===EMPTY) output.push(new Coordinate(x + 1, y - 1));
+    if (confirmSqr(x, y, x, y - 1) === ENEMY || confirmSqr(x, y, x, y - 1) === EMPTY) output.push(new Coordinate(x, y - 1));
+    if (confirmSqr(x, y, x - 1, y - 1) === ENEMY || confirmSqr(x, y, x - 1, y - 1) === EMPTY) output.push(new Coordinate(x - 1, y - 1));
+    if (confirmSqr(x, y, x - 1, y) === ENEMY || confirmSqr(x, y, x - 1, y) === EMPTY) output.push(new Coordinate(x - 1, y));
+    if (confirmSqr(x, y, x - 1, y + 1) === ENEMY || confirmSqr(x, y, x - 1, y + 1) === EMPTY) output.push(new Coordinate(x - 1, y + 1));
+    if (confirmSqr(x, y, x, y + 1) === ENEMY || confirmSqr(x, y, x, y + 1) === EMPTY) output.push(new Coordinate(x, y + 1));
+
+    // get castle moves if the rules allow it
+    const color = getPieceColor(board[y][x]);
+    let oppColor = WHITE;
+    if (color == WHITE) oppColor = BLACK;
+
+    const fenCastle = currentPosition.split(' ')[2];
+    if (fenCastle != '-' && getCastleMoves) {
+        // castling availability, one may or may not be null
+        const whiteCastle = fenCastle.match(/[A-Z]/g);
+        const blackCastle = fenCastle.match(/[a-z]/g);
+        let castleSides = whiteCastle;
+        if (color == BLACK) castleSides = blackCastle;
+
+        const wKPos = new Coordinate(4, 7);
+        const bKPos = new Coordinate(4, 0);
+        let kPos = wKPos;
+        if (color == BLACK) kPos = bKPos;
+
+        // confirm castle availability, and if in check
+        if (castleSides != null && !squareUnderFire(kPos, oppColor)) {
+            for (let side of castleSides) {
+                if (side == 'K' || side == 'k') {
+                    // confirm spaces between are empty, the two spaces king covers are not attacked
+                    let allClear = true;
+                    if (confirmSqr(kPos.x, kPos.y, kPos.x + 1, kPos.y) != EMPTY) allClear = false;
+                    if (confirmSqr(kPos.x, kPos.y, kPos.x + 2, kPos.y) != EMPTY) allClear = false;
+                    if (squareUnderFire(new Coordinate(kPos.x + 1, kPos.y), oppColor)) allClear = false;
+                    if (squareUnderFire(new Coordinate(kPos.x + 2, kPos.y), oppColor)) allClear = false;
+                    if (allClear) output.push(new Coordinate(kPos.x + 2, kPos.y));
+                }
+                if (side == 'Q' || side == 'q') {
+                    let allClear = true;
+                    if (confirmSqr(kPos.x, kPos.y, kPos.x - 1, kPos.y) != EMPTY) allClear = false;
+                    if (confirmSqr(kPos.x, kPos.y, kPos.x - 2, kPos.y) != EMPTY) allClear = false;
+                    if (confirmSqr(kPos.x, kPos.y, kPos.x - 3, kPos.y) != EMPTY) allClear = false;
+                    if (squareUnderFire(new Coordinate(kPos.x - 1, kPos.y), oppColor)) allClear = false;
+                    if (squareUnderFire(new Coordinate(kPos.x - 2, kPos.y), oppColor)) allClear = false;
+                    if (allClear) output.push(new Coordinate(kPos.x - 2, kPos.y));
+                }
+            }
+        }
+    }
     return output;
 }
 
@@ -559,8 +635,9 @@ function checkNW(x, y) {
     return output;
 }
 
-// returns true if the given square(x1,y1) is one that can generally be moved onto, otherwise false
+// returns occupation of the given square(x1,y1) given a starting position, false if not a valid square
 // (x0,y0) is location of the moving piece
+// excludes self checks and special rules idk
 function confirmSqr(x0, y0, x1, y1) {
     //confirm if position is still on the board
     if (x1 < 0 || x1 > 7 || y1 < 0 || y1 > 7) return false;
