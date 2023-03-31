@@ -31,6 +31,7 @@ if (playerColor==BLACK){
             console.log("received response: " + response);
             // TODO: handle the DB response here
             displayOpponentMove(response);
+            // should in best practice check for mate here but ill hope it never comes to it
             turn = !turn;
         })
         .catch(error => {
@@ -52,7 +53,7 @@ function pieceClicked(element) {
         let y = 8 - element.parentElement.id.slice(1, 2);
 
         //console.log("clickedPiece(piece = " + piece + ", x = " + x + "; y = " + y + ";");
-        displayLegalMoves(getLegalMoves(piece, x, y));
+        if (playerColor == getPieceColor(piece)) displayLegalMoves(getLegalMoves(piece, x, y));
         //console.log("pieceClicked is finished!");
         squareSelected = element.parentElement.id;
         pieceSelected = element.id;
@@ -86,10 +87,15 @@ function legalMoveClicked(element) {
     //update the board model, comes after updating html for some reason
     board = changePieceLocationOnBoard(board, oldX, oldY, newX, newY);
 
+    // TODO: DISPLAY MATE OR STALEMATE and end game and whatnot
+    const end = checkEndMates(board, playerColor);
+    if (end) {
+        console.log(end +' caused by ' + playerColor);
+    }
+
     //part of waiting for opponent's move
     hideLegalMoves();
     turn = !turn;
-    // TODO: CHECK FOR MATE OR STALEMATE
 
     console.log("Move completed: attempt to make an ajax call with gameID = %d, current position = %s, and last move = %s", gameID, currentPosition, lastMove);
     //ajaxCall(gameID, currentPosition, lastMove);
@@ -98,7 +104,11 @@ function legalMoveClicked(element) {
             console.log("received response: " + response);
             // TODO: handle the DB response here
             displayOpponentMove(response);
-            // TODO: CHECK FOR MATE OR STALEMATE
+            // TODO: DISPLAY MATE OR STALEMATE and end game and whatnot (player cant move anymore anyway)
+            const end = checkEndMates(board, getOppColor(playerColor));
+            if (end) {
+                console.log(end +' caused by ' + getOppColor(playerColor));
+            }
             turn = !turn;
         })
         .catch(error => {
@@ -246,7 +256,7 @@ function setBoard(newPosition) {
 
 function getLegalMoves(piece, x, y) {
     let legalMoves = [];
-    if (playerColor == WHITE) {
+    if (getPieceColor(piece) == WHITE) {
         switch (piece) {
             case "R": legalMoves = getRookMoves(x, y); break;
             case "B": legalMoves = getBishopMoves(x, y); break;
@@ -266,16 +276,16 @@ function getLegalMoves(piece, x, y) {
         }
     }
     legalMoves = remSelfChecks(piece, x, y, legalMoves)
-    console.log("GetLegalMoves: total number of moves =  " + legalMoves.length);
+//    console.log("GetLegalMoves: total number of moves =  " + legalMoves.length);
     return legalMoves;
 }
 
+//removes moves that get own king checked, used for the raw unfiltered getLegalMoves or sumting
 function remSelfChecks(piece, x, y, moves) {
     let newMoves = [];
     //determine whose move it is
     const myColor = getPieceColor(piece);
-    let opponent = BLACK;
-    if (myColor === BLACK) opponent = WHITE;
+    const oppColor = getOppColor(myColor);
 
     //check if moves has a move that gets their King checked
     for (let move of moves) {
@@ -283,7 +293,7 @@ function remSelfChecks(piece, x, y, moves) {
         let selfCheck = false;
         board = changePieceLocationOnBoard(board, x, y, move.x, move.y, false);
 
-        for (let oppMove of getColorMoves(opponent)) {
+        for (let oppMove of getColorAttacks(oppColor)) {
             if (board[oppMove.y][oppMove.x] == 'K' || board[oppMove.y][oppMove.x] == 'k') {
                 selfCheck = true;
             }
@@ -295,10 +305,38 @@ function remSelfChecks(piece, x, y, moves) {
     return newMoves;
 }
 
+// returns if a given color has accomplished checkmate or stalemate, false otherwise
+// movedColor = last color to make a move
+function checkEndMates(board, movedColor) {
+    const victimColor = getOppColor(movedColor);
+
+    //look for any legal moves
+    let availableMoves = [];
+    let victimKing = undefined;
+    for (let checkY = 0; checkY < board.length; checkY++) {
+        for (let checkX = 0; checkX < board.length; checkX++) {
+            const piece = board[checkY][checkX];
+            if (getPieceColor(piece) == victimColor) {
+                for (let legalMove of getLegalMoves(piece, checkX, checkY)) {
+                    availableMoves.push(legalMove);
+                }
+                if (piece == 'K' || piece == 'k') victimKing = new Coordinate(checkX, checkY);
+            }
+        }
+    }
+    if (availableMoves.length == 0) {
+        inCheck = squareUnderFire(victimKing, movedColor);
+        if (inCheck) return 'checkmate';
+        else return 'stalemate';
+    }
+    // supposed victim can still make a move
+    return ''; // Boolean('') evaluates false
+}
+
 //returns boolean whether a targetSqr (a coordinate) is covered by a given colors attack, needs to know the color that could attack that square
 function squareUnderFire(targetSqr, color) {
     let underFire = false;
-    for (let move of getColorMoves(color)) {
+    for (let move of getColorAttacks(color)) {
         if (move.x == targetSqr.x && move.y == targetSqr.y) {
             underFire = true;
         }
@@ -306,8 +344,8 @@ function squareUnderFire(targetSqr, color) {
     return underFire;
 }
 
-// returns array of all moves a color can make - INCLUDES SELF CHECKS
-function getColorMoves(color) {
+// returns array of all attacks a color can make - INCLUDES ILLEGAL SELF CHECKS
+function getColorAttacks(color) {
     let moves = [];
     for (let checkY = 0; checkY < board.length; checkY++) {
         for (let checkX = 0; checkX < board.length; checkX++) {
@@ -320,7 +358,7 @@ function getColorMoves(color) {
                         case "N": pieceMoves = getKnightMoves(checkX, checkY); break;
                         case "Q": pieceMoves = getQueenMoves(checkX, checkY); break;
                         case "K": pieceMoves = getKingMoves(checkX, checkY, false); break;
-                        case "P": pieceMoves = getPawnMoves(checkX, checkY); break;
+                        case "P": pieceMoves = getPawnMoves(checkX, checkY, true); break;
                     }
                 } else {
                     switch (board[checkY][checkX]) {
@@ -329,7 +367,7 @@ function getColorMoves(color) {
                         case "n": pieceMoves = getKnightMoves(checkX, checkY); break;
                         case "q": pieceMoves = getQueenMoves(checkX, checkY); break;
                         case "k": pieceMoves = getKingMoves(checkX, checkY, false); break;
-                        case "p": pieceMoves = getPawnMoves(checkX, checkY); break;
+                        case "p": pieceMoves = getPawnMoves(checkX, checkY, true); break;
                     }
                 }
                 for (let move of pieceMoves) {
@@ -380,8 +418,7 @@ function getKingMoves(x, y, getCastleMoves = true) {
 
     // get castle moves if the rules allow it
     const color = getPieceColor(board[y][x]);
-    let oppColor = WHITE;
-    if (color == WHITE) oppColor = BLACK;
+    const oppColor = getOppColor(color);
 
     const fenCastle = currentPosition.split(' ')[2];
     if (fenCastle != '-' && getCastleMoves) {
@@ -423,7 +460,8 @@ function getKingMoves(x, y, getCastleMoves = true) {
     return output;
 }
 
-function getPawnMoves(x, y) {
+// sometimes need to only retrieve attacks because pawns cant check the square in front of them
+function getPawnMoves(x, y, onlyAttacks = false) {
     let output = [];
     //to determine color of mover (i feel checking if its uppercase is more concise but risky and im too lazy)
     const daColor = getPieceColor(board[y][x]);
@@ -431,7 +469,7 @@ function getPawnMoves(x, y) {
 
     //determine direction based on color
     if (daColor === 'white') {
-        if (confirmSqr(x, y, x, y - 1) === EMPTY) {
+        if (confirmSqr(x, y, x, y - 1) === EMPTY && !onlyAttacks) {
             output.push(new Coordinate(x, y - 1));
             if (y == 6 && confirmSqr(x, y, x, y - 2) === EMPTY) output.push(new Coordinate(x, y - 2));
         }
@@ -478,7 +516,6 @@ function getPawnMoves(x, y) {
 }
 
 function checkNorth(x, y) {
-    //console.log("Checking North... x = " + x + "; y = " + y);
     let output = [];
     let squaresTillEdge = y; //or just y
     while (squaresTillEdge > 0)// or > 0
@@ -496,7 +533,6 @@ function checkNorth(x, y) {
                 return output;
         }
     }
-    //console.log("North has " + output + " available positions. Size: " + output.length);
     return output;
 }
 
@@ -777,6 +813,13 @@ function getPieceColor(pieceType) {
     return color;
 }
 
+// returns the opposite of a color
+function getOppColor(color) {
+    let oppColor = WHITE;
+    if (color == WHITE) oppColor = BLACK;
+    return oppColor;
+}
+
 function addLegalMove(coordinates) {
     let img = document.createElement("img");
     img.src = "green_circle.png";
@@ -850,8 +893,6 @@ class Coordinate {
     }
 
     getSquareName() {
-        //let letterX = String.fromCharCode(this.x+97);
-        //console.log("GetSquareName: squareName = "+ ""+String.fromCharCode(this.x+97)+(8-this.y));
         return "" + String.fromCharCode(this.x + 97) + (8 - this.y);
     }
 
