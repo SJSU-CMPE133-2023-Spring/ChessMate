@@ -66,14 +66,14 @@ if ($_GET and $_GET["gameid"] and $_GET["color"])
                 <tbody>
                     <tr>
                         <th style="color:white"></th>
-                        <th style="color:white">a</th>
-                        <th style="color:white">b</th>
-                        <th style="color:white">c</th>
-                        <th style="color:white">d</th>
-                        <th style="color:white">e</th>
-                        <th style="color:white">f</th>
-                        <th style="color:white">g</th>
-                        <th style="color:white">h</th>
+                        <th id="a" style="color:white">a</th>
+                        <th id="b" style="color:white">b</th>
+                        <th id="c" style="color:white">c</th>
+                        <th id="d" style="color:white">d</th>
+                        <th id="e" style="color:white">e</th>
+                        <th id="f" style="color:white">f</th>
+                        <th id="g" style="color:white">g</th>
+                        <th id="h" style="color:white">h</th>
                     </tr>
                     <!--
                     <tr>
@@ -118,7 +118,7 @@ if ($_GET and $_GET["gameid"] and $_GET["color"])
                     </tr>
                     -->
                     <tr>
-                        <th style="color:white">8</th>
+                        <th id="8" style="color:white">8</th>
                         <th id="a8" class="light"></th>
                         <th id="b8" class="dark"></th>
                         <th id="c8" class="light"></th>
@@ -130,7 +130,7 @@ if ($_GET and $_GET["gameid"] and $_GET["color"])
 
                     </tr>
                     <tr>
-                        <th style="color:white">7</th>
+                        <th id="7" style="color:white">7</th>
                         <th id="a7" class="dark"></th>
                         <th id="b7" class="light"></th>
                         <th id="c7" class="dark"></th>
@@ -143,7 +143,7 @@ if ($_GET and $_GET["gameid"] and $_GET["color"])
                     </tr>
 
                     <tr>
-                        <th style="color:white">6</th>
+                        <th id="6" style="color:white">6</th>
                         <th id="a6" class="light"></th>
                         <th id="b6" class="dark"></th>
                         <th id="c6" class="light"></th>
@@ -155,7 +155,7 @@ if ($_GET and $_GET["gameid"] and $_GET["color"])
 
                     </tr>
                     <tr>
-                        <th style="color:white">5</th>
+                        <th id="5" style="color:white">5</th>
                         <th id="a5" class="dark"></th>
                         <th id="b5" class="light"></th>
                         <th id="c5" class="dark"></th>
@@ -167,7 +167,7 @@ if ($_GET and $_GET["gameid"] and $_GET["color"])
 
                     </tr>
                     <tr>
-                        <th style="color:white">4</th>
+                        <th id="4" style="color:white">4</th>
                         <th id="a4" class="light"></th>
                         <th id="b4" class="dark"></th>
                         <th id="c4" class="light"></th>
@@ -179,7 +179,7 @@ if ($_GET and $_GET["gameid"] and $_GET["color"])
 
                     </tr>
                     <tr>
-                        <th style="color:white">3</th>
+                        <th id="3" style="color:white">3</th>
                         <th id="a3" class="dark"></th>
                         <th id="b3" class="light"></th>
                         <th id="c3" class="dark"></th>
@@ -191,7 +191,7 @@ if ($_GET and $_GET["gameid"] and $_GET["color"])
 
                     </tr>
                     <tr>
-                        <th style="color:white">2</th>
+                        <th id="2" style="color:white">2</th>
                         <th id="a2" class="light"></th>
                         <th id="b2" class="dark"></th>
                         <th id="c2" class="light"></th>
@@ -203,7 +203,7 @@ if ($_GET and $_GET["gameid"] and $_GET["color"])
 
                     </tr>
                     <tr>
-                        <th class=gameprefix style="color:white">1</th>
+                        <th id="1" class=gameprefix style="color:white">1</th>
                         <th id="a1" class="dark"></th>
                         <th id="b1" class="light"></th>
                         <th id="c1" class="dark"></th>
