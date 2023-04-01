@@ -59,11 +59,7 @@ if (playerColor==BLACK){
     ajaxCall(gameID, currentPosition, "")
         .then(response => {
             console.log("received response: " + response);
-            // TODO: handle the DB response here
-            displayOpponentMove(response);
-            fillHTMLBoard(board, playerColor);
-            // should in best practice check for mate here but ill hope it never comes to it
-            turn = !turn;
+            globalMoveUpdate(response);
         })
         .catch(error => {
             console.error(error);
@@ -104,44 +100,15 @@ function displayLegalMoves(legalMoves) {
 function legalMoveClicked(element) {
     //save for the ajax call:
     let lastMove = squareSelected+element.parentElement.id;
-    let oldX = parseInt(squareSelected.slice(0, 1), 36) - 10;
-    let oldY = 8 - squareSelected.slice(1, 2);
-    let newX = parseInt(element.parentElement.id.slice(0, 1), 36) - 10;
-    let newY = 8 - element.parentElement.id.slice(1, 2)
-
-//    //move the current piece to a new place
-//    document.getElementById(element.parentElement.id).innerHTML = document.getElementById(squareSelected).innerHTML;
-//    //remove the piece from its current position
-//    document.getElementById(squareSelected).innerHTML = "";
-
-    //update the board model, comes after updating html for some reason
-    board = changePieceLocationOnBoard(board, oldX, oldY, newX, newY);
-    fillHTMLBoard(board, playerColor);
-    // TODO: DISPLAY MATE OR STALEMATE and end game and whatnot
-    const end = checkEndMates(board, playerColor);
-    if (end) {
-        console.log(end +' caused by ' + playerColor);
-    }
+    globalMoveUpdate(lastMove);
 
     //part of waiting for opponent's move
-    hideLegalMoves();
-    turn = !turn;
-
     console.log("Move completed: attempt to make an ajax call with gameID = %d, current position = %s, and last move = %s", gameID, currentPosition, lastMove);
     //ajaxCall(gameID, currentPosition, lastMove);
     ajaxCall(gameID, currentPosition, lastMove)
         .then(response => {
             console.log("received response: " + response);
-            // TODO: handle the DB response here
-            // TODO: use board = changePieceLocationOnBoard() instead, up there too, delete displayOpponentMove() maybe
-            displayOpponentMove(response);
-            fillHTMLBoard(board, playerColor);
-            // TODO: DISPLAY MATE OR STALEMATE and end game and whatnot (player cant move anymore anyway)
-            const end = checkEndMates(board, getOppColor(playerColor));
-            if (end) {
-                console.log(end +' caused by ' + getOppColor(playerColor));
-            }
-            turn = !turn;
+            globalMoveUpdate(response);
         })
         .catch(error => {
             console.error(error);
@@ -151,15 +118,23 @@ function legalMoveClicked(element) {
     pieceSelected = null;
 }
 
-function displayOpponentMove(response) {
-    let oldX = parseInt(response.slice(0, 1), 36) - 10;
-    let oldY = 8 - response.slice(1, 2);
-    let newX = parseInt(response.slice(2, 3), 36) - 10;
-    let newY = 8 - response.slice(3, 4);
-//    document.getElementById(response.slice(2,4)).innerHTML = document.getElementById(response.slice(0,2)).innerHTML;
-//    //remove the piece from its current position
-//    document.getElementById(response.slice(0,2)).innerHTML = "";
+function globalMoveUpdate(move) {
+    let oldX = parseInt(move.slice(0, 1), 36) - 10;
+    let oldY = 8 - move.slice(1, 2);
+    let newX = parseInt(move.slice(2, 3), 36) - 10;
+    let newY = 8 - move.slice(3, 4);
+
     board = changePieceLocationOnBoard(board, oldX, oldY, newX, newY);
+    fillHTMLBoard(board, playerColor);
+
+    // TODO: display state of game on screen, maybe as a header - states include whose turn it is and mates
+    const end = checkEndMates(board, getOppColor(playerColor));
+    if (end) {
+        console.log(end +' caused by ' + getOppColor(playerColor));
+    }
+
+    hideLegalMoves();
+    turn = !turn;
 }
 
 //changes and returns a given board array given a moving piece, also handles promotion, castling, and en passant
@@ -168,10 +143,6 @@ function changePieceLocationOnBoard(board, oldX, oldY, newX, newY, affectGlobal 
     let oldBoard = board.map(innerArray => [...innerArray]);
     board[newY][newX] = board[oldY][oldX];
     board[oldY][oldX] = " ";
-//    if (affectGlobal) {
-//        document.getElementById(new Coordinate(newX, newY).getSquareName()).innerHTML = document.getElementById(new Coordinate(oldX, oldY).getSquareName()).innerHTML;
-//        document.getElementById(new Coordinate(oldX, oldY).getSquareName()).innerHTML = '';
-//    }
 
     // eat pawn if en passant was chosen
     const fenPassant = currentPosition.split(' ')[3];
@@ -180,14 +151,11 @@ function changePieceLocationOnBoard(board, oldX, oldY, newX, newY, affectGlobal 
         fenY = parseInt(fenPassant.split(',')[1]);
         if (oldBoard[oldY][oldX] == 'P' && newX == fenX && newY == fenY) {
             board[newY+1][newX] = ' ';
-            //update html
             const nothingPersonalKid = new Coordinate(newX, oldY);
-//            if (affectGlobal) document.getElementById(nothingPersonalKid.getSquareName()).innerHTML = '';
         }
         if (oldBoard[oldY][oldX] == 'p' && newX == fenX && newY == fenY) {
             board[newY-1][newX] = ' ';
             const nothingPersonalKid = new Coordinate(newX, oldY);
-//            if (affectGlobal) document.getElementById(nothingPersonalKid.getSquareName()).innerHTML = '';
         }
     }
 
@@ -204,35 +172,22 @@ function changePieceLocationOnBoard(board, oldX, oldY, newX, newY, affectGlobal 
             const oldCastlePos = new Coordinate(kPos.x+3, kPos.y);
             board[newCastlePos.y][newCastlePos.x] = board[oldCastlePos.y][oldCastlePos.x];
             board[oldCastlePos.y][oldCastlePos.x] = ' ';
-            //change HTML
-//            if (affectGlobal) {
-//                document.getElementById(newCastlePos.getSquareName()).innerHTML = document.getElementById(oldCastlePos.getSquareName()).innerHTML;
-//                document.getElementById(oldCastlePos.getSquareName()).innerHTML = '';
-//            }
         }
         if (newX == kPos.x - 2) {
             const newCastlePos = new Coordinate(kPos.x-1, kPos.y);
             const oldCastlePos = new Coordinate(kPos.x-4, kPos.y);
             board[newCastlePos.y][newCastlePos.x] = board[oldCastlePos.y][oldCastlePos.x];
             board[oldCastlePos.y][oldCastlePos.x] = ' ';
-            //change HTML
-//            if (affectGlobal) {
-//                document.getElementById(newCastlePos.getSquareName()).innerHTML = document.getElementById(oldCastlePos.getSquareName()).innerHTML;
-//                document.getElementById(oldCastlePos.getSquareName()).innerHTML = '';
-//            }
         }
     }
 
-    // promote a pawn to a queen TODO: promote to other pieces
+    // promote a pawn to a queen TODO: user can choose to promote to other pieces
     if (oldBoard[oldY][oldX] == 'P' && newY == 0) {
         board[newY][newX] = 'Q';
-//        if (affectGlobal) document.getElementById(new Coordinate(newX, newY).getSquareName()).innerHTML = '<img class="piece-img" onclick="pieceClicked(this)" id="Q_3" src="pieces/white-queen.png">';
     }
     if (oldBoard[oldY][oldX] == 'p' && newY == 7) {
         board[newY][newX] = 'q';
-//        if (affectGlobal) document.getElementById(new Coordinate(newX, newY).getSquareName()).innerHTML = '<img class="piece-img" onclick="pieceClicked(this)" id="q_3" src="pieces/black-queen.png">';
     }
-
 
     // finish up
     let newBoard = board.map(innerArray => [...innerArray]);
@@ -249,7 +204,7 @@ function hideLegalMoves() {
 
 // Model methods
 function setBoard(fenPosition) {
-    //fenPosition = "R7/PP4PP/8/8/R5R1/8/8/RPR5"; the first part of a fen
+    //fenPosition = "R7/PP4PP/8/8/R5R1/8/8/RPR5"; aka the first part of a fen
     let position = fenPosition.split("/");
     let newBoard = new Array(8);
     for (let column = 0; column < 8; column++) {
@@ -275,7 +230,6 @@ function setBoard(fenPosition) {
 
 //when changing the id at the top left corner for example, I need to change the id of the bottom right at the same time, otherwise ids mix up/dupe or something
 // thats why the for loops only cover half the board
-// TODO: flip the side coord bars as well, prob requires adding ids to php
 function flipHTMLBoard(boardArr) {
     // flip rank and file indicator bars with themselves
     for(let i = 0; i < boardArr.length/2; i++) {
