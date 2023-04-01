@@ -7,24 +7,25 @@ class Coordinate {
             this.x = x;
             this.y = y;
             this.square = this.getSquareName();
-            this.rank = square.charAt(0);
-            this.file = square.substring(1);
+            this.rank = this.square.substring(1);
+            this.file = this.square.charAt(0);
         }
         else { //square was given
             this.square = square;
-            this.rank = square.charAt(0);
-            this.file = square.substring(1);
+            this.rank = this.square.substring(1);
+            this.file = this.square.charAt(0);
             let indices = this.getArrayId().split(',');
             this.x = indices[0];
             this.y = indices[1];
         }
+
     }
 
-    getSquareName() return "" + String.fromCharCode(this.x + 97) + (8 - this.y);
+    getSquareName() { return "" + String.fromCharCode(this.x + 97) + (8 - this.y); }
 
-    getArrayId() return "" + String.fromCharCode(this.rank - 97) + ","+ (8 + this.file);
+    getArrayId() { return "" + String.fromCharCode(this.rank - 97) + ","+ (8 + this.file); }
 
-    toString() return `(${this.rank}, ${this.file})`;
+    toString() { return `(${this.rank}, ${this.file})`; }
 }
 
 
@@ -239,17 +240,6 @@ function changePieceLocationOnBoard(board, oldX, oldY, newX, newY, affectGlobal 
     return board;
 }
 
-
-/* TODO: make a method that will check if one of the legal moves allows opponent to capture the King
-      * if there is such a move, it should be removed from the legal moves.
-      * (this method can be only focused on the player from the bottom (ex. enemy pawns only move down))
-      * Idea: the capture can be made only from specific positions: pawns can attack a king only from NW or NE,
-           rooks only on the same x or y, and so on.
-           one of the ways to do it is by creating a list of pieces that can attack the king if there is no one around,
-           and then check if one of this attacks is blocked by a piece that is about to move. If after that move the king
-           is in danger - the move should be removed from the legalMoves.
- */
-
 function hideLegalMoves() {
     let i, elements = document.getElementsByClassName('legal-move-space-img');
     for (i = elements.length; i--;) {
@@ -287,6 +277,34 @@ function setBoard(fenPosition) {
 // thats why the for loops only cover half the board
 // TODO: flip the side coord bars as well, prob requires adding ids to php
 function flipHTMLBoard(boardArr) {
+    // flip rank and file indicator bars with themselves
+    for(let i = 0; i < boardArr.length/2; i++) {
+        const original = new Coordinate(i,i);
+        const originalRank = 8 - original.square.charAt(1);
+        const originalFile = original.square.charCodeAt(0) - 'a'.charCodeAt(0);
+
+        const flippedRank = String.fromCharCode('1'.charCodeAt(0) + originalRank);
+        const flippedFile = String.fromCharCode('h'.charCodeAt(0) - originalFile);
+
+        // flip rank id
+        let flipWithElement = document.getElementById(flippedRank);
+        document.getElementById(original.rank).id = flippedRank;
+        flipWithElement.id = original.rank;
+        // flip rank html
+        let flipWithInner = document.getElementById(flippedRank).innerHTML;
+        document.getElementById(flippedRank).innerHTML = document.getElementById(original.rank).innerHTML;
+        document.getElementById(original.rank).innerHTML = flipWithInner;
+        // flip file id
+        flipWithElement = document.getElementById(flippedFile);
+        document.getElementById(original.file).id = flippedFile;
+        flipWithElement.id = original.file;
+        // flip file html
+        flipWithInner = document.getElementById(flippedFile).innerHTML;
+        document.getElementById(flippedFile).innerHTML = document.getElementById(original.file).innerHTML;
+        document.getElementById(original.file).innerHTML = flipWithInner;
+    }
+
+    // swap the board ids of each square with the one across from it
     for (let rank = 0; rank < boardArr.length/2; rank++) {
         for (let file = 0; file < boardArr[0].length; file++) {
             const originalId = new Coordinate(file, rank).square;
