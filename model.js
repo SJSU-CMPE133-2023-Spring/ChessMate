@@ -1,36 +1,66 @@
+// new Coordinate(3,5);  -  holds boardId: d3, only x and y stored as an int
+// new Coordinate(undefined, undefined, d3);  -  holds x=3 and y=5
+// i think, avoid passing more than those two arguments
+class Coordinate {
+    constructor(x, y, square = 'a0') {
+        if (x !== undefined && y !== undefined) {
+            this.x = x;
+            this.y = y;
+            this.square = this.getSquareName();
+            this.rank = square.charAt(0);
+            this.file = square.substring(1);
+        }
+        else { //square was given
+            this.square = square;
+            this.rank = square.charAt(0);
+            this.file = square.substring(1);
+            let indices = this.getArrayId().split(',');
+            this.x = indices[0];
+            this.y = indices[1];
+        }
+    }
+
+    getSquareName() return "" + String.fromCharCode(this.x + 97) + (8 - this.y);
+
+    getArrayId() return "" + String.fromCharCode(this.rank - 97) + ","+ (8 + this.file);
+
+    toString() return `(${this.rank}, ${this.file})`;
+}
+
+
 //kinda static variables for the model
 const EMPTY = 0, ENEMY = 1, ALLY = 2;
 const WHITE = 'white', BLACK = 'black';
-
-
 
 // Controller Variables
 let squareSelected = null; //if true, then clicking on a highlighted square = move;
 let pieceSelected = null;
 
 // Model Variables
-
-
-
-let opponent = "id of an opponent / or AI id (if we have multiple: simple/medium/pro)";
-let currentPosition = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 0";
-let board = new Array(8);
-//setBoard(currentPosition);
-setBoard("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR");
-
 let gameID = document.getElementById("gameID").innerHTML;
 let playerColor = document.getElementById("color").innerHTML;
+let opponent = "id of an opponent / or AI id (if we have multiple: simple/medium/pro)";
+//let currentPosition = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 0";
+let currentPosition = "rnbqkbnr/pppqqppp/8/8/8/8/PPPQQPPP/RNBQKBNR w KQkq - 0 0";
+let board = setBoard(currentPosition.split(' ')[0]);
+logBoard(board);
+// flip ids of the html board to blacks perspective if black
+if (playerColor == BLACK) board = flipHTMLBoard(board);
+fillHTMLBoard(board, playerColor);
+
 
 //if white is first to move
 let turn = (playerColor==WHITE);
 
 //if black we have to wait for opponents move:
 if (playerColor==BLACK){
+    //wait for whites first move
     ajaxCall(gameID, currentPosition, "")
         .then(response => {
             console.log("received response: " + response);
             // TODO: handle the DB response here
             displayOpponentMove(response);
+            fillHTMLBoard(board, playerColor);
             // should in best practice check for mate here but ill hope it never comes to it
             turn = !turn;
         })
@@ -73,7 +103,6 @@ function displayLegalMoves(legalMoves) {
 function legalMoveClicked(element) {
     //save for the ajax call:
     let lastMove = squareSelected+element.parentElement.id;
-
     let oldX = parseInt(squareSelected.slice(0, 1), 36) - 10;
     let oldY = 8 - squareSelected.slice(1, 2);
     let newX = parseInt(element.parentElement.id.slice(0, 1), 36) - 10;
@@ -86,7 +115,7 @@ function legalMoveClicked(element) {
 
     //update the board model, comes after updating html for some reason
     board = changePieceLocationOnBoard(board, oldX, oldY, newX, newY);
-
+    fillHTMLBoard(board, playerColor);
     // TODO: DISPLAY MATE OR STALEMATE and end game and whatnot
     const end = checkEndMates(board, playerColor);
     if (end) {
@@ -103,7 +132,9 @@ function legalMoveClicked(element) {
         .then(response => {
             console.log("received response: " + response);
             // TODO: handle the DB response here
+            // TODO: use board = changePieceLocationOnBoard() instead, up there too, delete displayOpponentMove() maybe
             displayOpponentMove(response);
+            fillHTMLBoard(board, playerColor);
             // TODO: DISPLAY MATE OR STALEMATE and end game and whatnot (player cant move anymore anyway)
             const end = checkEndMates(board, getOppColor(playerColor));
             if (end) {
@@ -136,10 +167,10 @@ function changePieceLocationOnBoard(board, oldX, oldY, newX, newY, affectGlobal 
     let oldBoard = board.map(innerArray => [...innerArray]);
     board[newY][newX] = board[oldY][oldX];
     board[oldY][oldX] = " ";
-    if (affectGlobal) {
-        document.getElementById(new Coordinate(newX, newY).getSquareName()).innerHTML = document.getElementById(new Coordinate(oldX, oldY).getSquareName()).innerHTML;
-        document.getElementById(new Coordinate(oldX, oldY).getSquareName()).innerHTML = '';
-    }
+//    if (affectGlobal) {
+//        document.getElementById(new Coordinate(newX, newY).getSquareName()).innerHTML = document.getElementById(new Coordinate(oldX, oldY).getSquareName()).innerHTML;
+//        document.getElementById(new Coordinate(oldX, oldY).getSquareName()).innerHTML = '';
+//    }
 
     // eat pawn if en passant was chosen
     const fenPassant = currentPosition.split(' ')[3];
@@ -150,12 +181,12 @@ function changePieceLocationOnBoard(board, oldX, oldY, newX, newY, affectGlobal 
             board[newY+1][newX] = ' ';
             //update html
             const nothingPersonalKid = new Coordinate(newX, oldY);
-            if (affectGlobal) document.getElementById(nothingPersonalKid.getSquareName()).innerHTML = '';
+//            if (affectGlobal) document.getElementById(nothingPersonalKid.getSquareName()).innerHTML = '';
         }
         if (oldBoard[oldY][oldX] == 'p' && newX == fenX && newY == fenY) {
             board[newY-1][newX] = ' ';
             const nothingPersonalKid = new Coordinate(newX, oldY);
-            if (affectGlobal) document.getElementById(nothingPersonalKid.getSquareName()).innerHTML = '';
+//            if (affectGlobal) document.getElementById(nothingPersonalKid.getSquareName()).innerHTML = '';
         }
     }
 
@@ -173,10 +204,10 @@ function changePieceLocationOnBoard(board, oldX, oldY, newX, newY, affectGlobal 
             board[newCastlePos.y][newCastlePos.x] = board[oldCastlePos.y][oldCastlePos.x];
             board[oldCastlePos.y][oldCastlePos.x] = ' ';
             //change HTML
-            if (affectGlobal) {
-                document.getElementById(newCastlePos.getSquareName()).innerHTML = document.getElementById(oldCastlePos.getSquareName()).innerHTML;
-                document.getElementById(oldCastlePos.getSquareName()).innerHTML = '';
-            }
+//            if (affectGlobal) {
+//                document.getElementById(newCastlePos.getSquareName()).innerHTML = document.getElementById(oldCastlePos.getSquareName()).innerHTML;
+//                document.getElementById(oldCastlePos.getSquareName()).innerHTML = '';
+//            }
         }
         if (newX == kPos.x - 2) {
             const newCastlePos = new Coordinate(kPos.x-1, kPos.y);
@@ -184,21 +215,21 @@ function changePieceLocationOnBoard(board, oldX, oldY, newX, newY, affectGlobal 
             board[newCastlePos.y][newCastlePos.x] = board[oldCastlePos.y][oldCastlePos.x];
             board[oldCastlePos.y][oldCastlePos.x] = ' ';
             //change HTML
-            if (affectGlobal) {
-                document.getElementById(newCastlePos.getSquareName()).innerHTML = document.getElementById(oldCastlePos.getSquareName()).innerHTML;
-                document.getElementById(oldCastlePos.getSquareName()).innerHTML = '';
-            }
+//            if (affectGlobal) {
+//                document.getElementById(newCastlePos.getSquareName()).innerHTML = document.getElementById(oldCastlePos.getSquareName()).innerHTML;
+//                document.getElementById(oldCastlePos.getSquareName()).innerHTML = '';
+//            }
         }
     }
 
     // promote a pawn to a queen TODO: promote to other pieces
     if (oldBoard[oldY][oldX] == 'P' && newY == 0) {
         board[newY][newX] = 'Q';
-        if (affectGlobal) document.getElementById(new Coordinate(newX, newY).getSquareName()).innerHTML = '<img class="piece-img" onclick="pieceClicked(this)" id="Q_3" src="pieces/white-queen.png">';
+//        if (affectGlobal) document.getElementById(new Coordinate(newX, newY).getSquareName()).innerHTML = '<img class="piece-img" onclick="pieceClicked(this)" id="Q_3" src="pieces/white-queen.png">';
     }
     if (oldBoard[oldY][oldX] == 'p' && newY == 7) {
         board[newY][newX] = 'q';
-        if (affectGlobal) document.getElementById(new Coordinate(newX, newY).getSquareName()).innerHTML = '<img class="piece-img" onclick="pieceClicked(this)" id="q_3" src="pieces/black-queen.png">';
+//        if (affectGlobal) document.getElementById(new Coordinate(newX, newY).getSquareName()).innerHTML = '<img class="piece-img" onclick="pieceClicked(this)" id="q_3" src="pieces/black-queen.png">';
     }
 
 
@@ -227,15 +258,14 @@ function hideLegalMoves() {
 }
 
 // Model methods
-function setBoard(newPosition) {
-    //newPosition = "R7/PP4PP/8/8/R5R1/8/8/RPR5";
-    let position = newPosition.split("/");
+function setBoard(fenPosition) {
+    //fenPosition = "R7/PP4PP/8/8/R5R1/8/8/RPR5"; the first part of a fen
+    let position = fenPosition.split("/");
     let newBoard = new Array(8);
     for (let column = 0; column < 8; column++) {
         newBoard[column] = new Array(8);
         let line = position[column];
         for (let row = 0; row < 8; row++) {
-
             for (let charRead = 0; charRead < line.length; charRead++) {
                 let nextChar = line.slice(charRead, charRead + 1);
                 if (!(nextChar >= '0' && nextChar <= '9')) {
@@ -250,8 +280,53 @@ function setBoard(newPosition) {
             }
         }
     }
-    board = newBoard;
-    logBoard();
+    return newBoard;
+}
+
+//when changing the id at the top left corner for example, I need to change the id of the bottom right at the same time, otherwise ids mix up/dupe or something
+// thats why the for loops only cover half the board
+// TODO: flip the side coord bars as well, prob requires adding ids to php
+function flipHTMLBoard(boardArr) {
+    for (let rank = 0; rank < boardArr.length/2; rank++) {
+        for (let file = 0; file < boardArr[0].length; file++) {
+            const originalId = new Coordinate(file, rank).square;
+            const originalRank = 8 - originalId.charAt(1);
+            const originalFile = originalId.charCodeAt(0) - 'a'.charCodeAt(0);
+
+            const flippedRank = String.fromCharCode('1'.charCodeAt(0) + originalRank);
+            const flippedFile = String.fromCharCode('h'.charCodeAt(0) - originalFile);
+
+            let flipWithElement = document.getElementById(flippedFile + flippedRank);
+            document.getElementById(originalId).id = '' + flippedFile + flippedRank;
+            flipWithElement.id = originalId;
+        }
+    }
+    return boardArr;
+}
+
+// displays the board from the perspective of the color //black dont work yet i think
+function fillHTMLBoard(boardArr, colorPerspective = WHITE) {
+    for (let rank = 0; rank < boardArr.length; rank++) {
+        for (let file = 0; file < boardArr[0].length; file++) {
+            const pieceId = board[rank][file];
+            const color = getPieceColor(pieceId);
+            let pieceName = '';
+            switch (pieceId.toUpperCase()) {
+                case "R": pieceName = 'rook'; break;
+                case "B": pieceName = 'bishop'; break;
+                case "N": pieceName = 'knight'; break;
+                case "Q": pieceName = 'queen'; break;
+                case "K": pieceName = 'king'; break;
+                case "P": pieceName = 'pawn'; break;
+            }
+
+            let innerHTML = '';
+            if (pieceName) innerHTML = `<img class="piece-img" onclick="pieceClicked(this)" id="${pieceId}" src="pieces/${color}-${pieceName}.png">`;
+
+            const htmlCoord = new Coordinate(file, rank);
+            document.getElementById(htmlCoord.square).innerHTML = innerHTML;
+        }
+    }
 }
 
 function getLegalMoves(piece, x, y) {
@@ -702,16 +777,13 @@ function confirmSqr(x0, y0, x1, y1) {
 
     //if empty spot - add
     if (udaPiece === " ") {
-        //console.log("next square is empty! Adding it to the array");
         return EMPTY;
     }
     //if enemies
     else if (daColor == 'white' && udaColor == 'black' || daColor == 'black' && udaColor == 'white') {
-        //console.log("enemy detected! Stop the count!");
         return ENEMY;
     } //if teammates
     else if (daColor == 'white' && udaColor == 'white' || daColor == 'black' && udaColor == 'black') {
-        //console.log("ally detected at x="+x+", y="+squaresTillEdge+"! Stop the count!");
         return ALLY;
     }
 }
@@ -778,7 +850,7 @@ function genFenPieces(arr) {
     let boardFen = '';
     for (let rank = 0; rank < arr.length; rank++) {
         countEmpty = 0;
-        for (let file = 0; file < arr.length; file++) {
+        for (let file = 0; file < arr[0].length; file++) {
             piece = arr[rank][file];
             if (piece != ' ') {
                 if (countEmpty != 0) {
@@ -831,14 +903,8 @@ function addLegalMove(coordinates) {
     src.appendChild(img);
 }
 
-function logBoard() {
-    console.log("Current board position is:")
-    for (let y = 0; y < 8; y++) {
-        console.log(board[y]);
-    }
-}
-function logBoard2(board) {
-    console.log("Current board position is:")
+function logBoard(board) {
+    console.log("Given board: ")
     for (let y = 0; y < 8; y++) {
         console.log(board[y]);
     }
@@ -867,41 +933,5 @@ function ajaxCall(gameID, position, lastMove){ //rename to something like notify
         };
         xhr.send();
     });
-
-}
-
-// new Coordinate(3,5);  -  holds boardId: d3, only x and y stored as an int
-// new Coordinate(undefined, undefined, d3);  -  holds x=3 and y=5
-//i think, avoid passing more than those two arguments
-class Coordinate {
-    constructor(x, y, square = 'a0') {
-        if (x !== undefined && y !== undefined) {
-            this.x = x;
-            this.y = y;
-            this.square = this.getSquareName();
-            this.rank = square.charAt(0);
-            this.file = square.substring(1);
-        }
-        else { //square was given
-            this.square = square;
-            this.rank = square.charAt(0);
-            this.file = square.substring(1);
-            let indices = this.getArrayId().split(',');
-            this.x = indices[0];
-            this.y = indices[1];
-        }
-    }
-
-    getSquareName() {
-        return "" + String.fromCharCode(this.x + 97) + (8 - this.y);
-    }
-
-    getArrayId() {
-        return "" + String.fromCharCode(this.rank - 97) + ","+ (8 + this.file);
-    }
-
-    toString() {
-        return `(${this.rank}, ${this.file})`;
-    }
 
 }
