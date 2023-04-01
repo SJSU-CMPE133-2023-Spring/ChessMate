@@ -75,6 +75,7 @@ if ($_GET and $_GET["gameid"] and $_GET["color"])
                         <th style="color:white">g</th>
                         <th style="color:white">h</th>
                     </tr>
+                    <!--
                     <tr>
                         <th style="color:white">8</th>
                         <th id="a8" class="light"><img class="piece-img" onclick="pieceClicked(this)" id="r_4"
@@ -115,6 +116,32 @@ if ($_GET and $_GET["gameid"] and $_GET["color"])
                                 src="pieces/black-pawn.png"></th>
 
                     </tr>
+                    -->
+                    <tr>
+                        <th style="color:white">8</th>
+                        <th id="a8" class="light"></th>
+                        <th id="b8" class="dark"></th>
+                        <th id="c8" class="light"></th>
+                        <th id="d8" class="dark"></th>
+                        <th id="e8" class="light"></th>
+                        <th id="f8" class="dark"></th>
+                        <th id="g8" class="light"></th>
+                        <th id="h8" class="dark"></th>
+
+                    </tr>
+                    <tr>
+                        <th style="color:white">7</th>
+                        <th id="a7" class="dark"></th>
+                        <th id="b7" class="light"></th>
+                        <th id="c7" class="dark"></th>
+                        <th id="d7" class="light"></th>
+                        <th id="e7" class="dark"></th>
+                        <th id="f7" class="light"></th>
+                        <th id="g7" class="dark"></th>
+                        <th id="h7" class="light"></th>
+
+                    </tr>
+
                     <tr>
                         <th style="color:white">6</th>
                         <th id="a6" class="light"></th>
@@ -148,9 +175,7 @@ if ($_GET and $_GET["gameid"] and $_GET["color"])
                         <th id="e4" class="light"></th>
                         <th id="f4" class="dark"></th>
                         <th id="g4" class="light"></th>
-                        <th id="h4" class="dark">
-
-                        </th>
+                        <th id="h4" class="dark"></th>
 
                     </tr>
                     <tr>
@@ -165,6 +190,31 @@ if ($_GET and $_GET["gameid"] and $_GET["color"])
                         <th id="h3" class="light"></th>
 
                     </tr>
+                    <tr>
+                        <th style="color:white">2</th>
+                        <th id="a2" class="light"></th>
+                        <th id="b2" class="dark"></th>
+                        <th id="c2" class="light"></th>
+                        <th id="d2" class="dark"></th>
+                        <th id="e2" class="light"></th>
+                        <th id="f2" class="dark"></th>
+                        <th id="g2" class="light"></th>
+                        <th id="h2" class="dark"></th>
+
+                    </tr>
+                    <tr>
+                        <th class=gameprefix style="color:white">1</th>
+                        <th id="a1" class="dark"></th>
+                        <th id="b1" class="light"></th>
+                        <th id="c1" class="dark"></th>
+                        <th id="d1" class="light"></th>
+                        <th id="e1" class="dark"></th>
+                        <th id="f1" class="light"></th>
+                        <th id="g1" class="dark"></th>
+                        <th id="h1" class="light"></th>
+
+                    </tr>
+                    <!--
                     <tr>
                         <th style="color:white">2</th>
                         <th id="a2" class="light"><img class="piece-img" onclick="pieceClicked(this)" id="P_1"
@@ -205,6 +255,7 @@ if ($_GET and $_GET["gameid"] and $_GET["color"])
                                 src="pieces/white-rook.png"></th>
 
                     </tr>
+                    -->
                 </tbody>
             </table>
         </div>
