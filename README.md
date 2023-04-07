@@ -80,5 +80,4 @@ Here you can provide information on how to contact you or the project team. This
 
 ### Acknowledgements
 
-Here you can give credit to any individuals or organizations that have contributed to the project or provided support.
 [An example of Stockfish implementation in Java](https://github.com/bhlangonijr/chesslib/tree/master/src/main/java/com/github/bhlangonijr/chesslib)
