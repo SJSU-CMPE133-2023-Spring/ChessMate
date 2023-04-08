@@ -44,7 +44,7 @@ let opponent = "id of an opponent / or AI id (if we have multiple: simple/medium
 // let currentPosition = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 0";
 // castle ready position
 // let currentPosition = "r3k2r/pppb1ppp/n2pp2n/2b3q1/2B3Q1/N1BPP2N/PPP2PPP/R3K2R w KQkq - 3 7";
-let currentPosition = "rnbqkbnr/pppqqppp/8/8/8/8/PPPQQPPP/RNBQKBNR w KQkq - 0 0";
+let currentPosition = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 0";
 let board = setBoard(currentPosition.split(' ')[0]);
 logBoard(board);
 // flip ids of the html board to blacks perspective if black
