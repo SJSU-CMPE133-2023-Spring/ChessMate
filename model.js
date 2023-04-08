@@ -15,15 +15,14 @@ class Coordinate {
             this.rank = this.square.substring(1);
             this.file = this.square.charAt(0);
             let indices = this.getArrayId().split(',');
-            this.x = indices[0];
-            this.y = indices[1];
+            this.x = parseInt(indices[0]);
+            this.y = parseInt(indices[1]);
         }
-
     }
 
     getSquareName() { return "" + String.fromCharCode(this.x + 97) + (8 - this.y); }
 
-    getArrayId() { return "" + String.fromCharCode(this.rank - 97) + ","+ (8 + this.file); }
+    getArrayId() { return "" + (this.file.toLowerCase().charCodeAt(0) - 'a'.charCodeAt(0)) + "," + (8 - parseInt(this.rank)); }
 
     toString() { return `(${this.rank}, ${this.file})`; }
 }
@@ -41,7 +40,10 @@ let pieceSelected = null;
 let gameID = document.getElementById("gameID").innerHTML;
 let playerColor = document.getElementById("color").innerHTML;
 let opponent = "id of an opponent / or AI id (if we have multiple: simple/medium/pro)";
-//let currentPosition = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 0";
+// standard position
+// let currentPosition = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 0";
+// castle ready position
+// let currentPosition = "r3k2r/pppb1ppp/n2pp2n/2b3q1/2B3Q1/N1BPP2N/PPP2PPP/R3K2R w KQkq - 3 7";
 let currentPosition = "rnbqkbnr/pppqqppp/8/8/8/8/PPPQQPPP/RNBQKBNR w KQkq - 0 0";
 let board = setBoard(currentPosition.split(' ')[0]);
 logBoard(board);
@@ -137,7 +139,7 @@ function globalMoveUpdate(move) {
     turn = !turn;
 }
 
-//changes and returns a given board array given a moving piece, also handles promotion, castling, and en passant
+// changes and returns a given board array given a moving piece, also handles promotion, castling, and en passant
 // affectGlobal is false for when I need this method without changing the real board array and HTML
 function changePieceLocationOnBoard(board, oldX, oldY, newX, newY, affectGlobal = true) {
     let oldBoard = board.map(innerArray => [...innerArray]);
@@ -147,8 +149,9 @@ function changePieceLocationOnBoard(board, oldX, oldY, newX, newY, affectGlobal 
     // eat pawn if en passant was chosen
     const fenPassant = currentPosition.split(' ')[3];
     if (fenPassant != '-') {
-        fenX = parseInt(fenPassant.split(',')[0]);
-        fenY = parseInt(fenPassant.split(',')[1]);
+        arrayId = new Coordinate(undefined, undefined, fenPassant);
+        fenX = arrayId.x;
+        fenY = arrayId.y;
         if (oldBoard[oldY][oldX] == 'P' && newX == fenX && newY == fenY) {
             board[newY+1][newX] = ' ';
             const nothingPersonalKid = new Coordinate(newX, oldY);
@@ -522,17 +525,15 @@ function getPawnMoves(x, y, onlyAttacks = false) {
         }
         if (confirmSqr(x, y, x-1, y - 1) === ENEMY) {
             output.push(new Coordinate(x-1, y - 1));
-            //Here is the place for en passant - if (something)
-            // when
         }
         if (confirmSqr(x, y, x+1, y - 1) === ENEMY) {
             output.push(new Coordinate(x+1, y - 1));
-            //Here is the place for en passant - if (something)
         }
         // en passant
         if (fenPassant != '-') {
-            fenX = parseInt(fenPassant.split(',')[0]);
-            fenY = parseInt(fenPassant.split(',')[1]);
+            arrayId = new Coordinate(undefined, undefined, fenPassant);
+            fenX = arrayId.x;
+            fenY = arrayId.y;
             if (x == fenX - 1 && y == fenY + 1) output.push(new Coordinate(fenX, fenY));
             if (x == fenX + 1 && y == fenY + 1) output.push(new Coordinate(fenX, fenY));
         }
@@ -545,16 +546,15 @@ function getPawnMoves(x, y, onlyAttacks = false) {
         }
         if (confirmSqr(x, y, x-1, y + 1) === ENEMY) {
             output.push(new Coordinate(x-1, y + 1));
-            //Here is the place for en passant - if (something)
         }
         if (confirmSqr(x, y, x+1, y + 1) === ENEMY) {
             output.push(new Coordinate(x+1, y + 1));
-            //Here is the place for en passant - if (something)
         }
         // en passant
         if (fenPassant != '-') {
-            fenX = parseInt(fenPassant.split(',')[0]);
-            fenY = parseInt(fenPassant.split(',')[1]);
+            arrayId = new Coordinate(undefined, undefined, fenPassant);
+            fenX = arrayId.x;
+            fenY = arrayId.y;
             if (x == fenX - 1 && y == fenY - 1) output.push(new Coordinate(fenX, fenY));
             if (x == fenX + 1 && y == fenY - 1) output.push(new Coordinate(fenX, fenY));
         }
@@ -802,8 +802,8 @@ function generateFen(oldBoard, newBoard, oldX, oldY, newX, newY){
     newFen += newCastle;
 
     // en passant
-    if (pieceMoved == 'P' && oldY == 6 && newY == 4) newFen += ' ' + newX + ',' + (newY+1);
-    else if (pieceMoved == 'p' && oldY == 1 && newY == 3) newFen += ' ' + newX + ',' + (newY-1);
+    if (pieceMoved == 'P' && oldY == 6 && newY == 4) newFen += ' ' + new Coordinate(newX, newY+1).square;
+    else if (pieceMoved == 'p' && oldY == 1 && newY == 3) newFen += ' ' + new Coordinate(newX, newY-1).square;
     else newFen += ' -';
 
     // half move clock
