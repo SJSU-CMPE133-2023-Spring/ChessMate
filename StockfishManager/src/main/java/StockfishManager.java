@@ -21,7 +21,7 @@ public class StockfishManager {
         // connect to the Engine
         try {
 
-            String exe = StockfishManager.class.getResource("main/java/Stockfish/stockfish-windows-2022-x86-64-avx2.exe").getFile();
+            String exe = StockfishManager.class.getResource("stockfish-windows-2022-x86-64-avx2.exe").getFile();
             pb = new ProcessBuilder(exe);
             System.out.println(exe);
             p = pb.start();
