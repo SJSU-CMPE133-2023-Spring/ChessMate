@@ -28,6 +28,6 @@ bin/
 
 ### Mac OS ###
 .DS_Store
-/src/Stockfish/
+
 /target/
 
