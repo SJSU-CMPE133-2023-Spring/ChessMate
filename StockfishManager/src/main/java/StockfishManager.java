@@ -1,4 +1,7 @@
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -20,10 +23,18 @@ public class StockfishManager {
 
         // connect to the Engine
         try {
+            //String exe = "C:\\xampp2\\htdocs\\ChessMate\\StockfishManager\\src\\main\\resources\\stockfish-windows-2022-x86-64-avx2.exe";
+            //String exe = StockfishManager.class.getResource("stockfish-windows-2022-x86-64-avx2.exe").getFile();
+            //pb = new ProcessBuilder(exe);
+            String exeResourcePath = "/stockfish-windows-2022-x86-64-avx2.exe";
+            InputStream exeInputStream = StockfishManager.class.getResourceAsStream(exeResourcePath);
 
-            String exe = StockfishManager.class.getResource("stockfish-windows-2022-x86-64-avx2.exe").getFile();
-            pb = new ProcessBuilder(exe);
-            System.out.println(exe);
+            // Create a temporary file to store the executable
+            Path tempExePath = Files.createTempFile("stockfish", ".exe");
+            Files.copy(exeInputStream, tempExePath, StandardCopyOption.REPLACE_EXISTING);
+
+            // Start the process using the ProcessBuilder
+            ProcessBuilder pb = new ProcessBuilder(tempExePath.toString());
             p = pb.start();
             stdin = p.getOutputStream();
             stderr = p.getErrorStream();
