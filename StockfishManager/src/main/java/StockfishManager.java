@@ -12,20 +12,52 @@ public class StockfishManager {
     // it will not create a connection
     static MysqlConnect mysqlConnect = new MysqlConnect();
     static ProcessBuilder pb;
-    //static ProcessBuilder pb = new ProcessBuilder("C:\\chessProject\\stockfish_15.1_win_x64_avx2\\stockfish-windows-2022-x86-64-avx2.exe");
     static BufferedReader reader;
     static Process p;
     static OutputStream stdin;
     static InputStream stderr;
     static InputStream stdout;
     static BufferedWriter writer;
+    public StockfishManager(){
+        setupStockfish();
+    }
     public static void main(String[] args) {
 
         // connect to the Engine
+        StockfishManager manager = new StockfishManager();
+
+        // do engine calls here:
+        //printMatches();
+        while (true){
+            manager.joinGames();
+            manager.playEngineMoves();
+            //System.out.println(manager.evaluatePosition("e2e4 d7d5 e4d5 d8d5 b1c3 d5d8 d2d3 e7e5 c1d2 b8c6 f1e2 g8e7 f2f3 e7f5 g1h3 f5h4 e1g1 c8h3 g2h3 d8d7 d2g5 d7h3 f1f2 f8c5 d3d4 c5d4 d1f1 h4f3 g1h1 h3f1 f2f1 f3g5 e2b5 h7h6 c3d5", false));
+            System.out.println(manager.evaluatePosition("r3k2r/ppp2pp1/2n4p/1B1Np1n1/3b4/8/PPP4P/R4R1K b kq - 1 17", true));
+
+            /*
+            * position estimation can be triggered with "eval"
+              -0.4 is inaccuracy
+              -0.9 is a mistake
+              -2.0 is a blunder
+            * all legal moves can be listed with
+                position startpos moves e2e4 e7e5
+                go perft 1
+            * this can be useful to get a list of legal moves and play a random one,
+            * or get a list of moves, get a couple of random ones and pick the best one by evaluating the position
+            */
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+            System.out.println("The action queue is empty. Updating the queue...");
+        }
+
+
+    }
+
+    private void setupStockfish(){
         try {
-            //String exe = "C:\\xampp2\\htdocs\\ChessMate\\StockfishManager\\src\\main\\resources\\stockfish-windows-2022-x86-64-avx2.exe";
-            //String exe = StockfishManager.class.getResource("stockfish-windows-2022-x86-64-avx2.exe").getFile();
-            //pb = new ProcessBuilder(exe);
             String exeResourcePath = "/stockfish-windows-2022-x86-64-avx2.exe";
             InputStream exeInputStream = StockfishManager.class.getResourceAsStream(exeResourcePath);
 
@@ -45,24 +77,9 @@ public class StockfishManager {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-
-        // do engine calls here:
-        //printMatches();
-        while (true){
-            joinGames();
-            playEngineMoves();
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
-            System.out.println("The action queue is empty. Updating the queue...");
-        }
-
-
     }
 
-    public static void printMatches(){
+    public void printMatches(){
 
         String query = "SELECT * FROM matches";
         try (PreparedStatement preparedStatement = mysqlConnect.connect().prepareStatement(query)) {
@@ -76,7 +93,7 @@ public class StockfishManager {
         }
 
     }
-    public static void playEngineMoves(){
+    public void playEngineMoves(){
 
         //When adding difficulty levels - replace 'engine' with engine_difficulty level or something like that
         String query = "SELECT * FROM matches WHERE white = 'engine' OR black = 'engine'";
@@ -110,7 +127,7 @@ public class StockfishManager {
             e.printStackTrace();
         }
     }
-    public static void joinGames(){
+    public void joinGames(){
         String query = "SELECT * FROM matches WHERE status = 'waiting_engine'";
         try (PreparedStatement preparedStatement = mysqlConnect.connect().prepareStatement(query)) {
 
@@ -136,13 +153,13 @@ public class StockfishManager {
         }
     }
 
-    private static String getRandomStartingMove() {
+    private String getRandomStartingMove() {
         Random random = new Random(System.currentTimeMillis());
         String[] moves = {"e2e4", "d2d4", "c2c4", "g2g3", "g1f3"};
         return moves[random.nextInt(5)];
     }
 
-    public static String getBestMove(String fen, int waitTime) {
+    public String getBestMove(String fen, int waitTime) {
         sendCommand("position fen " + fen);
         sendCommand("go movetime " + waitTime);
         String output = getOutput(waitTime + 500);
@@ -155,7 +172,7 @@ public class StockfishManager {
         return output.split("bestmove ")[1].split(" ")[0];
     }
 
-    public static String getOutput(int waitTime) {
+    public String getOutput(int waitTime) {
         StringBuffer buffer = new StringBuffer();
         try {
             Thread.sleep(waitTime);
@@ -174,7 +191,7 @@ public class StockfishManager {
         return output;
     }
 
-    public static void sendCommand(String command) {
+    public void sendCommand(String command) {
         try {
             writer.write(command + "\n");
             writer.flush();
@@ -182,4 +199,46 @@ public class StockfishManager {
             e.printStackTrace();
         }
     }
+
+    // this methods returns a score of the given position (positive = white advantage). it can accept fen position or
+    // a list of moves (if the fen = false)
+    public double evaluatePosition(String position, boolean fen){
+        double score = 0;
+
+        // obtaining Stockfish's position evaluation
+        if (fen){
+            sendCommand("position fen "+ position);
+        } else {
+            sendCommand("position startpos moves " + position);
+        }
+        sendCommand("eval");
+        String engineOutput = getOutput(10);
+        while (!engineOutput.contains("Final evaluation ")) {
+            engineOutput = getOutput(10);
+
+        }
+
+        // obtaining the final evaluation score from the large evaluation report
+        int scoreIndex = engineOutput.lastIndexOf("Final evaluation");
+        if (scoreIndex != -1) {
+            String scoreString = engineOutput.substring(scoreIndex + 17);
+            String[] temp = scoreString.split(" ");
+
+            for (String s : temp) {
+                if (!s.equals("")) {
+                    scoreString = s;
+                    break;
+                }
+            }
+
+
+            score = Double.parseDouble(scoreString);
+            System.out.println("Score: " + score);
+        } else {
+            System.out.println("No score found...");
+        }
+        return score;
+    }
+
+    public
 }

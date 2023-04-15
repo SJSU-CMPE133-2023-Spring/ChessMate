@@ -9,6 +9,7 @@ class Coordinate {
             this.square = this.getSquareName();
             this.rank = this.square.substring(1);
             this.file = this.square.charAt(0);
+            
         }
         else { //square was given
             this.square = square;
