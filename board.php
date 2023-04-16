@@ -67,49 +67,41 @@ if ($_GET and $_GET["gameid"] and $_GET["color"])
                 <div class="white square" id="a8_parent">
                     <div class="superscript"></div>
                     <div class="pieceholder" id="a8">
-                        <img class="piece-img" onclick="pieceClicked(this)" id="r_4" src="pieces/black-rook.png">
                     </div>
                 </div>
                 <div class="black square" id="b8_parent">
                     <div class="superscript"></div>
                     <div class="pieceholder" id="b8">
-                        <img class="piece-img" onclick="pieceClicked(this)" id="n_4" src="pieces/black-knight.png">
                     </div>
                 </div>
                 <div class="white square" id="c8_parent">
                     <div class="superscript"></div>
                     <div class="pieceholder" id="c8">
-                        <img class="piece-img" onclick="pieceClicked(this)" id="b_4" src="pieces/black-bishop.png">
                     </div>
                 </div>
                 <div class="black square" id="d8_parent">
                     <div class="superscript"></div>
                     <div class="pieceholder" id="d8">
-                        <img class="piece-img" onclick="pieceClicked(this)" id="q_2" src="pieces/black-queen.png">
                     </div>
                 </div>
                 <div class="white square" id="e8_parent">
                     <div class="superscript"></div>
                     <div class="pieceholder" id="e8">
-                        <img class="piece-img" onclick="pieceClicked(this)" id="k_2" src="pieces/black-king.png">
                     </div>
                 </div>
                 <div class="black square" id="f8_parent">
                     <div class="superscript"></div>
                     <div class="pieceholder" id="f8">
-                        <img class="piece-img" onclick="pieceClicked(this)" id="b_3" src="pieces/black-bishop.png">
                     </div>
                 </div>
                 <div class="white square" id="g8_parent">
                     <div class="superscript"></div>
                     <div class="pieceholder" id="g8">
-                        <img class="piece-img" onclick="pieceClicked(this)" id="n_3" src="pieces/black-knight.png">
                     </div>
                 </div>
                 <div class="black square" id="h8_parent">
                     <div class="superscript"></div>
                     <div class="pieceholder" id="h8">
-                        <img class="piece-img" onclick="pieceClicked(this)" id="r_3" src="pieces/black-rook.png">
                     </div>
                 </div>
             </div>
@@ -117,49 +109,41 @@ if ($_GET and $_GET["gameid"] and $_GET["color"])
                 <div class="black square" id="a7_parent">
                     <div class="superscript"></div>
                     <div class="pieceholder" id="a7">
-                        <img class="piece-img" onclick="pieceClicked(this)" id="p_9" src="pieces/black-pawn.png">
                     </div>
                 </div>
                 <div class="white square" id="b7_parent">
                     <div class="superscript"></div>
                     <div class="pieceholder" id="b7">
-                        <img class="piece-img" onclick="pieceClicked(this)" id="p_10" src="pieces/black-pawn.png">
                     </div>
                 </div>
                 <div class="black square" id="c7_parent">
                     <div class="superscript"></div>
                     <div class="pieceholder" id="c7">
-                        <img class="piece-img" onclick="pieceClicked(this)" id="p_11" src="pieces/black-pawn.png">
                     </div>
                 </div>
                 <div class="white square" id="d7_parent">
                     <div class="superscript"></div>
                     <div class="pieceholder" id="d7">
-                        <img class="piece-img" onclick="pieceClicked(this)" id="p_12" src="pieces/black-pawn.png">
                     </div>
                 </div>
                 <div class="black square" id="e7_parent">
                     <div class="superscript"></div>
                     <div class="pieceholder" id="e7">
-                        <img class="piece-img" onclick="pieceClicked(this)" id="p_13" src="pieces/black-pawn.png">
                     </div>
                 </div>
                 <div class="white square" id="f7_parent">
                     <div class="superscript"></div>
                     <div class="pieceholder" id="f7">
-                        <img class="piece-img" onclick="pieceClicked(this)" id="p_14" src="pieces/black-pawn.png">
                     </div>
                 </div>
                 <div class="black square" id="g7_parent">
                     <div class="superscript"></div>
                     <div class="pieceholder" id="g7">
-                        <img class="piece-img" onclick="pieceClicked(this)" id="p_15" src="pieces/black-pawn.png">
                     </div>
                 </div>
                 <div class="white square" id="h7_parent">
                     <div class="superscript"></div>
                     <div class="pieceholder" id="h7">
-                        <img class="piece-img" onclick="pieceClicked(this)" id="p_16" src="pieces/black-pawn.png">
                     </div>
                 </div>
             </div>
@@ -335,49 +319,41 @@ if ($_GET and $_GET["gameid"] and $_GET["color"])
                 <div class="white square" id="a2_parent">
                     <div class="superscript"></div>
                     <div class="pieceholder" id="a2">
-                        <img class="piece-img" onclick="pieceClicked(this)" id="P_1" src="pieces/white-pawn.png">
                     </div>
                 </div>
                 <div class="black square" id="b2_parent">
                     <div class="superscript"></div>
                     <div class="pieceholder" id="b2">
-                        <img class="piece-img" onclick="pieceClicked(this)" id="P_2" src="pieces/white-pawn.png">
                     </div>
                 </div>
                 <div class="white square" id="c2_parent">
                     <div class="superscript"></div>
                     <div class="pieceholder" id="c2">
-                        <img class="piece-img" onclick="pieceClicked(this)" id="P_3" src="pieces/white-pawn.png">
                     </div>
                 </div>
                 <div class="black square" id="d2_parent">
                     <div class="superscript"></div>
                     <div class="pieceholder" id="d2">
-                        <img class="piece-img" onclick="pieceClicked(this)" id="P_4" src="pieces/white-pawn.png">
                     </div>
                 </div>
                 <div class="white square" id="e2_parent">
                     <div class="superscript"></div>
                     <div class="pieceholder" id="e2">
-                        <img class="piece-img" onclick="pieceClicked(this)" id="P_5" src="pieces/white-pawn.png">
                     </div>
                 </div>
                 <div class="black square" id="f2_parent">
                     <div class="superscript"></div>
                     <div class="pieceholder" id="f2">
-                        <img class="piece-img" onclick="pieceClicked(this)" id="P_6" src="pieces/white-pawn.png">
                     </div>
                 </div>
                 <div class="white square" id="g2_parent">
                     <div class="superscript"></div>
                     <div class="pieceholder" id="g2">
-                        <img class="piece-img" onclick="pieceClicked(this)" id="P_7" src="pieces/white-pawn.png">
                     </div>
                 </div>
                 <div class="black square" id="h2_parent">
                     <div class="superscript"></div>
                     <div class="pieceholder" id="h2">
-                        <img class="piece-img" onclick="pieceClicked(this)" id="P_8" src="pieces/white-pawn.png">
                     </div>
                 </div>
             </div>
@@ -385,49 +361,41 @@ if ($_GET and $_GET["gameid"] and $_GET["color"])
                 <div class="black square" id="a1_parent">
                     <div class="superscript"></div>
                     <div class="pieceholder" id="a1">
-                        <img class="piece-img" onclick="pieceClicked(this)" id="R_2" src="pieces/white-rook.png">
                     </div>
                 </div>
                 <div class="white square" id="b1_parent">
                     <div class="superscript"></div>
                     <div class="pieceholder" id="b1">
-                        <img class="piece-img" onclick="pieceClicked(this)" id="N_2" src="pieces/white-knight.png">
                     </div>
                 </div>
                 <div class="black square" id="c1_parent">
                     <div class="superscript"></div>
                     <div class="pieceholder" id="c1">
-                        <img class="piece-img" onclick="pieceClicked(this)" id="B_2" src="pieces/white-bishop.png">
                     </div>
                 </div>
                 <div class="white square" id="d1_parent">
                     <div class="superscript"></div>
                     <div class="pieceholder" id="d1">
-                        <img class="piece-img" onclick="pieceClicked(this)" id="Q_1" src="pieces/white-queen.png">
                     </div>
                 </div>
                 <div class="black square" id="e1_parent">
                     <div class="superscript"></div>
                     <div class="pieceholder" id="e1">
-                        <img class="piece-img" onclick="pieceClicked(this)" id="K_1" src="pieces/white-king.png">
                     </div>
                 </div>
                 <div class="white square" id="f1_parent">
                     <div class="superscript"></div>
                     <div class="pieceholder" id="f1">
-                        <img class="piece-img" onclick="pieceClicked(this)" id="B_1" src="pieces/white-bishop.png">
                     </div>
                 </div>
                 <div class="black square" id="g1_parent">
                     <div class="superscript"></div>
                     <div class="pieceholder" id="g1">
-                        <img class="piece-img" onclick="pieceClicked(this)" id="N_1" src="pieces/white-knight.png">
                     </div>
                 </div>
                 <div class="white square" id="h1_parent">
                     <div class="superscript"></div>
                     <div class="pieceholder" id="h1">
-                        <img class="piece-img" onclick="pieceClicked(this)" id="R_1" src="pieces/white-rook.png">
                     </div>
                 </div>
             </div>
