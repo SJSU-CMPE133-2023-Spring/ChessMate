@@ -39,6 +39,9 @@ public class StockfishManager {
               -0.4 is inaccuracy
               -0.9 is a mistake
               -2.0 is a blunder
+              *
+              *
+              *
             * all legal moves can be listed with
                 position startpos moves e2e4 e7e5
                 go perft 1
@@ -240,5 +243,18 @@ public class StockfishManager {
         return score;
     }
 
-    public
+    public String[] getLegalMoves(String position){
+        String[] legalMoves = {};
+        sendCommand("position fen "+ position);
+        sendCommand("go perft 1");
+        String engineOutput = getOutput(10);
+        while (!engineOutput.contains("Nodes searched: ")) {
+            engineOutput = getOutput(10);
+
+        }
+        System.out.println(engineOutput);
+
+
+        return legalMoves;
+    }
 }

@@ -15,4 +15,11 @@ class StockfishManagerTest {
         assertEquals(expectedEvaluation, manager.evaluatePosition(moves, false));
         assertEquals(expectedEvaluation, manager.evaluatePosition(fen, true));
     }
+
+    @Test
+    public void testGetLegalMoves(){
+        String fen = "r3k2r/ppp2pp1/2n4p/1B1Np1n1/3b4/8/PPP4P/R4R1K b kq - 1 17";
+        StockfishManager manager = new StockfishManager();
+        manager.getLegalMoves(fen);
+    }
 }

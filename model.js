@@ -28,6 +28,7 @@ class Coordinate {
     toString() { return `(${this.rank}, ${this.file})`; }
 }
 
+let rotationAngle = 0;
 
 //kinda static variables for the model
 const EMPTY = 0, ENEMY = 1, ALLY = 2;
@@ -49,7 +50,7 @@ let currentPosition = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 0"
 let board = setBoard(currentPosition.split(' ')[0]);
 logBoard(board);
 // flip ids of the html board to blacks perspective if black
-if (playerColor == BLACK) board = flipHTMLBoard(board);
+if (playerColor == BLACK) flipHTMLBoard();
 fillHTMLBoard(board, playerColor);
 
 
@@ -234,7 +235,22 @@ function setBoard(fenPosition) {
 
 //when changing the id at the top left corner for example, I need to change the id of the bottom right at the same time, otherwise ids mix up/dupe or something
 // thats why the for loops only cover half the board
-function flipHTMLBoard(boardArr) {
+function flipHTMLBoard(){
+    const board = document.getElementById('board');
+    const squares = document.querySelectorAll('.square');
+    rotationAngle += 180;
+
+    board.style.transform = `rotate(${rotationAngle}deg)`;
+    board.style.transition = 'transform 0.5s ease';
+
+    squares.forEach(function (square) {
+        square.style.transform = `rotate(${rotationAngle}deg)`;
+        square.style.transition = 'transform 0.5s ease';
+    });
+    console.log("rotated!");
+
+}
+/*function old_flipHTMLBoard(boardArr) {
     // flip rank and file indicator bars with themselves
     for(let i = 0; i < boardArr.length/2; i++) {
         const original = new Coordinate(i,i);
@@ -278,10 +294,10 @@ function flipHTMLBoard(boardArr) {
         }
     }
     return boardArr;
-}
+}*/
 
 // displays the board from the perspective of the color //black dont work yet i think
-function fillHTMLBoard(boardArr, colorPerspective = WHITE) {
+function fillHTMLBoard(boardArr) {
     for (let rank = 0; rank < boardArr.length; rank++) {
         for (let file = 0; file < boardArr[0].length; file++) {
             const pieceId = board[rank][file];
@@ -908,3 +924,5 @@ function ajaxCall(gameID, position, lastMove){ //rename to something like notify
     });
 
 }
+
+// this should be in some static initial call

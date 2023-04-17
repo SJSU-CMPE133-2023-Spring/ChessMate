@@ -13,43 +13,17 @@ if ($_GET and $_GET["gameid"] and $_GET["color"])
     <title>Chessmate</title>
     <link rel="stylesheet" href="chess.css">
 
-    <div id="topFooter">
+
+
+</head>
+<div id="topFooter">
         <a href="board.php">
             <img src="Chessmate_logo.PNG" class="logo" alt="chessmate logo">
         </a>
     </div>
 
-</head>
 
-
-
-<body id="board">
-    <!-- TODO: make a prototype for this page (on a separate branch):
-      Stage 1:
-      * The page should have the board on the left and a some kind of menu on the right
-      * The menu should have tabs (around 3) with buttons and text on them
-      * The page should be scalable and the tab menu should hide if the page is too narrow
-      * There also should be a button to hide the menu manually
-      * The top and the bottom should have footers with some temporary buttons/fields
-      * An example of the page look is something like this:
-      ___________________________________________________________
-      |                      [top footer]                       |
-      ___________________________________________________________
-      |                                     |[tab1]|[tab2]|[tab3|
-      |                                     |      |------|-----|
-      |                                     |                   |
-      |                                     |     [button]      |
-      |               [board]               |                   |
-      |                                     |     [button]      |
-      |                                     |                   |
-      |                                     |     [button]      |
-      |                                     |                   |
-      |                                     |                   |
-      |_________________________________________________________|
-      |                       [bottom footer]                   |
-      |_________________________________________________________|
-
-      -->
+<body id="game_page">
 
     <!-- TODO: replace the table below with a structure of divs (on a separate branch).
       Stage 1:
@@ -63,6 +37,7 @@ if ($_GET and $_GET["gameid"] and $_GET["color"])
           -->
     <div class="flex-container1">
         <div class="column left">
+        <div class="board" id="board">
             <div class="row">
                 <div class="white square" id="a8_parent">
                     <div class="superscript"></div>
@@ -351,9 +326,13 @@ if ($_GET and $_GET["gameid"] and $_GET["color"])
                     <div class="tileletter">h</div>
                 </div>
             </div>
+
+        </div>
+
         </div>
 
         <div class="column right">
+        <img src="reverse.png" id="rotate-img" class=menu-image alt="menu button rotate the board">
             <div class="flex-container2">
                 <div class="dropdown">
                     <button onclick="myFunction1()" class="dropbtn">Play</button>
@@ -382,7 +361,7 @@ if ($_GET and $_GET["gameid"] and $_GET["color"])
             </div>
         </div>
     </div>
-    </div>
+
 
     <?php
     if ($_GET) {
@@ -392,6 +371,9 @@ if ($_GET and $_GET["gameid"] and $_GET["color"])
     ?>
 
     <script>
+    document.getElementById('rotate-img').addEventListener('click', function () {
+        flipHTMLBoard();
+    });
         function myFunction1() {
             document.getElementById("myDropdown").classList.toggle("show");
         }
