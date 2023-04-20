@@ -12,15 +12,13 @@ if ($_GET and $_GET["gameid"] and $_GET["color"])
     <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
     <title>Chessmate</title>
     <link rel="stylesheet" href="chess.css">
-
-
-
-</head>
-<div id="topFooter">
         <a href="board.php">
             <img src="Chessmate_logo.PNG" class="logo" alt="chessmate logo">
         </a>
-    </div>
+
+
+</head>
+
 
 
 <body id="game_page">

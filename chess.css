@@ -29,11 +29,11 @@
   background-color: #2B2929;
 }
 
-#topFooter .logo{
+.logo{
   width: 20%;
   height: 20%;
-  max-width: 250px;
-  max-height: 250px;
+  max-width: 5vw;
+  max-height: 5vw;
 }
 
 
