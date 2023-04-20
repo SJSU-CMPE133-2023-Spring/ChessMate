@@ -7,6 +7,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Objects;
 import java.util.Random;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class StockfishManager {
     // it will not create a connection
@@ -32,7 +34,7 @@ public class StockfishManager {
             manager.joinGames();
             manager.playEngineMoves();
             //System.out.println(manager.evaluatePosition("e2e4 d7d5 e4d5 d8d5 b1c3 d5d8 d2d3 e7e5 c1d2 b8c6 f1e2 g8e7 f2f3 e7f5 g1h3 f5h4 e1g1 c8h3 g2h3 d8d7 d2g5 d7h3 f1f2 f8c5 d3d4 c5d4 d1f1 h4f3 g1h1 h3f1 f2f1 f3g5 e2b5 h7h6 c3d5", false));
-            System.out.println(manager.evaluatePosition("r3k2r/ppp2pp1/2n4p/1B1Np1n1/3b4/8/PPP4P/R4R1K b kq - 1 17", true));
+            //System.out.println(manager.evaluatePosition("r3k2r/ppp2pp1/2n4p/1B1Np1n1/3b4/8/PPP4P/R4R1K b kq - 1 17", true));
 
             /*
             * position estimation can be triggered with "eval"
@@ -53,7 +55,7 @@ public class StockfishManager {
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
-            System.out.println("The action queue is empty. Updating the queue...");
+            //System.out.println("The action queue is empty. Updating the queue...");
         }
 
 
@@ -118,8 +120,9 @@ public class StockfishManager {
                 if (playerToMove.equals(engineColor)) {
                     // 500 here is time for the engine to think. More for better output
                     String bestMove = getBestMove(fen, 1);
+                    String newPosition = getLastFenPosition();
                     String moves = resultSet.getString("move_history")+ " "+bestMove;
-                    query = "UPDATE matches SET move_history = '"+moves+"' WHERE id = "+gameID;
+                    query = "UPDATE matches SET move_history = '"+moves+"', position = '"+ newPosition +"' WHERE id = "+gameID;
                     PreparedStatement preparedStatement2 = mysqlConnect.connect().prepareStatement(query);
                     preparedStatement2.executeUpdate();
                     System.out.printf("Engine: made move %s in game (id = %d).\n", bestMove, gameID);
@@ -171,7 +174,6 @@ public class StockfishManager {
             output = getOutput(200);
             System.out.println("Output read failed. Attempting again");
         }
-
         return output.split("bestmove ")[1].split(" ")[0];
     }
 
@@ -256,5 +258,21 @@ public class StockfishManager {
 
 
         return legalMoves;
+    }
+
+    public String getLastFenPosition(){
+        String position = "";
+        sendCommand("d");
+        String engineOutput = getOutput(10);
+        while (!engineOutput.contains("Fen: ")) {
+            engineOutput = getOutput(10);
+        }
+        Pattern pattern = Pattern.compile("Fen:\\s+(.*?)\\s+Key:");
+        Matcher matcher = pattern.matcher(engineOutput);
+        if (matcher.find()) {
+            position = matcher.group(1);
+            System.out.println("position updated");
+        }
+        return position;
     }
 }

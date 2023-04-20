@@ -16,6 +16,7 @@
 */
 }
 
+
 .parent{
   position: relative;
   top: 0px;
@@ -183,13 +184,20 @@ footer{
 .superscript{
   position:absolute;
   box-sizing: border-box;
-  width:20%;
-  height:20%;
+  width:35%;
+  height:35%;
 
-  background-color: yellow;
-  right:5%;
-  top: 5%;
-  z-index:5;
+
+
+  right:-5%;
+  top: -5%;
+  z-index:500;
+
+}
+.superscript-img{
+  max-width: 100%;
+  max-height: 100%;
+  display: block;
 
 }
 

@@ -1,36 +1,12 @@
 // new Coordinate(3,5);  -  holds boardId: d3, only x and y stored as an int
 // new Coordinate(undefined, undefined, d3);  -  holds x=3 and y=5
 // i think, avoid passing more than those two arguments
-class Coordinate {
-    constructor(x, y, square = 'a0') {
-        if (x !== undefined && y !== undefined) {
-            this.x = x;
-            this.y = y;
-            this.square = this.getSquareName();
-            this.rank = this.square.substring(1);
-            this.file = this.square.charAt(0);
-            
-        }
-        else { //square was given
-            this.square = square;
-            this.rank = this.square.substring(1);
-            this.file = this.square.charAt(0);
-            let indices = this.getArrayId().split(',');
-            this.x = parseInt(indices[0]);
-            this.y = parseInt(indices[1]);
-        }
-    }
 
-    getSquareName() { return "" + String.fromCharCode(this.x + 97) + (8 - this.y); }
-
-    getArrayId() { return "" + (this.file.toLowerCase().charCodeAt(0) - 'a'.charCodeAt(0)) + "," + (8 - parseInt(this.rank)); }
-
-    toString() { return `(${this.rank}, ${this.file})`; }
-}
 
 let rotationAngle = 0;
 
 //kinda static variables for the model
+const SUBSCRIPT_WIN = "win", SUBSCRIPT_CHECKMATE = "checkmate", SUBSCRIPT_DRAW = "draw";
 const EMPTY = 0, ENEMY = 1, ALLY = 2;
 const WHITE = 'white', BLACK = 'black';
 
@@ -42,25 +18,27 @@ let pieceSelected = null;
 let gameID = document.getElementById("gameID").innerHTML;
 let playerColor = document.getElementById("color").innerHTML;
 let opponent = "id of an opponent / or AI id (if we have multiple: simple/medium/pro)";
-// standard position
-// let currentPosition = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 0";
-// castle ready position
-// let currentPosition = "r3k2r/pppb1ppp/n2pp2n/2b3q1/2B3Q1/N1BPP2N/PPP2PPP/R3K2R w KQkq - 3 7";
-let currentPosition = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 0";
-let board = setBoard(currentPosition.split(' ')[0]);
-logBoard(board);
-// flip ids of the html board to blacks perspective if black
-if (playerColor == BLACK) flipHTMLBoard();
-fillHTMLBoard(board, playerColor);
+let board;
+
+
+let currentPosition = loadPosition(gameID).then(response=>{
+    currentPosition = response;
+    board = setBoard(currentPosition.split(' ')[0]);
+    logBoard(board);
+    // flip ids of the html board to blacks perspective if black
+    if (playerColor === BLACK) flipHTMLBoard();
+    fillHTMLBoard(board, playerColor);
+});
+
 
 
 //if white is first to move
-let turn = (playerColor==WHITE);
+let turn = (playerColor===WHITE);
 
 //if black we have to wait for opponents move:
-if (playerColor==BLACK){
+if (playerColor===BLACK){
     //wait for whites first move
-    ajaxCall(gameID, currentPosition, "")
+    writeToDB(gameID, currentPosition, "")
         .then(response => {
             console.log("received response: " + response);
             globalMoveUpdate(response);
@@ -109,7 +87,7 @@ function legalMoveClicked(element) {
     //part of waiting for opponent's move
     console.log("Move completed: attempt to make an ajax call with gameID = %d, current position = %s, and last move = %s", gameID, currentPosition, lastMove);
     //ajaxCall(gameID, currentPosition, lastMove);
-    ajaxCall(gameID, currentPosition, lastMove)
+    writeToDB(gameID, currentPosition, lastMove)
         .then(response => {
             console.log("received response: " + response);
             globalMoveUpdate(response);
@@ -135,6 +113,13 @@ function globalMoveUpdate(move) {
     const end = checkEndMates(board, getOppColor(playerColor));
     if (end) {
         console.log(end +' caused by ' + getOppColor(playerColor));
+        if (getOppColor(playerColor)===BLACK) {
+            displaySuperscript(getPieceSquare("k"), SUBSCRIPT_WIN);
+            displaySuperscript(getPieceSquare("K"), SUBSCRIPT_CHECKMATE);
+        } else {
+            displaySuperscript(getPieceSquare("K"), SUBSCRIPT_WIN);
+            displaySuperscript(getPieceSquare("k"), SUBSCRIPT_CHECKMATE);
+        }
     }
 
     hideLegalMoves();
@@ -250,51 +235,6 @@ function flipHTMLBoard(){
     console.log("rotated!");
 
 }
-/*function old_flipHTMLBoard(boardArr) {
-    // flip rank and file indicator bars with themselves
-    for(let i = 0; i < boardArr.length/2; i++) {
-        const original = new Coordinate(i,i);
-        const originalRank = 8 - original.square.charAt(1);
-        const originalFile = original.square.charCodeAt(0) - 'a'.charCodeAt(0);
-
-        const flippedRank = String.fromCharCode('1'.charCodeAt(0) + originalRank);
-        const flippedFile = String.fromCharCode('h'.charCodeAt(0) - originalFile);
-
-        // flip rank id
-        let flipWithElement = document.getElementById(flippedRank);
-        document.getElementById(original.rank).id = flippedRank;
-        flipWithElement.id = original.rank;
-        // flip rank html
-        let flipWithInner = document.getElementById(flippedRank).innerHTML;
-        document.getElementById(flippedRank).innerHTML = document.getElementById(original.rank).innerHTML;
-        document.getElementById(original.rank).innerHTML = flipWithInner;
-        // flip file id
-        flipWithElement = document.getElementById(flippedFile);
-        document.getElementById(original.file).id = flippedFile;
-        flipWithElement.id = original.file;
-        // flip file html
-        flipWithInner = document.getElementById(flippedFile).innerHTML;
-        document.getElementById(flippedFile).innerHTML = document.getElementById(original.file).innerHTML;
-        document.getElementById(original.file).innerHTML = flipWithInner;
-    }
-
-    // swap the board ids of each square with the one across from it
-    for (let rank = 0; rank < boardArr.length/2; rank++) {
-        for (let file = 0; file < boardArr[0].length; file++) {
-            const originalId = new Coordinate(file, rank).square;
-            const originalRank = 8 - originalId.charAt(1);
-            const originalFile = originalId.charCodeAt(0) - 'a'.charCodeAt(0);
-
-            const flippedRank = String.fromCharCode('1'.charCodeAt(0) + originalRank);
-            const flippedFile = String.fromCharCode('h'.charCodeAt(0) - originalFile);
-
-            let flipWithElement = document.getElementById(flippedFile + flippedRank);
-            document.getElementById(originalId).id = '' + flippedFile + flippedRank;
-            flipWithElement.id = originalId;
-        }
-    }
-    return boardArr;
-}*/
 
 // displays the board from the perspective of the color //black dont work yet i think
 function fillHTMLBoard(boardArr) {
@@ -321,6 +261,17 @@ function fillHTMLBoard(boardArr) {
     }
 }
 
+function displaySuperscript(square, superscript){
+    document.getElementById(square+"_superscript").innerHTML = `<img class="superscript-img" src="superscripts/${superscript}.png">`;
+}
+
+function hideSuperscripts(){
+    const images = document.querySelectorAll('img.subscript-img');
+
+    images.forEach(img => {
+        img.parentNode.removeChild(img);
+    });
+}
 function getLegalMoves(piece, x, y) {
     let legalMoves = [];
     if (getPieceColor(piece) == WHITE) {
@@ -347,6 +298,15 @@ function getLegalMoves(piece, x, y) {
     return legalMoves;
 }
 
+function getPieceSquare(target){
+    let square = "";
+    for (let checkY = 0; checkY < board.length; checkY++) {
+        for (let checkX = 0; checkX < board.length; checkX++) {
+            if(board[checkY][checkX]===target) square = new Coordinate(checkX, checkY).square;
+        }
+    }
+    return square;
+}
 //removes moves that get own king checked, used for the raw unfiltered getLegalMoves or sumting
 function remSelfChecks(piece, x, y, moves) {
     let newMoves = [];
@@ -904,7 +864,7 @@ function logBoard(board) {
 Our goal is to send the changes of the model to the DB and get the response (that we are to display later)
  */
 //this method makes a db call with the following arguments:
-function ajaxCall(gameID, position, lastMove){ //rename to something like notifyDB()
+function writeToDB(gameID, position, lastMove){ //rename to something like notifyDB()
     //console.log("entered ajax call");
     return new Promise((resolve, reject) => {
         let xhr = new XMLHttpRequest();
@@ -924,5 +884,50 @@ function ajaxCall(gameID, position, lastMove){ //rename to something like notify
     });
 
 }
+function loadPosition(gameID){
+    return new Promise((resolve, reject) => {
+        let xhr = new XMLHttpRequest();
+        //xhr.open("GET", "DBActions/test.php")
+        xhr.open("GET", "DBActions/loadPosition.php?id=" + gameID);
+        xhr.onload = function () {
+            if (xhr.status === 200) {
+                resolve(xhr.response);
+            } else {
+                reject(xhr.statusText);
+            }
+        };
+        xhr.onerror = function () {
+            reject("Network Error");
+        };
+        xhr.send();
+    });
 
+}
+
+class Coordinate {
+    constructor(x, y, square = 'a0') {
+        if (x !== undefined && y !== undefined) {
+            this.x = x;
+            this.y = y;
+            this.square = this.getSquareName();
+            this.rank = this.square.substring(1);
+            this.file = this.square.charAt(0);
+
+        }
+        else { //square was given
+            this.square = square;
+            this.rank = this.square.substring(1);
+            this.file = this.square.charAt(0);
+            let indices = this.getArrayId().split(',');
+            this.x = parseInt(indices[0]);
+            this.y = parseInt(indices[1]);
+        }
+    }
+
+    getSquareName() { return "" + String.fromCharCode(this.x + 97) + (8 - this.y); }
+
+    getArrayId() { return "" + (this.file.toLowerCase().charCodeAt(0) - 'a'.charCodeAt(0)) + "," + (8 - parseInt(this.rank)); }
+
+    toString() { return `(${this.rank}, ${this.file})`; }
+}
 // this should be in some static initial call
