@@ -42,8 +42,12 @@ if ($_GET and $_GET["gameid"] and $_GET["color"])
                     <div class="grid-container-enemy-player-panel">
                         <div class="profile-pic-c">
                         </div>
-                        <div class="name-c">
-                        </div>
+                        <div class="grid-container-name-captured">
+                           <div class="name-c">
+                            </div>
+                              <div class="captured-c">
+                            </div>
+                        </div> 
                         <div class="time-c">
                         </div>
                     </div>
@@ -338,15 +342,18 @@ if ($_GET and $_GET["gameid"] and $_GET["color"])
                                 <div class="tileletter">h</div>
                             </div>
                         </div>
-
                     </div>
                 </div>
                 <div class="player-panel">
                     <div class=" grid-container-enemy-player-panel">
                         <div class="profile-pic-c">
                         </div>
-                        <div class="name-c">
-                        </div>
+                        <div class="grid-container-name-captured">
+                           <div class="name-c">
+                            </div>
+                              <div class="captured-c">
+                            </div>
+                        </div> 
                         <div class="time-c">
                         </div>
                         <?php
