@@ -12,10 +12,10 @@ if ($_GET and $_GET["gameid"] and $_GET["color"])
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chessmate</title>
     <link rel="stylesheet" href="chess.css">
-    <!--
-        <a href="board.php">
-            <img src="Chessmate_logo.PNG" class="logo" alt="chessmate logo">
-        </a>
+<!--
+    <a href="board.php">
+        <img src="Chessmate_logo.PNG" class="logo" alt="chessmate logo">
+    </a>
 -->
 
 </head>
@@ -367,8 +367,20 @@ if ($_GET and $_GET["gameid"] and $_GET["color"])
                         ?>
                     </div>
                 </div>
-                
             </div>
+        </div>
+
+        <div class="promotion" id="white promotion">
+            <img src="pieces/white-queen.png" alt="Q">
+            <img src="pieces/white-rook.png" alt="R">
+            <img src="pieces/white-bishop.png" alt="B">
+            <img src="pieces/white-knight.png" alt="N">
+        </div>
+        <div class="promotion" id="black promotion">
+            <img src="pieces/black-queen.png" alt="q">
+            <img src="pieces/black-rook.png" alt="r">
+            <img src="pieces/black-bishop.png" alt="b">
+            <img src="pieces/black-knight.png" alt="n">
         </div>
 
         <div class="menu-column">

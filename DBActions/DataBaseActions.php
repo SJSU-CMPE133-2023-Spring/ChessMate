@@ -125,9 +125,9 @@ VALUES ('$player1_id', '$player2_id', '$gameStatus', '$this->INITIAL_POSITION', 
         return end($movesArr);
     }
 
-    public function getLastPositionAndLastMove($id): string{
+    public function getLastPositionAndMove($id): string{
         $movesArr = explode(" ", $this->getMoveHistory($id));
-        return $this->getPosition."&".end($movesArr);
+        return $this->getPosition($id)."&".end($movesArr);
     }
 
     public function enterOrStartGame($playerID, $opponent){

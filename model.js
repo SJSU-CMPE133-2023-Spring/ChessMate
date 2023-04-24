@@ -1,7 +1,32 @@
 // new Coordinate(3,5);  -  holds boardId: d3, only x and y stored as an int
 // new Coordinate(undefined, undefined, d3);  -  holds x=3 and y=5
-// i think, avoid passing more than those two arguments
+// i think, avoid passing more than those two ways
+class Coordinate {
+    constructor(x, y, square = 'a0') {
+        if (x !== undefined && y !== undefined) {
+            this.x = x;
+            this.y = y;
+            this.square = this.getSquareName();
+            this.rank = this.square.substring(1);
+            this.file = this.square.charAt(0);
+            
+        }
+        else { //square was given
+            this.square = square;
+            this.rank = this.square.substring(1);
+            this.file = this.square.charAt(0);
+            let indices = this.getArrayId().split(',');
+            this.x = parseInt(indices[0]);
+            this.y = parseInt(indices[1]);
+        }
+    }
+    getSquareName() { return "" + String.fromCharCode(this.x + 97) + (8 - this.y); }
 
+    getArrayId() { return "" + (this.file.toLowerCase().charCodeAt(0) - 'a'.charCodeAt(0)) + "," + (8 - parseInt(this.rank)); }
+
+    toString() { return `(${this.rank}, ${this.file})`; }
+
+}
 
 let rotationAngle = 0;
 
@@ -13,6 +38,7 @@ const WHITE = 'white', BLACK = 'black';
 // Controller Variables
 let squareSelected = null; //if true, then clicking on a highlighted square = move;
 let pieceSelected = null;
+let promotion = '';
 
 // Model Variables
 let gameID = document.getElementById("gameID").innerHTML;
@@ -20,16 +46,22 @@ let playerColor = document.getElementById("color").innerHTML;
 let opponent = "id of an opponent / or AI id (if we have multiple: simple/medium/pro)";
 let board;
 
-
 let currentPosition = loadPosition(gameID).then(response=>{
     currentPosition = response;
+//     Kevin's sandbox
+//     standard position
+//     currentPosition = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 0";
+//     castle ready position
+//     currentPosition = "r3k2r/pppb1ppp/n2pp2n/2b3q1/2B3Q1/N1BPP2N/PPP2PPP/R3K2R w KQkq - 3 7";
+//     promotion mania position
+//     currentPosition = "8/PPPPPPPP/8/k7/7K/8/pppppppp/8 w - - 0 0";
+
     board = setBoard(currentPosition.split(' ')[0]);
     logBoard(board);
     // flip ids of the html board to blacks perspective if black
     if (playerColor === BLACK) flipHTMLBoard();
     fillHTMLBoard(board, playerColor);
 });
-
 
 
 //if white is first to move
@@ -41,7 +73,12 @@ if (playerColor===BLACK){
     writeToDB(gameID, currentPosition, "")
         .then(response => {
             console.log("received response: " + response);
-            globalMoveUpdate(response);
+            oppFen = response.split('$')[0];
+            oppMove = response.split('&')[1];
+            globalMoveUpdate(oppMove);
+            // for updating board if opp did a promotion, then globalMoveUpdate is not enough
+             board = setBoard(oppFen.split(' ')[0]);
+             fillHTMLBoard(board);
         })
         .catch(error => {
             console.error(error);
@@ -52,8 +89,9 @@ if (playerColor===BLACK){
 // Controller Methods
 function pieceClicked(element) {
     if (!turn) return; //uncomment this line to get turns
-    if ((squareSelected === null) || (element.parentElement.id !== squareSelected)) {
+    if ((squareSelected == null) || (element.parentElement.id !== squareSelected)) {
         hideLegalMoves();
+        document.getElementById(playerColor + ' promotion').style.display = 'none';
         //element.parentElement.style.background="#ffd500";
         //cut the piece from the potential id (ex. P_6 -> P);
         let piece = element.id.slice(0, 1);
@@ -68,6 +106,7 @@ function pieceClicked(element) {
         pieceSelected = element.id;
     } else {
         hideLegalMoves();
+        document.getElementById(playerColor + ' promotion').style.display = 'none';
         squareSelected = null;
     }
 }
@@ -79,18 +118,27 @@ function displayLegalMoves(legalMoves) {
     }
 }
 
-function legalMoveClicked(element) {
+async function legalMoveClicked(element) {
+    // presents ui if promoting a pawn and stores it globally
+    promotion = await promotePrompt(squareSelected, element.parentElement.id, playerColor);
+
     //save for the ajax call:
     let lastMove = squareSelected+element.parentElement.id;
     globalMoveUpdate(lastMove);
 
     //part of waiting for opponent's move
     console.log("Move completed: attempt to make an ajax call with gameID = %d, current position = %s, and last move = %s", gameID, currentPosition, lastMove);
+
     //ajaxCall(gameID, currentPosition, lastMove);
     writeToDB(gameID, currentPosition, lastMove)
         .then(response => {
             console.log("received response: " + response);
-            globalMoveUpdate(response);
+            oppFen = response.split('$')[0];
+            oppMove = response.split('&')[1];
+            globalMoveUpdate(oppMove);
+            // for updating board if opp did a promotion, then globalMoveUpdate is not enough
+             board = setBoard(oppFen.split(' ')[0]);
+             fillHTMLBoard(board);
         })
         .catch(error => {
             console.error(error);
@@ -107,7 +155,7 @@ function globalMoveUpdate(move) {
     let newY = 8 - move.slice(3, 4);
 
     board = changePieceLocationOnBoard(board, oldX, oldY, newX, newY);
-    fillHTMLBoard(board, playerColor);
+    fillHTMLBoard(board);
 
     // TODO: display state of game on screen, maybe as a header - states include whose turn it is and mates
     const end = checkEndMates(board, getOppColor(playerColor));
@@ -156,7 +204,7 @@ function changePieceLocationOnBoard(board, oldX, oldY, newX, newY, affectGlobal 
     let kPos = wKPos;
     if (color == BLACK) kPos = bKPos;
 
-    if (oldBoard[oldY][oldX] == 'K' || oldBoard[oldY][oldX] == 'k' && oldX == kPos.x && oldY == kPos.y) {
+    if ((oldBoard[oldY][oldX] == 'K' || oldBoard[oldY][oldX] == 'k') && oldX == kPos.x && oldY == kPos.y) {
         if (newX == kPos.x + 2) {
             const newCastlePos = new Coordinate(kPos.x+1, kPos.y);
             const oldCastlePos = new Coordinate(kPos.x+3, kPos.y);
@@ -174,15 +222,47 @@ function changePieceLocationOnBoard(board, oldX, oldY, newX, newY, affectGlobal 
     // promote a pawn to a queen TODO: user can choose to promote to other pieces
     if (oldBoard[oldY][oldX] == 'P' && newY == 0) {
         board[newY][newX] = 'Q';
+        if (affectGlobal && playerColor == WHITE) {
+            board[newY][newX] = promotion;
+            promotion = '';
+        }
     }
     if (oldBoard[oldY][oldX] == 'p' && newY == 7) {
         board[newY][newX] = 'q';
+        if (affectGlobal && playerColor == BLACK) {
+            board[newY][newX] = promotion;
+            promotion = '';
+        }
     }
 
     // finish up
     let newBoard = board.map(innerArray => [...innerArray]);
     if (affectGlobal) currentPosition = generateFen(oldBoard, newBoard, oldX, oldY, newX, newY);
     return board;
+}
+
+// will display pieces user can pick to promote pawn to and return the letter of that piece
+function promotePrompt(srcId, destId, color) {
+    const srcCoord = new Coordinate(undefined, undefined, srcId);
+    const destCoord = new Coordinate(undefined, undefined, destId);
+
+    if (board[srcCoord.y][srcCoord.x] == 'P' && destCoord.y == 0 || board[srcCoord.y][srcCoord.x] == 'p' && destCoord.y == 7) {
+        const promoSqr = document.getElementById(destCoord.square + '_parent');
+        const menu = document.getElementById(color + ' promotion');
+        const images = menu.getElementsByTagName('img');
+        promoSqr.appendChild(menu);
+        menu.style.display = 'flex'; //make menu appear
+        //to halt everything until user picks a piece to promote
+        return new Promise((resolve, reject) => {
+            for (let i = 0; i < images.length; i++) {
+                images[i].addEventListener('click', () => {
+                    menu.style = 'none'; //make menu disappear
+                    // Resolve the promise with the selected piece
+                    resolve(images[i].alt);
+                });
+            }
+        });
+    }
 }
 
 function hideLegalMoves() {
@@ -218,25 +298,27 @@ function setBoard(fenPosition) {
     return newBoard;
 }
 
-//when changing the id at the top left corner for example, I need to change the id of the bottom right at the same time, otherwise ids mix up/dupe or something
-// thats why the for loops only cover half the board
+//the z difference is needed to prevent promotion ui from being overlapped/hidden
 function flipHTMLBoard(){
     const board = document.getElementById('board');
     const squares = document.querySelectorAll('.square');
     rotationAngle += 180;
+//    rotationAngle = (rotationAngle + 180) % 360; keeps rotation angle as either 0 or 180
 
     board.style.transform = `rotate(${rotationAngle}deg)`;
     board.style.transition = 'transform 0.5s ease';
 
+    let z = 100, delta = -1;
+    if (rotationAngle % 360 == 0) delta = 1;
     squares.forEach(function (square) {
         square.style.transform = `rotate(${rotationAngle}deg)`;
         square.style.transition = 'transform 0.5s ease';
+        square.style.zIndex = z;
+        z += delta;
     });
-    console.log("rotated!");
-
 }
 
-// displays the board from the perspective of the color //black dont work yet i think
+// populates the html given a board arr
 function fillHTMLBoard(boardArr) {
     for (let rank = 0; rank < boardArr.length; rank++) {
         for (let file = 0; file < boardArr[0].length; file++) {
@@ -272,29 +354,18 @@ function hideSuperscripts(){
         img.parentNode.removeChild(img);
     });
 }
+
 function getLegalMoves(piece, x, y) {
     let legalMoves = [];
-    if (getPieceColor(piece) == WHITE) {
-        switch (piece) {
-            case "R": legalMoves = getRookMoves(x, y); break;
-            case "B": legalMoves = getBishopMoves(x, y); break;
-            case "N": legalMoves = getKnightMoves(x, y); break;
-            case "Q": legalMoves = getQueenMoves(x, y); break;
-            case "K": legalMoves = getKingMoves(x, y); break;
-            case "P": legalMoves = getPawnMoves(x, y); break;
-        }
-    } else {
-        switch (piece) {
-            case "r": legalMoves = getRookMoves(x, y); break;
-            case "b": legalMoves = getBishopMoves(x, y); break;
-            case "n": legalMoves = getKnightMoves(x, y); break;
-            case "q": legalMoves = getQueenMoves(x, y); break;
-            case "k": legalMoves = getKingMoves(x, y); break;
-            case "p": legalMoves = getPawnMoves(x, y); break;
-        }
+    switch (piece.toUpperCase()) {
+        case "R": legalMoves = getRookMoves(x, y); break;
+        case "B": legalMoves = getBishopMoves(x, y); break;
+        case "N": legalMoves = getKnightMoves(x, y); break;
+        case "Q": legalMoves = getQueenMoves(x, y); break;
+        case "K": legalMoves = getKingMoves(x, y); break;
+        case "P": legalMoves = getPawnMoves(x, y); break;
     }
-    legalMoves = remSelfChecks(piece, x, y, legalMoves)
-//    console.log("GetLegalMoves: total number of moves =  " + legalMoves.length);
+    legalMoves = remSelfChecks(piece, x, y, legalMoves);
     return legalMoves;
 }
 
@@ -307,6 +378,7 @@ function getPieceSquare(target){
     }
     return square;
 }
+
 //removes moves that get own king checked, used for the raw unfiltered getLegalMoves or sumting
 function remSelfChecks(piece, x, y, moves) {
     let newMoves = [];
@@ -316,10 +388,9 @@ function remSelfChecks(piece, x, y, moves) {
 
     //check if moves has a move that gets their King checked
     for (let move of moves) {
-        let originalBoard = board.map(innerArray => [...innerArray]);
+        const originalBoard = board.map(innerArray => [...innerArray]);
         let selfCheck = false;
         board = changePieceLocationOnBoard(board, x, y, move.x, move.y, false);
-
         for (let oppMove of getColorAttacks(oppColor)) {
             if (board[oppMove.y][oppMove.x] == 'K' || board[oppMove.y][oppMove.x] == 'k') {
                 selfCheck = true;
@@ -376,26 +447,15 @@ function getColorAttacks(color) {
     let moves = [];
     for (let checkY = 0; checkY < board.length; checkY++) {
         for (let checkX = 0; checkX < board.length; checkX++) {
-            if (getPieceColor(board[checkY][checkX]) === color) {
+            if (getPieceColor(board[checkY][checkX]) == color) {
                 let pieceMoves = [];
-                if (color == WHITE) {
-                    switch (board[checkY][checkX]) {
-                        case "R": pieceMoves = getRookMoves(checkX, checkY); break;
-                        case "B": pieceMoves = getBishopMoves(checkX, checkY); break;
-                        case "N": pieceMoves = getKnightMoves(checkX, checkY); break;
-                        case "Q": pieceMoves = getQueenMoves(checkX, checkY); break;
-                        case "K": pieceMoves = getKingMoves(checkX, checkY, false); break;
-                        case "P": pieceMoves = getPawnMoves(checkX, checkY, true); break;
-                    }
-                } else {
-                    switch (board[checkY][checkX]) {
-                        case "r": pieceMoves = getRookMoves(checkX, checkY); break;
-                        case "b": pieceMoves = getBishopMoves(checkX, checkY); break;
-                        case "n": pieceMoves = getKnightMoves(checkX, checkY); break;
-                        case "q": pieceMoves = getQueenMoves(checkX, checkY); break;
-                        case "k": pieceMoves = getKingMoves(checkX, checkY, false); break;
-                        case "p": pieceMoves = getPawnMoves(checkX, checkY, true); break;
-                    }
+                switch (board[checkY][checkX].toUpperCase()) {
+                    case "R": pieceMoves = getRookMoves(checkX, checkY); break;
+                    case "B": pieceMoves = getBishopMoves(checkX, checkY); break;
+                    case "N": pieceMoves = getKnightMoves(checkX, checkY); break;
+                    case "Q": pieceMoves = getQueenMoves(checkX, checkY); break;
+                    case "K": pieceMoves = getKingMoves(checkX, checkY, false); break;
+                    case "P": pieceMoves = getPawnMoves(checkX, checkY, true); break;
                 }
                 for (let move of pieceMoves) {
                     moves.push(move);
@@ -904,30 +964,4 @@ function loadPosition(gameID){
 
 }
 
-class Coordinate {
-    constructor(x, y, square = 'a0') {
-        if (x !== undefined && y !== undefined) {
-            this.x = x;
-            this.y = y;
-            this.square = this.getSquareName();
-            this.rank = this.square.substring(1);
-            this.file = this.square.charAt(0);
-
-        }
-        else { //square was given
-            this.square = square;
-            this.rank = this.square.substring(1);
-            this.file = this.square.charAt(0);
-            let indices = this.getArrayId().split(',');
-            this.x = parseInt(indices[0]);
-            this.y = parseInt(indices[1]);
-        }
-    }
-
-    getSquareName() { return "" + String.fromCharCode(this.x + 97) + (8 - this.y); }
-
-    getArrayId() { return "" + (this.file.toLowerCase().charCodeAt(0) - 'a'.charCodeAt(0)) + "," + (8 - parseInt(this.rank)); }
-
-    toString() { return `(${this.rank}, ${this.file})`; }
-}
 // this should be in some static initial call
