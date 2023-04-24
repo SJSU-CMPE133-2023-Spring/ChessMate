@@ -48,13 +48,13 @@ let board;
 
 let currentPosition = loadPosition(gameID).then(response=>{
     currentPosition = response;
-    // Kevin's sandbox
-    // standard position
-    // currentPosition = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 0";
-    // castle ready position
-    // currentPosition = "r3k2r/pppb1ppp/n2pp2n/2b3q1/2B3Q1/N1BPP2N/PPP2PPP/R3K2R w KQkq - 3 7";
-    // promotion mania position
-     currentPosition = "8/PPPPPPPP/8/k7/7K/8/pppppppp/8 w - - 0 0";
+//     Kevin's sandbox
+//     standard position
+//     currentPosition = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 0";
+//     castle ready position
+//     currentPosition = "r3k2r/pppb1ppp/n2pp2n/2b3q1/2B3Q1/N1BPP2N/PPP2PPP/R3K2R w KQkq - 3 7";
+//     promotion mania position
+//     currentPosition = "8/PPPPPPPP/8/k7/7K/8/pppppppp/8 w - - 0 0";
 
     board = setBoard(currentPosition.split(' ')[0]);
     logBoard(board);
