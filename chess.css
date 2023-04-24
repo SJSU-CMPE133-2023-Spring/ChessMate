@@ -197,12 +197,11 @@ body{
 }
 
 .black{
-  background-color: #3c3c42;
-
+    background-color: #3c3c42;
 }
 
 .white{
-  background-color: #a6a2a2;
+    background-color: #a6a2a2;
 }
 
 .pieceholder{
@@ -265,7 +264,6 @@ body{
 }
 
 .legal-move-space-img{
-
   position: absolute;
   top: 20%;
   left: 20%;
@@ -307,3 +305,27 @@ footer{
   font-family: Arial, Helvetica, sans-serif;
 }
 */
+
+.promotion {
+    position: relative;
+    z-index: 5;
+    display: flex;
+    display: none;
+    flex-direction: row;
+    justify-content: space-evenly;
+    align-items: center;
+    left: -150%;
+    top: -100%;
+    width: 40vh;
+    height: 10vh;
+    background-color: #736f6f;
+    box-shadow: 1px -4px 10px 2px rgba(0,0,0,.7);
+    border-radius: 4px;
+}
+
+.promotion img {
+    position: relative;
+    height:90%;
+    background-color: #d6d6d6;
+    border-radius: 4px;
+}
