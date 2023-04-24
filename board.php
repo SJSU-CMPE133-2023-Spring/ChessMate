@@ -25,6 +25,9 @@ if ($_GET and $_GET["gameid"] and $_GET["color"])
 <body id="game_page">
     <div class="grid-container-whole">
         <div class="leftmost-column">
+        <a href="board.php">
+            <img style="width:4vw; height:6vh;" src="Chessmate_logo.PNG" class="logo" alt="chessmate logo" >
+        </a>
         </div>
         <!-- TODO: replace the table below with a structure of divs (on a separate branch).
       Stage 1:
@@ -43,11 +46,11 @@ if ($_GET and $_GET["gameid"] and $_GET["color"])
                         <div class="profile-pic-c">
                         </div>
                         <div class="grid-container-name-captured">
-                           <div class="name-c">
+                            <div class="name-c">
                             </div>
-                              <div class="captured-c">
+                            <div class="captured-c">
                             </div>
-                        </div> 
+                        </div>
                         <div class="time-c">
                         </div>
                     </div>
@@ -349,11 +352,11 @@ if ($_GET and $_GET["gameid"] and $_GET["color"])
                         <div class="profile-pic-c">
                         </div>
                         <div class="grid-container-name-captured">
-                           <div class="name-c">
+                            <div class="name-c">
                             </div>
-                              <div class="captured-c">
+                            <div class="captured-c">
                             </div>
-                        </div> 
+                        </div>
                         <div class="time-c">
                         </div>
                         <?php
@@ -364,12 +367,17 @@ if ($_GET and $_GET["gameid"] and $_GET["color"])
                         ?>
                     </div>
                 </div>
+                
             </div>
-
         </div>
 
         <div class="menu-column">
-            <img src="reverse.png" id="rotate-img" class=menu-image alt="menu button rotate the board">
+             <!--<div class="grid-container-option-buttons">
+                    <img src="reverse.png" id="rotate-img" class=menu-image alt="menu button rotate the board">
+                </div>-->
+                <img src="settings_icon.png" class=menu-image2 alt="button for extra settings">
+                <img src="reverse.png" id="rotate-img" class=menu-image alt="menu button rotate the board">
+
             <!--
             <div class="menu-container">
                 <div class="dropdown">
