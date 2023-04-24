@@ -207,8 +207,8 @@ public class StockfishManager {
 
     // this methods returns a score of the given position (positive = white advantage). it can accept fen position or
     // a list of moves (if the fen = false)
-    public double evaluatePosition(String position, boolean fen){
-        double score = 0;
+    public String evaluatePosition(String position, boolean fen){
+        String score = "0";
 
         // obtaining Stockfish's position evaluation
         if (fen){
@@ -218,7 +218,11 @@ public class StockfishManager {
         }
         sendCommand("eval");
         String engineOutput = getOutput(10);
+
         while (!engineOutput.contains("Final evaluation ")) {
+            if (engineOutput.contains("Final evaluation: none")) {
+                return null;
+            }
             engineOutput = getOutput(10);
 
         }
@@ -237,8 +241,8 @@ public class StockfishManager {
             }
 
 
-            score = Double.parseDouble(scoreString);
-            System.out.println("Score: " + score);
+            score = scoreString;
+            //System.out.println("Score: " + score);
         } else {
             System.out.println("No score found...");
         }
@@ -271,8 +275,26 @@ public class StockfishManager {
         Matcher matcher = pattern.matcher(engineOutput);
         if (matcher.find()) {
             position = matcher.group(1);
-            System.out.println("position updated");
+            //System.out.println("position updated");
         }
         return position;
+    }
+
+    public String[][] makeReport(int gameID){
+
+        String query = "SELECT * FROM matches WHERE id="+gameID;
+        try (PreparedStatement preparedStatement = mysqlConnect.connect().prepareStatement(query)) {
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                System.out.println(resultSet.getString("move_history"));
+                StockfishMatchAnalyzer analyzer = new StockfishMatchAnalyzer();
+                 return analyzer.analyzeMatch(this, resultSet.getString("move_history").split(" "));
+                //System.out.println();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }

@@ -125,6 +125,11 @@ VALUES ('$player1_id', '$player2_id', '$gameStatus', '$this->INITIAL_POSITION', 
         return end($movesArr);
     }
 
+    public function getLastPositionAndLastMove($id): string{
+        $movesArr = explode(" ", $this->getMoveHistory($id));
+        return $this->getPosition."&".end($movesArr);
+    }
+
     public function enterOrStartGame($playerID, $opponent){
 
         $randBool = (bool) mt_rand(0, 1);

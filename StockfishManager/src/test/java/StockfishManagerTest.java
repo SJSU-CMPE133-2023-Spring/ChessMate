@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class StockfishManagerTest {
 
+
     @Test
     public void testEvaluatePosition(){
         // this method should work with both fen and moves.
@@ -21,5 +22,17 @@ class StockfishManagerTest {
         String fen = "r3k2r/ppp2pp1/2n4p/1B1Np1n1/3b4/8/PPP4P/R4R1K b kq - 1 17";
         StockfishManager manager = new StockfishManager();
         manager.getLegalMoves(fen);
+    }
+
+    @Test
+    public void testMakeReport(){
+        StockfishManager manager = new StockfishManager();
+        String[][] analysis = manager.makeReport(69);
+        for (String[] moveAnalysis : analysis) {
+            System.out.println("FEN Position: " + moveAnalysis[0]);
+            System.out.println("Last Move: " + moveAnalysis[1]);
+            System.out.println("Evaluation: " + moveAnalysis[2]);
+            System.out.println("-----------------------");
+        }
     }
 }

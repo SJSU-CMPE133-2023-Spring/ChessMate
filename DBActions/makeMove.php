@@ -14,13 +14,6 @@ if($_GET){
     while($lastMove == $db->getLastMove($gameID)) usleep(500);
 
     echo $db->getLastMove($gameID);
-
-    //this method can be upgraded later with request id: 1 for make a move, 2 for give a hint, 3 for estimation of the position and so on
-    /*
-    if($_GET['status']==1){
-        $email = $_GET['email'];
-        $pin = $_GET['pin'];
-        echo $db->atmLogin($email, $pin);
-    }
-    */
+    //echo $db->getPositionAndLastMove($gameID);
+    
 } else echo "error";
