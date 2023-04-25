@@ -12,7 +12,7 @@ if ($_GET and $_GET["gameid"] and $_GET["color"])
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chessmate</title>
     <link rel="stylesheet" href="chess.css">
-<!--
+    <!--
     <a href="board.php">
         <img src="Chessmate_logo.PNG" class="logo" alt="chessmate logo">
     </a>
@@ -25,9 +25,9 @@ if ($_GET and $_GET["gameid"] and $_GET["color"])
 <body id="game_page">
     <div class="grid-container-whole">
         <div class="leftmost-column">
-        <a href="board.php">
-            <img style="width:4vw; height:6vh;" src="Chessmate_logo.PNG" class="logo" alt="chessmate logo" >
-        </a>
+            <a href="board.php">
+                <img style="width:4vw; height:6vh;" src="Chessmate_logo.PNG" class="logo" alt="chessmate logo">
+            </a>
         </div>
         <!-- TODO: replace the table below with a structure of divs (on a separate branch).
       Stage 1:
@@ -359,17 +359,16 @@ if ($_GET and $_GET["gameid"] and $_GET["color"])
                         </div>
                         <div class="time-c">
                         </div>
-                        <?php
+                        <!-- <?php
                         if ($_GET) {
                             echo '<h2>Your color is: <div id="color">' . $_GET["color"] . '</div></h2>
                         <h2>Game ID: <div id="gameID">' . $_GET["gameid"] . '</div></h2>';
                         }
-                        ?>
+                        ?> -->
                     </div>
                 </div>
             </div>
         </div>
-
         <div class="promotion" id="white promotion">
             <img src="pieces/white-queen.png" alt="Q">
             <img src="pieces/white-rook.png" alt="R">
@@ -384,12 +383,17 @@ if ($_GET and $_GET["gameid"] and $_GET["color"])
         </div>
 
         <div class="menu-column">
-             <!--<div class="grid-container-option-buttons">
+            <!--<div class="grid-container-option-buttons">
                     <img src="reverse.png" id="rotate-img" class=menu-image alt="menu button rotate the board">
                 </div>-->
-                <img src="settings_icon.png" class=menu-image2 alt="button for extra settings">
-                <img src="reverse.png" id="rotate-img" class=menu-image alt="menu button rotate the board">
-
+            <img src="settings_icon.png" class=menu-image2 alt="button for extra settings">
+            <img src="reverse.png" id="rotate-img" class=menu-image alt="menu button rotate the board">
+            <?php
+                        if ($_GET) {
+                            echo '<h2>Your color is: <div id="color">' . $_GET["color"] . '</div></h2>
+                        <h2>Game ID: <div id="gameID">' . $_GET["gameid"] . '</div></h2>';
+                        }
+                        ?>
             <!--
             <div class="menu-container">
                 <div class="dropdown">
