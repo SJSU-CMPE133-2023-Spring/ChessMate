@@ -2,7 +2,7 @@
 require_once('DBActions/DataBaseActions.php');
 $db = new DataBaseActions();
 
-if ($_GET and $_GET["id"] and $_GET["login"]){
+if ($_GET and $_GET["id"]){
 
     $opponent = $_GET["opponent"];
     echo $opponent;

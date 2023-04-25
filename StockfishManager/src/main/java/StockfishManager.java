@@ -28,8 +28,6 @@ public class StockfishManager {
         // connect to the Engine
         StockfishManager manager = new StockfishManager();
 
-        // do engine calls here:
-        //printMatches();
         while (true){
             manager.joinGames();
             manager.playEngineMoves();
@@ -110,6 +108,7 @@ public class StockfishManager {
             while (resultSet.next()) {
                 String fen = resultSet.getString("position");
                 int moveOrder = resultSet.getString("move_history").split(" ").length;
+                if (resultSet.getString("move_history").equals("")) moveOrder = 0;
                 int gameID = resultSet.getInt("id");
 
                 // if the number of moves is even - it's white's move, otherwise - black
@@ -119,13 +118,17 @@ public class StockfishManager {
                 // if it is engine's turn to move - make a move
                 if (playerToMove.equals(engineColor)) {
                     // 500 here is time for the engine to think. More for better output
-                    String bestMove = getBestMove(fen, 1);
-                    String newPosition = getLastFenPosition();
+
+                    String bestMove = getBestMoveFromMoves(resultSet.getString("move_history"), 1);
+
+
                     String moves = resultSet.getString("move_history")+ " "+bestMove;
+                    String newPosition = getFenFromMoves(moves);
+                    System.out.println("position = "+ newPosition);
                     query = "UPDATE matches SET move_history = '"+moves+"', position = '"+ newPosition +"' WHERE id = "+gameID;
                     PreparedStatement preparedStatement2 = mysqlConnect.connect().prepareStatement(query);
                     preparedStatement2.executeUpdate();
-                    System.out.printf("Engine: made move %s in game (id = %d).\n", bestMove, gameID);
+                    System.out.printf("Engine: made move %s in game (id = %d). Color to move = %s, engineColor = %s, moves = %s\n", bestMove, gameID, playerToMove,engineColor,moves);
 
                 }
             }
@@ -141,17 +144,21 @@ public class StockfishManager {
 
             while (resultSet.next()) {
                 int gameID = resultSet.getInt("id");
+                String color = "error";
                 // connect to the game and make a first move if needed
                 if (Objects.equals(resultSet.getString("black"), "engine")){
                     // the engine is black
                     query = "UPDATE matches SET status = 'started' WHERE id = "+gameID;
-                } else {
+                    color = "black";
+                } else if (Objects.equals(resultSet.getString("white"), "engine")){
                     // the engine is white
-                    query = "UPDATE matches SET status = 'started', move_history = '"+getRandomStartingMove()+"'";
+                    String firstMove = getRandomStartingMove();
+                    query = "UPDATE matches SET status = 'started', move_history = '"+firstMove+"', position = '"+getFenFromMoves(firstMove)+"'";
+                    color = "white";
                 }
                 PreparedStatement preparedStatement2 = mysqlConnect.connect().prepareStatement(query);
                 preparedStatement2.executeUpdate();
-                System.out.println("Joined game with id = "+gameID);
+                System.out.println("Joined game with id = "+gameID+" as "+color);
 
             }
         } catch (SQLException e) {
@@ -165,8 +172,19 @@ public class StockfishManager {
         return moves[random.nextInt(5)];
     }
 
-    public String getBestMove(String fen, int waitTime) {
+    public String getBestMoveFromFen(String fen, int waitTime) {
         sendCommand("position fen " + fen);
+        sendCommand("go movetime " + waitTime);
+        String output = getOutput(waitTime + 500);
+
+        while (!output.contains("bestmove ")) {
+            output = getOutput(200);
+            System.out.println("Output read failed. Attempting again");
+        }
+        return output.split("bestmove ")[1].split(" ")[0];
+    }
+    public String getBestMoveFromMoves(String moves, int waitTime) {
+        sendCommand("position startpos moves " + moves);
         sendCommand("go movetime " + waitTime);
         String output = getOutput(waitTime + 500);
 
@@ -266,6 +284,23 @@ public class StockfishManager {
 
     public String getLastFenPosition(){
         String position = "";
+        sendCommand("d");
+        String engineOutput = getOutput(10);
+        while (!engineOutput.contains("Fen: ")) {
+            engineOutput = getOutput(10);
+        }
+        Pattern pattern = Pattern.compile("Fen:\\s+(.*?)\\s+Key:");
+        Matcher matcher = pattern.matcher(engineOutput);
+        if (matcher.find()) {
+            position = matcher.group(1);
+            //System.out.println("position updated");
+        }
+        return position;
+    }
+    public String getFenFromMoves(String moves){
+        String position = "";
+        if (moves.equals(""))sendCommand("position startpos");
+        else sendCommand("position startpos moves "+moves);
         sendCommand("d");
         String engineOutput = getOutput(10);
         while (!engineOutput.contains("Fen: ")) {
