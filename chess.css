@@ -12,7 +12,9 @@ body{
   grid-template-columns: 5% 60% 30% 5%; /* percentages denote space taken up by each item in the grid */
   height:100%;
 } 
-
+.board{
+  float: right;
+}
 
 .grid-container-boardside{
   display:grid;
@@ -106,6 +108,13 @@ body{
 .board-column{
   display:flex;
 
+}
+
+.board-menu{
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  transform: translateX(-110%);
 }
 
 .board-container {
@@ -297,23 +306,14 @@ body{
 
 .menu-image{
   position: relative;
-  top:5%;
-  left: -9.3vh;
   width: 4vh;
   height: 4vh;
   border: 10px black;
   cursor: pointer;
+  margin-bottom: 10px;
 }
 
-.menu-image2{
-  position: relative;
-  top:0;
-  left: -5vh;
-  width: 4vh;
-  height: 4vh;
-  border: 10px black;
-  cursor: pointer;
-}
+
 /* UNUSED
 
 .logo{
@@ -359,4 +359,12 @@ footer{
     height:90%;
     background-color: #d6d6d6;
     border-radius: 4px;
+}
+
+.hidden {
+  visibility: hidden;
+}
+
+  .visible {
+  visibility: visible;
 }

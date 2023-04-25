@@ -353,6 +353,11 @@ if ($_GET and $_GET["gameid"] and $_GET["color"])
                             </div>
                         </div>
                     </div>
+                    <div class="board-menu">
+                        <img src="settings_icon.png" class=menu-image alt="button for extra settings">
+                        <img src="reverse.png" id="rotate-img" class=menu-image alt="menu button rotate the board">
+                        <img src="show.png" id="show-img" class=menu-image alt="menu button show/hide menu">
+                    </div>
 
                 </div>
                 <div class="player-panel">
@@ -369,6 +374,7 @@ if ($_GET and $_GET["gameid"] and $_GET["color"])
                         </div>
                         <div class="time-c">
                         </div>
+
                         <!-- <?php
                         if ($_GET) {
                             echo '<h2>Your color is: <div id="color">' . $_GET["color"] . '</div></h2>
@@ -394,9 +400,7 @@ if ($_GET and $_GET["gameid"] and $_GET["color"])
         </div>
 
         <div class="menu-column">
-        <img src="settings_icon.png" class=menu-image2 alt="button for extra settings">
-            <img src="reverse.png" id="rotate-img" class=menu-image alt="menu button rotate the board">
-            <!--<div class="grid-container-option-buttons">
+                    <!--<div class="grid-container-option-buttons">
                     <img src="reverse.png" id="rotate-img" class=menu-image alt="menu button rotate the board">
                 </div>-->
 
@@ -443,19 +447,24 @@ if ($_GET and $_GET["gameid"] and $_GET["color"])
 
         <script>
             document.getElementById('rotate-img').addEventListener('click', function () {
-                flipHTMLBoard(false);
+                flipHTMLBoard(true);
+            });
+            document.getElementById('show-img').addEventListener('click', function () {
+                var container = document.getElementById("menu-column");
+                container.classList.toggle("hidden");
+                container.classList.toggle("visible");
             });
             function myFunction1() {
                 document.getElementById("myDropdown").classList.toggle("show");
-            }
+            };
 
             function myFunction2() {
                 document.getElementById("myDropdown2").classList.toggle("show");
-            }
+            };
 
             function myFunction3() {
                 document.getElementById("myDropdown3").classList.toggle("show");
-            }
+            };
 
             // Close the dropdown if the user clicks outside of it
             window.onclick = function (event) {
