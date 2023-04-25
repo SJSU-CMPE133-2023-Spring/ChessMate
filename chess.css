@@ -50,6 +50,11 @@ body{
   border-color: black;
 }
 
+.player-avatar{
+  width:100%;
+  height:100%;
+}
+
 .name-c{
   width:90%;
   height:4vh;
@@ -58,6 +63,8 @@ body{
   border-style:solid;
   border-width: 3px;
   border-color: black;
+  font-size:30px;
+  text-indent: 3px;
 }
 
 .captured-c{
@@ -68,6 +75,7 @@ body{
   border-style:solid;
   border-width: 3px;
   border-color: black;
+  font-size: 30px;
 }
 
 .time-c{

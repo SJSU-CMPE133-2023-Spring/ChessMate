@@ -44,11 +44,14 @@ if ($_GET and $_GET["gameid"] and $_GET["color"])
                 <div class="enemy-panel">
                     <div class="grid-container-enemy-player-panel">
                         <div class="profile-pic-c">
+                            <img class="player-avatar" src="pieces/white-knight.png" alt="white knight">
                         </div>
                         <div class="grid-container-name-captured">
                             <div class="name-c">
+                                The White Knights
                             </div>
-                            <div class="captured-c">
+                            <div class="captured-c" id="black-pieces-captured">
+                                
                             </div>
                         </div>
                         <div class="time-c">
@@ -350,11 +353,13 @@ if ($_GET and $_GET["gameid"] and $_GET["color"])
                 <div class="player-panel">
                     <div class=" grid-container-enemy-player-panel">
                         <div class="profile-pic-c">
+                            <img class="player-avatar" src="pieces/black-knight.png" alt="black king">
                         </div>
                         <div class="grid-container-name-captured">
                             <div class="name-c">
+                                Dark Knights
                             </div>
-                            <div class="captured-c">
+                            <div class="captured-c" id="white-pieces-captured">
                             </div>
                         </div>
                         <div class="time-c">
