@@ -105,11 +105,22 @@ VALUES ('$player1_id', '$player2_id', '$gameStatus', '$this->INITIAL_POSITION', 
 
     }
 
-    private function getMoveHistory($id){
-        $sql = "SELECT * FROM matches WHERE id=$id";
-        $result = mysqli_query($this->conn, $sql);
+    private function getMoveHistory($id) {
+        // Set the maximum execution time for the script to a higher value
+    // to avoid timeouts. The value is in seconds (e.g., 300 seconds = 5 minutes)
+    ini_set('max_execution_time', 300);
+
+    $sql = "SELECT * FROM matches WHERE id=$id";
+    $result = mysqli_query($this->conn, $sql);
+
+    if ($result && mysqli_num_rows($result) > 0) {
         $row = mysqli_fetch_object($result);
         return $row->move_history;
+    } else {
+        // Handle the case where no row was found or a player didn't make a move within the time limit
+        // You can return an error message or a default value, depending on your application's requirements
+        return "No move found or timed out";
+    }
     }
 
     public function getPosition($id){

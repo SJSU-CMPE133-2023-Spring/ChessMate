@@ -45,8 +45,9 @@ let gameID = document.getElementById("gameID").innerHTML;
 let playerColor = document.getElementById("color").innerHTML;
 let opponent = "id of an opponent / or AI id (if we have multiple: simple/medium/pro)";
 let board;
+let currentPosition;
 
-let currentPosition = loadPosition(gameID).then(response=>{
+loadPosition(gameID).then(response=>{
     currentPosition = response;
 //     Kevin's sandbox
 //     standard position
@@ -59,7 +60,7 @@ let currentPosition = loadPosition(gameID).then(response=>{
     board = setBoard(currentPosition.split(' ')[0]);
     logBoard(board);
     // flip ids of the html board to blacks perspective if black
-    if (playerColor === BLACK) flipHTMLBoard();
+    if (playerColor === BLACK) flipHTMLBoard(false);
     fillHTMLBoard(board, playerColor);
 });
 
@@ -73,7 +74,7 @@ if (playerColor===BLACK){
     writeToDB(gameID, currentPosition, "")
         .then(response => {
             console.log("received response: " + response);
-            oppFen = response.split('$')[0];
+            oppFen = response.split('&')[0];
             oppMove = response.split('&')[1];
             globalMoveUpdate(oppMove);
             // for updating board if opp did a promotion, then globalMoveUpdate is not enough
@@ -133,7 +134,7 @@ async function legalMoveClicked(element) {
     writeToDB(gameID, currentPosition, lastMove)
         .then(response => {
             console.log("received response: " + response);
-            oppFen = response.split('$')[0];
+            oppFen = response.split('&')[0];
             oppMove = response.split('&')[1];
             globalMoveUpdate(oppMove);
             // for updating board if opp did a promotion, then globalMoveUpdate is not enough
@@ -299,20 +300,19 @@ function setBoard(fenPosition) {
 }
 
 //the z difference is needed to prevent promotion ui from being overlapped/hidden
-function flipHTMLBoard(){
+function flipHTMLBoard(animation){
     const board = document.getElementById('board');
     const squares = document.querySelectorAll('.square');
     rotationAngle += 180;
 //    rotationAngle = (rotationAngle + 180) % 360; keeps rotation angle as either 0 or 180
 
     board.style.transform = `rotate(${rotationAngle}deg)`;
-    board.style.transition = 'transform 0.5s ease';
-
+    if (animation) board.style.transition = 'transform 0.5s ease';
     let z = 100, delta = -1;
     if (rotationAngle % 360 == 0) delta = 1;
     squares.forEach(function (square) {
         square.style.transform = `rotate(${rotationAngle}deg)`;
-        square.style.transition = 'transform 0.5s ease';
+        if (animation) square.style.transition = 'transform 0.5s ease';
         square.style.zIndex = z;
         z += delta;
     });

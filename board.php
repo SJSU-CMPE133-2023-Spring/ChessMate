@@ -39,6 +39,8 @@ if ($_GET and $_GET["gameid"] and $_GET["color"])
       (Later at Stage 2: there should be also a way to highlight the square for a hint,
           and an image of class "comment" must be shown in the right top corner of the square)
           -->
+
+
         <div class="board-column">
             <div class="grid-container-boardside">
                 <div class="enemy-panel">
@@ -55,7 +57,9 @@ if ($_GET and $_GET["gameid"] and $_GET["color"])
                         </div>
                     </div>
                 </div>
+
                 <div class="board-container">
+
                     <div class="board" id="board">
                         <div class="row">
                             <div class="white square" id="a8_parent">
@@ -346,6 +350,7 @@ if ($_GET and $_GET["gameid"] and $_GET["color"])
                             </div>
                         </div>
                     </div>
+
                 </div>
                 <div class="player-panel">
                     <div class=" grid-container-enemy-player-panel">
@@ -368,6 +373,7 @@ if ($_GET and $_GET["gameid"] and $_GET["color"])
                     </div>
                 </div>
             </div>
+
         </div>
         <div class="promotion" id="white promotion">
             <img src="pieces/white-queen.png" alt="Q">
@@ -383,11 +389,12 @@ if ($_GET and $_GET["gameid"] and $_GET["color"])
         </div>
 
         <div class="menu-column">
+        <img src="settings_icon.png" class=menu-image2 alt="button for extra settings">
+            <img src="reverse.png" id="rotate-img" class=menu-image alt="menu button rotate the board">
             <!--<div class="grid-container-option-buttons">
                     <img src="reverse.png" id="rotate-img" class=menu-image alt="menu button rotate the board">
                 </div>-->
-            <img src="settings_icon.png" class=menu-image2 alt="button for extra settings">
-            <img src="reverse.png" id="rotate-img" class=menu-image alt="menu button rotate the board">
+
             <?php
                         if ($_GET) {
                             echo '<h2>Your color is: <div id="color">' . $_GET["color"] . '</div></h2>
@@ -431,7 +438,7 @@ if ($_GET and $_GET["gameid"] and $_GET["color"])
 
         <script>
             document.getElementById('rotate-img').addEventListener('click', function () {
-                flipHTMLBoard();
+                flipHTMLBoard(false);
             });
             function myFunction1() {
                 document.getElementById("myDropdown").classList.toggle("show");
