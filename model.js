@@ -34,65 +34,85 @@ let rotationAngle = 0;
 const SUBSCRIPT_WIN = "win", SUBSCRIPT_CHECKMATE = "checkmate", SUBSCRIPT_DRAW = "draw";
 const EMPTY = 0, ENEMY = 1, ALLY = 2;
 const WHITE = 'white', BLACK = 'black';
+//Board modes:
+const BOARD_MODE_SANDBOX = 0, BOARD_MODE_ONLINE = 1;
 
 // Controller Variables
 let squareSelected = null; //if true, then clicking on a highlighted square = move;
 let pieceSelected = null;
 let promotion = '';
-
-// Model Variables
-let gameID = document.getElementById("gameID").innerHTML;
-let playerColor = document.getElementById("color").innerHTML;
-let opponent = "id of an opponent / or AI id (if we have multiple: simple/medium/pro)";
+let boardMode;
 let board;
 let currentPosition;
+let turn = true;
+let playerColor
+let gameID
 
-loadPosition(gameID).then(response=>{
-    currentPosition = response;
-//     Kevin's sandbox
-//     standard position
-//     currentPosition = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 0";
-//     castle ready position
-//     currentPosition = "r3k2r/pppb1ppp/n2pp2n/2b3q1/2B3Q1/N1BPP2N/PPP2PPP/R3K2R w KQkq - 3 7";
-//     promotion mania position
-//     currentPosition = "8/PPPPPPPP/8/k7/7K/8/pppppppp/8 w - - 0 0";
+// IMPORTANT: if player is in an active game - when he enters this piece of code - it should set
+// this board to player's current board, if player is not in an active game - this board should become
+// a sandbox.
 
-    board = setBoard(currentPosition.split(' ')[0]);
-    logBoard(board);
-    // flip ids of the html board to blacks perspective if black
-    if (playerColor === BLACK) flipHTMLBoard(false);
-    fillHTMLBoard(board, playerColor);
+// TODO: check if a player is in an active gamee; Else:
+boardMode = BOARD_MODE_SANDBOX;
+document.addEventListener("DOMContentLoaded", function(){
+    console.log("myID = "+document.getElementById("player-id").innerHTML);
 });
 
 
-//if white is first to move
-let turn = (playerColor===WHITE);
 
-//if black we have to wait for opponents move:
-if (playerColor===BLACK){
-    //wait for whites first move
-    writeToDB(gameID, currentPosition, "")
+
+// Model Variables
+if (boardMode !== BOARD_MODE_SANDBOX){
+    //this is actually different now and somehow you gotta get playerColor and gameID - another ajaxCall
+    initOnlineGame();
+}
+if (boardMode === BOARD_MODE_SANDBOX){
+    currentPosition = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 0";
+    board = setBoard(currentPosition.split(' ')[0]);
+    logBoard(board);
+    fillHTMLBoard(board, WHITE);
+}
+
+let opponent = "id of an opponent / or AI id (if we have multiple: simple/medium/pro)";
+function initOnlineGame(newGameID, newPlayerColor){
+    console.log("Started new game: gameID = "+newGameID+"; playerColor = "+newPlayerColor);
+    gameID = newGameID;
+    playerColor = newPlayerColor;
+    loadPosition(gameID).then(response=>{
+        currentPosition = response;
+        board = setBoard(currentPosition.split(' ')[0]);
+        logBoard(board);
+        // flip ids of the html board to blacks perspective if black
+        if (playerColor === BLACK) flipHTMLBoard(false);
+        fillHTMLBoard(board, playerColor);
+        turn = (playerColor===WHITE);
+    });
+    if (playerColor===BLACK){
+        //wait for whites first move
+        writeToDB(gameID, currentPosition, "")
         .then(response => {
             console.log("received response: " + response);
             oppFen = response.split('&')[0];
             oppMove = response.split('&')[1];
             globalMoveUpdate(oppMove);
             // for updating board if opp did a promotion, then globalMoveUpdate is not enough
-             board = setBoard(oppFen.split(' ')[0]);
-             fillHTMLBoard(board);
+            board = setBoard(oppFen.split(' ')[0]);
+            fillHTMLBoard(board);
         })
         .catch(error => {
             console.error(error);
             // handle the error
         });
+    }
 }
-
 // Controller Methods
 function pieceClicked(element) {
-    if (!turn) return; //uncomment this line to get turns
+
+    if (boardMode!==BOARD_MODE_SANDBOX && !turn) return; //uncomment this line to get turns
     if ((squareSelected == null) || (element.parentElement.id !== squareSelected)) {
         hideLegalMoves();
-        document.getElementById(playerColor + ' promotion').style.display = 'none';
+        if (boardMode!==BOARD_MODE_SANDBOX) document.getElementById(playerColor + ' promotion').style.display = 'none';
+
         //element.parentElement.style.background="#ffd500";
         //cut the piece from the potential id (ex. P_6 -> P);
         let piece = element.id.slice(0, 1);
@@ -101,13 +121,13 @@ function pieceClicked(element) {
         let y = 8 - element.parentElement.id.slice(1, 2);
 
         //console.log("clickedPiece(piece = " + piece + ", x = " + x + "; y = " + y + ";");
-        if (playerColor == getPieceColor(piece)) displayLegalMoves(getLegalMoves(piece, x, y));
+        if (boardMode===BOARD_MODE_SANDBOX || playerColor == getPieceColor(piece)) displayLegalMoves(getLegalMoves(piece, x, y));
         //console.log("pieceClicked is finished!");
         squareSelected = element.parentElement.id;
         pieceSelected = element.id;
     } else {
         hideLegalMoves();
-        document.getElementById(playerColor + ' promotion').style.display = 'none';
+        if (boardMode!==BOARD_MODE_SANDBOX) document.getElementById(playerColor + ' promotion').style.display = 'none';
         squareSelected = null;
     }
 }
@@ -121,30 +141,31 @@ function displayLegalMoves(legalMoves) {
 
 async function legalMoveClicked(element) {
     // presents ui if promoting a pawn and stores it globally
-    promotion = await promotePrompt(squareSelected, element.parentElement.id, playerColor);
+    if (boardMode!==BOARD_MODE_SANDBOX) promotion = await promotePrompt(squareSelected, element.parentElement.id, playerColor);
 
     //save for the ajax call:
     let lastMove = squareSelected+element.parentElement.id;
     globalMoveUpdate(lastMove);
 
-    //part of waiting for opponent's move
-    console.log("Move completed: attempt to make an ajax call with gameID = %d, current position = %s, and last move = %s", gameID, currentPosition, lastMove);
+    if (boardMode!==BOARD_MODE_SANDBOX){
+        console.log("Move completed: attempt to make an ajax call with gameID = %d, current position = %s, and last move = %s", gameID, currentPosition, lastMove);
 
-    //ajaxCall(gameID, currentPosition, lastMove);
-    writeToDB(gameID, currentPosition, lastMove)
+        //ajaxCall(gameID, currentPosition, lastMove);
+        writeToDB(gameID, currentPosition, lastMove)
         .then(response => {
             console.log("received response: " + response);
             oppFen = response.split('&')[0];
             oppMove = response.split('&')[1];
             globalMoveUpdate(oppMove);
             // for updating board if opp did a promotion, then globalMoveUpdate is not enough
-             board = setBoard(oppFen.split(' ')[0]);
-             fillHTMLBoard(board);
+            board = setBoard(oppFen.split(' ')[0]);
+            fillHTMLBoard(board);
         })
         .catch(error => {
             console.error(error);
             // handle the error
         });
+    }
     squareSelected = null;
     pieceSelected = null;
 }
@@ -159,17 +180,20 @@ function globalMoveUpdate(move) {
     fillHTMLBoard(board);
 
     // TODO: display state of game on screen, maybe as a header - states include whose turn it is and mates
-    const end = checkEndMates(board, getOppColor(playerColor));
-    if (end) {
-        console.log(end +' caused by ' + getOppColor(playerColor));
-        if (getOppColor(playerColor)===BLACK) {
-            displaySuperscript(getPieceSquare("k"), SUBSCRIPT_WIN);
-            displaySuperscript(getPieceSquare("K"), SUBSCRIPT_CHECKMATE);
-        } else {
-            displaySuperscript(getPieceSquare("K"), SUBSCRIPT_WIN);
-            displaySuperscript(getPieceSquare("k"), SUBSCRIPT_CHECKMATE);
+    if (boardMode!==BOARD_MODE_SANDBOX){
+        const end = checkEndMates(board, getOppColor(playerColor));
+        if (end) {
+            console.log(end +' caused by ' + getOppColor(playerColor));
+            if (getOppColor(playerColor)===BLACK) {
+                displaySuperscript(getPieceSquare("k"), SUBSCRIPT_WIN);
+                displaySuperscript(getPieceSquare("K"), SUBSCRIPT_CHECKMATE);
+            } else {
+                displaySuperscript(getPieceSquare("K"), SUBSCRIPT_WIN);
+                displaySuperscript(getPieceSquare("k"), SUBSCRIPT_CHECKMATE);
+            }
         }
     }
+
 
     hideLegalMoves();
     turn = !turn;
@@ -221,18 +245,27 @@ function changePieceLocationOnBoard(board, oldX, oldY, newX, newY, affectGlobal 
     }
 
     // promote a pawn to a queen TODO: user can choose to promote to other pieces
-    if (oldBoard[oldY][oldX] == 'P' && newY == 0) {
-        board[newY][newX] = 'Q';
-        if (affectGlobal && playerColor == WHITE) {
-            board[newY][newX] = promotion;
-            promotion = '';
+    if (boardMode===BOARD_MODE_SANDBOX){
+        if (oldBoard[oldY][oldX] == 'P' && newY == 0) {
+            board[newY][newX] = 'Q';
         }
-    }
-    if (oldBoard[oldY][oldX] == 'p' && newY == 7) {
-        board[newY][newX] = 'q';
-        if (affectGlobal && playerColor == BLACK) {
-            board[newY][newX] = promotion;
-            promotion = '';
+        if (oldBoard[oldY][oldX] == 'p' && newY == 7) {
+            board[newY][newX] = 'q';
+        }
+    } else {
+        if (oldBoard[oldY][oldX] == 'P' && newY == 0) {
+            board[newY][newX] = 'Q';
+            if (affectGlobal && playerColor == WHITE) {
+                board[newY][newX] = promotion;
+                promotion = '';
+            }
+        }
+        if (oldBoard[oldY][oldX] == 'p' && newY == 7) {
+            board[newY][newX] = 'q';
+            if (affectGlobal && playerColor == BLACK) {
+                board[newY][newX] = promotion;
+                promotion = '';
+            }
         }
     }
 
@@ -964,4 +997,92 @@ function loadPosition(gameID){
 
 }
 
-// this should be in some static initial call
+//game start logic
+async function startGameButtonOnClick() {
+    // Switch container view
+    switchContainerView("initial-menu", "waiting-game-menu");
+
+    // Get player ID
+    const playerId = document.getElementById('player-id').innerHTML;
+    let storedGameId;
+
+    // Make AJAX call to createOrEnterLobby.php
+    try {
+        const response = await fetch(`DBActions/createOrEnterLobby.php?id=${playerId}`);
+        const result = await response.text();
+        if (result === null) {
+            console.log("Lobby is already created!!!");
+            return;
+        }
+
+        const [newGameId, lobbyStatus, newPlayerColor] = result.split('&');
+        console.log("Response from createOrEnterLobby:", result);
+
+        // Declare a variable to store the timeout ID
+        storedGameId = newGameId;
+        let updateGameStatusTimeout;
+
+        // Function to cancel the waiting process
+        async function cancelWaiting() {
+            // Stop the updateGameStatus loop
+            clearTimeout(updateGameStatusTimeout);
+
+            // Make AJAX call to delete the created waiting lobby
+            try {
+                await fetch(`DBActions/deleteLobby.php?id=${newGameId}`);
+            } catch (error) {
+                console.error('Error during cancelWaiting fetch:', error);
+            }
+            switchContainerView("waiting-game-menu","initial-menu");
+        }
+
+        // Attach cancelWaiting to the cancel button's onclick event
+        document.getElementById('cancel-button').onclick = cancelWaiting;
+
+        // Function to update the game status
+        const updateGameStatus = (async function loop() {
+            try {
+                const response = await fetch(`DBActions/getLobbyStatus.php?playerId=${playerId}&gameId=${storedGameId}`);
+                const status = await response.text();
+                const [newGameId, lobbyStatus, newPlayerColor] = status.split('&');
+                console.log("Response from getLobbyStatus:", status);
+                console.log(lobbyStatus);
+                if (lobbyStatus === 'ready') {
+                    // Stop the updateGameStatus loop and start the game
+
+                    clearTimeout(updateGameStatusTimeout);
+                    startGame(newGameId, newPlayerColor);
+                } else {
+                    // Schedule the next updateGameStatus call
+                    updateGameStatusTimeout = setTimeout(loop, 1000); // Adjust the delay as needed
+                }
+            } catch (error) {
+                console.error('Error during updateGameStatus fetch:', error);
+            }
+        });
+
+        if (lobbyStatus === 'waiting') {
+            // Call updateGameStatus in a loop with a delay
+            updateGameStatus();
+
+        } else if (lobbyStatus === 'ready') {
+            // Start the game if the lobby is found
+            startGame(newGameId, newPlayerColor);
+        }
+    } catch (error) {
+        console.error('Error during createOrEnterLobby fetch:', error);
+    }
+}
+
+function startGame(gameID, newPlayerColor) {
+    boardMode = BOARD_MODE_ONLINE;
+    initOnlineGame(gameID, newPlayerColor);
+    switchContainerView("waiting-game-menu", "online-game-menu");
+    console.log("start game!!!");
+}
+
+function switchContainerView(hideID, showID) {
+    document.getElementById(hideID).classList.add('hidden');
+    document.getElementById(showID).classList.remove('hidden');
+}
+

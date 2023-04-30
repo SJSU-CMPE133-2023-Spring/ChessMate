@@ -7,7 +7,7 @@ if ($_GET and $_GET["id"]){
     $opponent = $_GET["opponent"];
     echo $opponent;
     $gameID = $db->enterOrStartGame($_GET["id"],$_GET["opponent"]);
-    while ($db->getGameStatus($gameID) == "waiting") sleep(1);
+    while ($db->getGameStatus($gameID) == "waiting") sleep(10);
     $color = $db->getPlayerColor($gameID, $_GET["id"]);
 
     if ($color == -1) {

@@ -26,7 +26,7 @@ if ($_GET and $_GET["gameid"] and $_GET["color"])
     <div class="grid-container-whole">
         <div class="leftmost-column">
             <a href="board.php">
-                <img style="width:4vw; height:6vh;" src="Chessmate_logo.PNG" class="logo" alt="chessmate logo">
+
             </a>
         </div>
         <!-- TODO: replace the table below with a structure of divs (on a separate branch).
@@ -394,17 +394,46 @@ if ($_GET and $_GET["gameid"] and $_GET["color"])
             <img src="pieces/black-knight.png" alt="n">
         </div>
 
-        <div class="menu-column" id="menu-column">
-                    <!--<div class="grid-container-option-buttons">
-                    <img src="reverse.png" id="rotate-img" class=menu-image alt="menu button rotate the board">
-                </div>-->
+        <div class="menu-column flex" id="menu-column">
+            <div class="login-container">
+                <p>Anon123</p>
+                <button>Log in</button>
+                <button>Sign up</button>
+            </div>
+            <img src="Chessmate_logo.PNG" class="logo" alt="chessmate logo">
+            <div class="dynamic-menu-container">
+                <div class="dynamic-menu-group" id="initial-menu">
+                    <button class="dynamic-menu-element" id="start-classic">Classic Match</button>
+                    <button class="dynamic-menu-element" id="start-ranked">Ranked Game</button>
+                    <button class="dynamic-menu-element" id="start-engine">vs Computer</button>
+                    <button class="dynamic-menu-element">Leaderboard</button>
+                </div>
+                <div class="dynamic-menu-group hidden" id="leaderboard-menu">
+                    <button class="back-button">back</button>
+                    <p>Leaderboard</p>
+                    <!-- ? Leaderboard somehow: Like a scrollable list in a container -->
+                </div>
+                <div class="dynamic-menu-group hidden" id="online-game-menu">
+                    <button class="dynamic-menu-element">Resign</button>
+                    <button class="dynamic-menu-element">Offer Draw</button>
+                    <p>Chat</p>
+                    <!-- ? Chat somehow: Like a scrollable list in a container -->
+                </div>
+                <div class="dynamic-menu-group hidden" id="engine-game-menu">
+                    <button class="dynamic-menu-element">Resign</button>
+                    <button class="dynamic-menu-element">Offer Draw</button>
+                    <button class="dynamic-menu-element">Get Hint</button>
+                    <button class="dynamic-menu-element">Change Move</button>
+                </div>
+                <div class="dynamic-menu-group hidden" id="waiting-game-menu">
+                    <button class="dynamic-menu-element" id="cancel-button">Cancel</button>
+                    <!-- animation <img gif>-->
 
-            <?php
-                        if ($_GET) {
-                            echo '<h2>Your color is: <div id="color">' . $_GET["color"] . '</div></h2>
-                        <h2>Game ID: <div id="gameID">' . $_GET["gameid"] . '</div></h2>';
-                        }
-                        ?>
+                </div>
+
+            </div>
+
+
             <!--
             <div class="menu-container">
                 <div class="dropdown">
@@ -441,47 +470,60 @@ if ($_GET and $_GET["gameid"] and $_GET["color"])
 
 
         <script>
-            document.getElementById('rotate-img').addEventListener('click', function () {
-                flipHTMLBoard(true);
-            });
+        document.getElementById('rotate-img').addEventListener('click', function () {
+            flipHTMLBoard(true);
+        });
         document.getElementById('show-img').addEventListener('click', function () {
             toggleContainer();
         });
-            function toggleContainer() {
-                var container = document.getElementById("menu-column");
+        document.getElementById('start-classic').addEventListener('click', function(){
+            startGameButtonOnClick();
+        });
+        function toggleContainer() {
+            let container = document.getElementById("menu-column");
+
+                container.classList.toggle("flex");
                 container.classList.toggle("hidden");
-                container.classList.toggle("visible");
-            }
-            function myFunction1() {
-                document.getElementById("myDropdown").classList.toggle("show");
-            };
 
-            function myFunction2() {
-                document.getElementById("myDropdown2").classList.toggle("show");
-            };
+        }
+        function myFunction1() {
+            document.getElementById("myDropdown").classList.toggle("show");
+        }
 
-            function myFunction3() {
-                document.getElementById("myDropdown3").classList.toggle("show");
-            };
+        function myFunction2() {
+            document.getElementById("myDropdown2").classList.toggle("show");
+        };
 
-            // Close the dropdown if the user clicks outside of it
-            window.onclick = function (event) {
-                if (!event.target.matches('.dropbtn')) {
-                    var dropdowns = document.getElementsByClassName("dropdown-content");
-                    var i;
-                    for (i = 0; i < dropdowns.length; i++) {
-                        var openDropdown = dropdowns[i];
-                        if (openDropdown.classList.contains('show')) {
-                            openDropdown.classList.remove('show');
-                        }
+        function myFunction3() {
+            document.getElementById("myDropdown3").classList.toggle("show");
+        };
+
+        // Close the dropdown if the user clicks outside of it
+        window.onclick = function (event) {
+            if (!event.target.matches('.dropbtn')) {
+                var dropdowns = document.getElementsByClassName("dropdown-content");
+                var i;
+                for (i = 0; i < dropdowns.length; i++) {
+                    var openDropdown = dropdowns[i];
+                    if (openDropdown.classList.contains('show')) {
+                        openDropdown.classList.remove('show');
                     }
                 }
             }
+        }
+
+
+
         </script>
         <script src="model.js">
         </script>
     </div>
-
+<div class="hidden" id="player-id">
+    <?php echo rand();    ?>
+</div>
+<div class="hidden" id="queue-status">
+    <?php echo "none";   ?>
+</div>
 </body>
 
 </html>
