@@ -80,7 +80,18 @@ body{
   border-width: 3px;
   border-color: black;
 }
+label {
+  display: inline-block;
+  width: 100%;
+  text-align: left;
+  padding-left: 10px;
+}
 
+
+input {
+  display: inline-block;
+  width: 100%;
+}
 
 .piece-img {
   max-width: 100%;
@@ -172,14 +183,13 @@ body{
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100%;
+
 }
 .dynamic-menu-group{
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 10px;
   width: 100%;
-  height: 100%;
   box-sizing: border-box;
   padding: 20px;
 }
@@ -191,6 +201,17 @@ body{
   background-color: lightgray;
   border-radius: 5px;
   padding: 10px;
+  box-sizing: border-box;
+  text-align: center;
+}
+.dynamic-menu-back-button{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: lightgray;
+  border-radius: 5px;
+  padding: 5px;
+  width: 60%;
   box-sizing: border-box;
   text-align: center;
 }
@@ -394,14 +415,27 @@ footer{
     background-color: #d6d6d6;
     border-radius: 4px;
 }
+.login-register-button{}
+
+.label-field-container{
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.label-container, .input-container {
+  width: 50%;
+}
 
 .hidden {
   display: none;
 }
 
-  .visible {
+.visible {
   display: block;
 }
+
 .flex{
   display: flex;
 }
+

@@ -1084,5 +1084,17 @@ function startGame(gameID, newPlayerColor) {
 function switchContainerView(hideID, showID) {
     document.getElementById(hideID).classList.add('hidden');
     document.getElementById(showID).classList.remove('hidden');
+
+    //hide/show login/registration container between scenes
+    if (hideID === "initial-menu"){
+        $(document).ready(function() {
+            $(".login-register-button").css("visibility", "hidden");
+        });
+    }
+    if (showID === "initial-menu"){
+        $(document).ready(function() {
+            $(".login-register-button").css("visibility", "visible");
+        });
+    }
 }
 

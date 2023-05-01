@@ -12,6 +12,8 @@ if ($_GET and $_GET["gameid"] and $_GET["color"])
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chessmate</title>
     <link rel="stylesheet" href="chess.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
     <!--
     <a href="board.php">
         <img src="Chessmate_logo.PNG" class="logo" alt="chessmate logo">
@@ -29,18 +31,6 @@ if ($_GET and $_GET["gameid"] and $_GET["color"])
 
             </a>
         </div>
-        <!-- TODO: replace the table below with a structure of divs (on a separate branch).
-      Stage 1:
-      * Every div should be a class of "square" or something like that,
-      * they should have fixed sizes or scale
-      * they should display an image of class "piece" in the center, "legal-move" above anything else,
-      * the board coloring should be made with a js function color() that takes 1 boolean argument
-          where 1 is white and 0 is black (something like "boolean drawFromWhitePerspective").
-      (Later at Stage 2: there should be also a way to highlight the square for a hint,
-          and an image of class "comment" must be shown in the right top corner of the square)
-          -->
-
-
         <div class="board-column">
             <div class="grid-container-boardside">
                 <div class="enemy-panel">
@@ -395,10 +385,10 @@ if ($_GET and $_GET["gameid"] and $_GET["color"])
         </div>
 
         <div class="menu-column flex" id="menu-column">
-            <div class="login-container">
+            <div class="login-container" id="login-container">
                 <p>Anon123</p>
-                <button>Log in</button>
-                <button>Sign up</button>
+                <button onclick="switchContainerView('initial-menu', 'login-menu')" class="login-register-button">Log in</button>
+                <button onclick="switchContainerView('initial-menu', 'registration-menu')" class="login-register-button">Sign up</button>
             </div>
             <img src="Chessmate_logo.PNG" class="logo" alt="chessmate logo">
             <div class="dynamic-menu-container">
@@ -409,7 +399,7 @@ if ($_GET and $_GET["gameid"] and $_GET["color"])
                     <button class="dynamic-menu-element">Leaderboard</button>
                 </div>
                 <div class="dynamic-menu-group hidden" id="leaderboard-menu">
-                    <button class="back-button">back</button>
+                    <button class="back-button" onclick="switchContainerView('leaderboard-menu', 'initial-menu')">back</button>
                     <p>Leaderboard</p>
                     <!-- ? Leaderboard somehow: Like a scrollable list in a container -->
                 </div>
@@ -430,6 +420,40 @@ if ($_GET and $_GET["gameid"] and $_GET["color"])
                     <!-- animation <img gif>-->
 
                 </div>
+                <div class="dynamic-menu-group hidden" id="login-menu">
+                    <button class="dynamic-menu-back-button" id="back-button" onclick="switchContainerView('login-menu', 'initial-menu')">Back</button>
+
+                    <div class="dynamic-menu-element">Log in</div>
+                    <form>
+                        <div class="dynamic-menu-element">
+                            <div class="label-field-container">
+                                <div class="label-container">
+                                    <label for="example-input">Login:</label>
+                                </div>
+                                <div class="input-container">
+                                    <input type="text" id="example-input" name="example-input">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="dynamic-menu-element">
+                            <div class="label-field-container">
+                                <div class="label-container">
+                                    <label for="example-input">Password:</label>
+                                </div>
+                                <div class="input-container">
+                                    <input type="text" id="example-input" name="example-input">
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+
+                </div>
+                <div class="dynamic-menu-group hidden" id="registration-menu">
+                    <button class="dynamic-menu-back-button" id="back-button" onclick="switchContainerView('registration-menu', 'initial-menu')">Back</button>
+                    <!-- fields and labels + button (actually a form) -->
+
+                </div>
+
 
             </div>
 
@@ -497,6 +521,7 @@ if ($_GET and $_GET["gameid"] and $_GET["color"])
         function myFunction3() {
             document.getElementById("myDropdown3").classList.toggle("show");
         };
+
 
         // Close the dropdown if the user clicks outside of it
         window.onclick = function (event) {
