@@ -424,27 +424,29 @@ if ($_GET and $_GET["gameid"] and $_GET["color"])
                     <button class="dynamic-menu-back-button" id="back-button" onclick="switchContainerView('login-menu', 'initial-menu')">Back</button>
 
                     <div class="dynamic-menu-element">Log in</div>
-                    <form>
+                    <form id="login-form">
                         <div class="dynamic-menu-element">
                             <div class="label-field-container">
                                 <div class="label-container">
-                                    <label for="example-input">Login:</label>
+                                    <label style="padding-left: 0" for="login">Login:</label>
                                 </div>
                                 <div class="input-container">
-                                    <input type="text" id="example-input" name="example-input">
+                                    <input type="text" id="login" name="login">
                                 </div>
                             </div>
                         </div>
                         <div class="dynamic-menu-element">
                             <div class="label-field-container">
                                 <div class="label-container">
-                                    <label for="example-input">Password:</label>
+                                    <label style="padding-left: 0" for="password">Password:</label>
                                 </div>
                                 <div class="input-container">
-                                    <input type="text" id="example-input" name="example-input">
+                                    <input type="password" id="password" name="password">
                                 </div>
                             </div>
+
                         </div>
+                        <button type="submit" class="dynamic-menu-element" style="width: 100%">Submit</button>
                     </form>
 
                 </div>
@@ -536,6 +538,32 @@ if ($_GET and $_GET["gameid"] and $_GET["color"])
                 }
             }
         }
+         $(document).ready(function() {
+             $('#login-form').on('submit', function(e) {
+                 e.preventDefault();
+                 const login = $('#login').val();
+                 const password = $('#password').val();
+
+                 $.ajax({
+                     url: 'your-server-url',
+                     method: 'POST',
+                     data: {
+                         login: login,
+                         password: password
+                     },
+                     success: function(response) {
+                         if (isNaN(response)) {
+                             $('.error-message').text(response).show();
+                         } else {
+                             window.location.href = 'your-redirect-page-url';
+                         }
+                     },
+                     error: function(xhr, status, error) {
+                         console.error("AJAX request error:", error);
+                     }
+                 });
+             });
+         });
 
 
 

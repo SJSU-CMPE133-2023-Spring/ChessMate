@@ -374,6 +374,11 @@ input {
   height: 30vh;
 
 }
+
+.error-message {
+  color: red;
+  display: none;
+}
 /* UNUSED
 
 
