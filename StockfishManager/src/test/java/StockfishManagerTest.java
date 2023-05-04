@@ -27,7 +27,7 @@ class StockfishManagerTest {
     @Test
     public void testMakeReport(){
         StockfishManager manager = new StockfishManager();
-        String[][] analysis = manager.makeReport(69);
+        String[][] analysis = manager.makeReport(11);
         for (String[] moveAnalysis : analysis) {
             System.out.println("FEN Position: " + moveAnalysis[0]);
             System.out.println("Last Move: " + moveAnalysis[1]);

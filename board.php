@@ -1,8 +1,5 @@
 <?php
 require_once("DBActions/DataBaseActions.php");
-if ($_GET and $_GET["gameid"] and $_GET["color"])
-    ;
-
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -423,8 +420,9 @@ if ($_GET and $_GET["gameid"] and $_GET["color"])
                 <div class="dynamic-menu-group hidden" id="login-menu">
                     <button class="dynamic-menu-back-button" id="back-button" onclick="switchContainerView('login-menu', 'initial-menu')">Back</button>
 
-                    <div class="dynamic-menu-element">Log in</div>
+                    <div class="dynamic-menu-element" style="padding: 5px">Log in</div>
                     <form id="login-form">
+                    <input type="hidden" id="operation" value="login" name="operation">
                         <div class="dynamic-menu-element">
                             <div class="label-field-container">
                                 <div class="label-container">
@@ -444,15 +442,41 @@ if ($_GET and $_GET["gameid"] and $_GET["color"])
                                     <input type="password" id="password" name="password">
                                 </div>
                             </div>
-
                         </div>
-                        <button type="submit" class="dynamic-menu-element" style="width: 100%">Submit</button>
+                        <div class="error-message"></div>
+                        <button type="submit" class="dynamic-menu-element" style="width: 100%">Log in</button>
                     </form>
 
                 </div>
                 <div class="dynamic-menu-group hidden" id="registration-menu">
                     <button class="dynamic-menu-back-button" id="back-button" onclick="switchContainerView('registration-menu', 'initial-menu')">Back</button>
-                    <!-- fields and labels + button (actually a form) -->
+                     <div class="dynamic-menu-element" style="padding: 5px">Sign up</div>
+                    <form id="registration-form">
+                        <input type="hidden" id="operation1" value="register" name="operation">
+                        <div class="dynamic-menu-element">
+                            <div class="label-field-container">
+                                <div class="label-container">
+                                    <label style="padding-left: 0" for="login">Login:</label>
+                                </div>
+                                <div class="input-container">
+                                    <input type="text" id="login1" name="login">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="dynamic-menu-element">
+                            <div class="label-field-container">
+                                <div class="label-container">
+                                    <label style="padding-left: 0" for="password">Password:</label>
+                                </div>
+                                <div class="input-container">
+                                    <input type="password" id="password1" name="password">
+                                </div>
+
+                            </div>
+                        </div>
+                        <div class="error-message"></div>
+                        <button type="submit" class="dynamic-menu-element" style="width: 100%">Register</button>
+                    </form>
 
                 </div>
 
@@ -503,7 +527,13 @@ if ($_GET and $_GET["gameid"] and $_GET["color"])
             toggleContainer();
         });
         document.getElementById('start-classic').addEventListener('click', function(){
-            startGameButtonOnClick();
+            startClassicButtonOnClick();
+        });
+        document.getElementById('start-ranked').addEventListener('click', function(){
+            startRankedButtonOnClick();
+        });
+        document.getElementById('start-engine').addEventListener('click', function(){
+            startEngineButtonOnClick();
         });
         function toggleContainer() {
             let container = document.getElementById("menu-column");
@@ -539,31 +569,60 @@ if ($_GET and $_GET["gameid"] and $_GET["color"])
             }
         }
          $(document).ready(function() {
-             $('#login-form').on('submit', function(e) {
-                 e.preventDefault();
-                 const login = $('#login').val();
-                 const password = $('#password').val();
+            $('#login-form').on('submit', function(e) {
+                e.preventDefault();
+                const login = $('#login').val();
+                const password = $('#password').val();
 
-                 $.ajax({
-                     url: 'your-server-url',
-                     method: 'POST',
-                     data: {
-                         login: login,
-                         password: password
-                     },
-                     success: function(response) {
-                         if (isNaN(response)) {
-                             $('.error-message').text(response).show();
-                         } else {
-                             window.location.href = 'your-redirect-page-url';
-                         }
-                     },
-                     error: function(xhr, status, error) {
-                         console.error("AJAX request error:", error);
-                     }
-                 });
-             });
-         });
+                $.ajax({
+                    url: 'DBActions/login_register.php',
+                    method: 'POST',
+                    data: {
+                        login: login,
+                        password: password,
+                        operation: 'login'
+                    },
+                    success: function(response) {
+                        if (isNaN(response)) {
+                            $('.error-message').text(response).show();
+                        } else {
+                            window.location.href = 'board.php?id='+response;
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error("AJAX request error:", error);
+                    }
+                });
+            });
+        });
+        $(document).ready(function() {
+            $('#login-register-form').on('submit', function(e) {
+                e.preventDefault();
+                const login = $('#login').val();
+                const password = $('#password').val();
+                const operation = $('#operation').val();
+                $.ajax({
+                    url: 'DBActions/login_register.php',
+                    method: 'POST',
+                    data: {
+                        login: login,
+                        password: password,
+                        operation: operation
+                    },
+                    success: function(response) {
+                        if (isNaN(response)) {
+                            $('.error-message').text(response).show();
+                        } else {
+                            window.location.href = 'board.php?id='+response;
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error("AJAX request error:", error);
+                    }
+                });
+            });
+        });
+
 
 
 
@@ -572,7 +631,10 @@ if ($_GET and $_GET["gameid"] and $_GET["color"])
         </script>
     </div>
 <div class="hidden" id="player-id">
-    <?php echo rand();    ?>
+    <?php
+    if ($_GET){
+        echo $_GET['id'];
+    } else echo rand();?>
 </div>
 <div class="hidden" id="queue-status">
     <?php echo "none";   ?>

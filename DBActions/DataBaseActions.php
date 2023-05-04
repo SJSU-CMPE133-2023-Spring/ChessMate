@@ -14,6 +14,7 @@ class DataBaseActions extends Exception
     public $PLAYER_STATUS_OFFLINE = "offline";
     public $PLAYER_STATUS_ONLINE = "online";
     public $PLAYER_STATUS_PLAYING = "playing";
+    public $WRONG_PASSWORD_MESSAGE = "Wrong login or password! Please check the spelling.";
     public function __construct()
     {
 
@@ -59,7 +60,9 @@ class DataBaseActions extends Exception
             `white` varchar(255) NOT NULL,
             `black` varchar(255) NOT NULL,
             `status` varchar(255) NOT NULL,
-            `position` varchar(255) NOT NULL, 
+            `type` varchar(255) NOT NULL,
+            `position` varchar(255) NOT NULL,
+            `captured` varchar(255) NOT NULL,
             `move_history` varchar(255) NOT NULL, 
             `date` varchar(255) NOT NULL) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;";
         $results = mysqli_query($this->conn, $sql);
@@ -94,18 +97,18 @@ class DataBaseActions extends Exception
     }
 
     public function login($login, $password){
-        $sql = "SELECT * FROM accounts WHERE login=$login and password=$password";
+        $sql = "SELECT * FROM accounts WHERE (login='$login' AND password='$password')";
         $result = mysqli_query($this->conn, $sql);
         $row = mysqli_fetch_object($result);
-        if ($row!==null)return true;
-        else return false;
+        if ($row!=null)return $row->id;
+        else return $this->WRONG_PASSWORD_MESSAGE;
     }
-    public function startMatch($player1_id, $player2_id, $gameStatus){
+    public function startMatch($player1_id, $player2_id, $gameStatus, $type){
         $date = date("Y-m-d h:i:sa");
 
 
-        $sql = "INSERT INTO `matches` (`white`, `black`, status,`position`, `move_history`, `date`) 
-VALUES ('$player1_id', '$player2_id', '$gameStatus', '$this->INITIAL_POSITION', '', '$date');";
+        $sql = "INSERT INTO `matches` (`white`, `black`, status,`position`, `move_history`, `date`, `captured`,`type`)
+VALUES ('$player1_id', '$player2_id', '$gameStatus', '$this->INITIAL_POSITION', '', '$date','', '$type');";
         $results = mysqli_query($this->conn, $sql);
 
         //update players's statuses:
@@ -149,6 +152,12 @@ VALUES ('$player1_id', '$player2_id', '$gameStatus', '$this->INITIAL_POSITION', 
         $row = mysqli_fetch_object($result);
         return $row->position;
     }
+    public function getCaptured($id){
+        $sql = "SELECT * FROM matches WHERE id=$id";
+        $result = mysqli_query($this->conn, $sql);
+        $row = mysqli_fetch_object($result);
+        return $row->captured;
+    }
 
     public function getLastMove($id): string
     {
@@ -162,17 +171,22 @@ VALUES ('$player1_id', '$player2_id', '$gameStatus', '$this->INITIAL_POSITION', 
     }
 
 
-    public function enterOrStartGame($playerID, $opponent){
+    public function enterOrStartGame($playerID, $type){
 
         $randBool = (bool) mt_rand(0, 1);
-        if ($opponent == "online"){
-            //online opponent
-            return $this->enterOrStartOnlineGame($playerID);
-        } else {
+        if ($type == "classic"){
+            // online opponent
+            return $this->enterOrStartOnlineGame($playerID, $type);
+        }
+        if ($type == "ranked"){
+            // TODO: make this code make a ranked game
+            return $this->enterOrStartOnlineGame($playerID, $type);
+        }
+        if ($type == "engine"){
             // engine opponent
 
-            if ($randBool) $this->startMatch($playerID, "engine", "waiting_engine");
-            else  $this->startMatch("engine", $playerID, "waiting_engine");
+            if ($randBool) $this->startMatch($playerID, "engine", "waiting_engine", $type);
+            else  $this->startMatch("engine", $playerID, "waiting_engine", $type);
             $sql = "SELECT * FROM matches WHERE status='$this->STATUS_WAITING_ENGINE' AND (white = $playerID OR black = $playerID)";
             $result = mysqli_query($this->conn, $sql);
             $row = mysqli_fetch_object($result);
@@ -180,14 +194,14 @@ VALUES ('$player1_id', '$player2_id', '$gameStatus', '$this->INITIAL_POSITION', 
         }
 
     }
-    public function enterOrStartOnlineGame($playerID){
+    public function enterOrStartOnlineGame($playerID, $type){
         $randBool = (bool) mt_rand(0, 1);
         $sql = "SELECT * FROM matches WHERE status='$this->STATUS_WAITING_OPPONENT'";
         $result = mysqli_query($this->conn, $sql);
         $row = mysqli_fetch_object($result);
         if ($row == null){
             //no waiting lobbies - create one
-            $this->startMatch($playerID, "", $this->STATUS_WAITING_OPPONENT);
+            $this->startMatch($playerID, "", $this->STATUS_WAITING_OPPONENT, $type);
             $result = mysqli_query($this->conn, $sql);
             $row = mysqli_fetch_object($result);
         } else {

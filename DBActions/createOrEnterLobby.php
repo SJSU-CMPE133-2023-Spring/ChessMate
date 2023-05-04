@@ -6,8 +6,8 @@ $db = new DataBaseActions();
 if($_GET){
     //make find match logic
     $playerID = $_GET['id'];
-    
-    $gameID = $db->enterOrStartOnlineGame($playerID);
+    $gameType = $_GET['type'];
+    $gameID = $db->enterOrStartGame($playerID, $gameType);
     if ($gameID===null) {
         echo "error";
         return;

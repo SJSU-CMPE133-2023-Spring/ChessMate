@@ -998,7 +998,16 @@ function loadPosition(gameID){
 }
 
 //game start logic
-async function startGameButtonOnClick() {
+function startClassicButtonOnClick(){
+    startGameButtonOnClick("classic");
+}
+function startRankedButtonOnClick(){
+    startGameButtonOnClick("ranked");
+}
+function startEngineButtonOnClick(){
+    startGameButtonOnClick("engine");
+}
+async function startGameButtonOnClick(gameType) {
     // Switch container view
     switchContainerView("initial-menu", "waiting-game-menu");
 
@@ -1008,7 +1017,7 @@ async function startGameButtonOnClick() {
 
     // Make AJAX call to createOrEnterLobby.php
     try {
-        const response = await fetch(`DBActions/createOrEnterLobby.php?id=${playerId}`);
+        const response = await fetch(`DBActions/createOrEnterLobby.php?id=${playerId}&type=${gameType}`);
         const result = await response.text();
         if (result === null) {
             console.log("Lobby is already created!!!");

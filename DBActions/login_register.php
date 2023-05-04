@@ -3,12 +3,13 @@
 require_once('DataBaseActions.php');
 $db = new DataBaseActions();
 
-if($_GET){
+if($_POST){
     //make find match logic
-    $login = $_GET['login'];
-    $password = $_GET['password'];
-    $operation = $_GET['operation'];
-    if ($operation==="login") return $db->login($login, $password);
-    else $db->register($login, $password);
+    $login = $_POST['login'];
+    $password = $_POST['password'];
+    $operation = $_POST['operation'];
+
+    if ($operation==="login") echo $db->login($login, $password);
+    else echo $db->register($login, $password);
        
 } else echo "error";
