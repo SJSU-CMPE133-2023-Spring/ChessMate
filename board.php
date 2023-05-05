@@ -399,7 +399,7 @@ if ($_GET and $_GET["gameid"] and $_GET["color"])
             <img src="pieces/black-knight.png" alt="n">
         </div>
 
-        <div class="menu-column">
+        <div class="menu-column" id="menu-column">
                     <!--<div class="grid-container-option-buttons">
                     <img src="reverse.png" id="rotate-img" class=menu-image alt="menu button rotate the board">
                 </div>-->
@@ -449,11 +449,14 @@ if ($_GET and $_GET["gameid"] and $_GET["color"])
             document.getElementById('rotate-img').addEventListener('click', function () {
                 flipHTMLBoard(true);
             });
-            document.getElementById('show-img').addEventListener('click', function () {
+        document.getElementById('show-img').addEventListener('click', function () {
+            toggleContainer();
+        });
+            function toggleContainer() {
                 var container = document.getElementById("menu-column");
                 container.classList.toggle("hidden");
                 container.classList.toggle("visible");
-            });
+            }
             function myFunction1() {
                 document.getElementById("myDropdown").classList.toggle("show");
             };
