@@ -52,7 +52,9 @@ class DataBaseActions extends Exception
             `password` VARCHAR(255) NOT NULL,
             `status` VARCHAR(255) NOT NULL,
             `wins` VARCHAR(255) NOT NULL, 
-            `loses` VARCHAR(255) NOT NULL, 
+            `loses` VARCHAR(255) NOT NULL,
+            `rating` VARCHAR(255) NOT NULL,
+            `icon` VARCHAR(255) NOT NULL,
             `friends` VARCHAR(255) NOT NULL) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;";
         $results = mysqli_query($this->conn, $sql);
         $sql = "CREATE TABLE IF NOT EXISTS `matches` (
@@ -86,15 +88,24 @@ class DataBaseActions extends Exception
 
         //Potential way to enter initial data to the table
 
-        $sql = "INSERT INTO `accounts` (`login`, `password`, `status`, `wins`,`loses`, `friends` ) VALUES ('Spect', 'pass','$this->PLAYER_STATUS_OFFLINE', '999', '111', '? - list of IDs?');";
+        $sql = "INSERT INTO `accounts` (`login`, `password`, `status`, `wins`,`loses`, `rating`,`icon`, `friends` ) VALUES ('Mike', 'pass','$this->PLAYER_STATUS_OFFLINE', '999', '111', '1000','img-1.png', '? - list of IDs?');";
         $results = mysqli_query($this->conn, $sql);
 
     }
-    public function register($login, $password){
-        $sql = "INSERT INTO `accounts` (`login`, `password`, `status`, `wins`,`loses`, `friends` ) VALUES ($login, $password,$this->PLAYER_STATUS_ONLINE, '0', '0', '');";
+    public function accountExists($login){
+        $sql = "SELECT * FROM accounts WHERE login='$login'";
         $result = mysqli_query($this->conn, $sql);
-
+        $row = mysqli_fetch_object($result);
+        if ($row!=null)return true;
+        else return false;
     }
+    public function register($login, $password){
+        if($this->accountExists($login)) return false;
+        $sql = "INSERT INTO `accounts` (`login`, `password`, `status`, `wins`,`loses`, `rating`,`icon`, `friends` ) VALUES ('$login', '$password','$this->PLAYER_STATUS_ONLINE', '0', '0', '500','img-2.png', '');";
+        $result = mysqli_query($this->conn, $sql);
+        return true;
+    }
+
 
     public function login($login, $password){
         $sql = "SELECT * FROM accounts WHERE (login='$login' AND password='$password')";
@@ -110,10 +121,6 @@ class DataBaseActions extends Exception
         $sql = "INSERT INTO `matches` (`white`, `black`, status,`position`, `move_history`, `date`, `captured`,`type`)
 VALUES ('$player1_id', '$player2_id', '$gameStatus', '$this->INITIAL_POSITION', '', '$date','', '$type');";
         $results = mysqli_query($this->conn, $sql);
-
-        //update players's statuses:
-        //if($player1_id < 100) $this->changePlayerStatus($player1_id, $this->PLAYER_STATUS_PLAYING);
-        //if($player2_id < 100) $this->changePlayerStatus($player2_id, $this->PLAYER_STATUS_PLAYING);
     }
 
     public function makeMove($gameID, $newPosition, $lastMove){ //actually this can be something like DBRequest with request id: 1 for makeMove, 2 for give a hint, etc.
@@ -220,6 +227,25 @@ VALUES ('$player1_id', '$player2_id', '$gameStatus', '$this->INITIAL_POSITION', 
             else  $this->updateGame($gameID, $player2, $player1);
         }
         return $row->id;
+    }
+
+    //returns data for the profiles in the following order: White's name&rating&icon and then the same data for black to split in array with (&).
+    public function getGameData($gameID){
+        $sql = "SELECT * FROM matches WHERE id='$gameID'";
+        $result = mysqli_query($this->conn, $sql);
+        $row = mysqli_fetch_object($result);
+        return $this->getPlayerNameRatingIcon($row->white)."&".$this->getPlayerNameRatingIcon($row->black);
+    }
+
+    //returns Players Name, Rating and Icon separated by "&"
+    public function getPlayerNameRatingIcon($playerID){
+        if ($playerID=="engine") return "Stockfish Engine&???&stockfish.png";
+        if ($playerID>100) return "Guest&500&guest.png";
+
+        $sql = "SELECT * FROM accounts WHERE id='$playerID'";
+        $result = mysqli_query($this->conn, $sql);
+        $row = mysqli_fetch_object($result);
+        return $row->login."&".$row->rating."&".$row->icon;
     }
 
     public function getGameStatus($id){

@@ -10,13 +10,6 @@ require_once("DBActions/DataBaseActions.php");
     <title>Chessmate</title>
     <link rel="stylesheet" href="chess.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-
-    <!--
-    <a href="board.php">
-        <img src="Chessmate_logo.PNG" class="logo" alt="chessmate logo">
-    </a>
--->
-
 </head>
 
 
@@ -30,17 +23,17 @@ require_once("DBActions/DataBaseActions.php");
         </div>
         <div class="board-column">
             <div class="grid-container-boardside">
-                <div class="enemy-panel">
-                    <div class="grid-container-enemy-player-panel">
-                        <div class="profile-pic-c">
+                <div class="black-panel">
+                    <div class="grid-container-black-player-panel">
+                        <div class="profile-pic-c" id="black-icon">
                         </div>
                         <div class="grid-container-name-captured">
-                            <div class="name-c">
+                            <div class="name-c" id="black-name">
                             </div>
-                            <div class="captured-c">
+                            <div class="captured-c" id="black-captured">
                             </div>
                         </div>
-                        <div class="time-c">
+                        <div class="time-c" id="black-time">
                         </div>
                     </div>
                 </div>
@@ -345,24 +338,17 @@ require_once("DBActions/DataBaseActions.php");
 
                 </div>
                 <div class="player-panel">
-                    <div class=" grid-container-enemy-player-panel">
-                        <div class="profile-pic-c">
+                    <div class=" grid-container-black-player-panel">
+                        <div class="profile-pic-c" id="white-icon">
                         </div>
                         <div class="grid-container-name-captured">
-                            <div class="name-c">
+                            <div class="name-c" id="white-name">
                             </div>
-                            <div class="captured-c">
+                            <div class="captured-c" id="white-captured">
                             </div>
                         </div>
-                        <div class="time-c">
+                        <div class="time-c" id="white-time">
                         </div>
-
-                        <!-- <?php
-                        if ($_GET) {
-                            echo '<h2>Your color is: <div id="color">' . $_GET["color"] . '</div></h2>
-                        <h2>Game ID: <div id="gameID">' . $_GET["gameid"] . '</div></h2>';
-                        }
-                        ?> -->
                     </div>
                 </div>
             </div>
@@ -383,9 +369,10 @@ require_once("DBActions/DataBaseActions.php");
 
         <div class="menu-column flex" id="menu-column">
             <div class="login-container" id="login-container">
-                <p>Anon123</p>
-                <button onclick="switchContainerView('initial-menu', 'login-menu')" class="login-register-button">Log in</button>
-                <button onclick="switchContainerView('initial-menu', 'registration-menu')" class="login-register-button">Sign up</button>
+                <p id="player-name">Guest</p>
+                <button onclick="switchContainerView('initial-menu', 'login-menu')" id="login-button" class="login-register-button">Log in</button>
+                <button onclick="switchContainerView('initial-menu', 'registration-menu')" id="sign-up-button" class="login-register-button">Sign up</button>
+                <button onclick="signOut()" id="sigh-out-button" class="login-register-button hidden" style="transform: translateX(9vh);">Sign out</button>
             </div>
             <img src="Chessmate_logo.PNG" class="logo" alt="chessmate logo">
             <div class="dynamic-menu-container">
@@ -418,10 +405,10 @@ require_once("DBActions/DataBaseActions.php");
 
                 </div>
                 <div class="dynamic-menu-group hidden" id="login-menu">
-                    <button class="dynamic-menu-back-button" id="back-button" onclick="switchContainerView('login-menu', 'initial-menu')">Back</button>
+                    <button class="dynamic-menu-back-button" id="back-button" onclick="switchContainerView('login-menu', 'initial-menu'); toggleErrorMessage('');">Back</button>
 
                     <div class="dynamic-menu-element" style="padding: 5px">Log in</div>
-                    <form id="login-form">
+                    <form id="login-reguster-form" onsubmit="handleSubmit(event);">
                     <input type="hidden" id="operation" value="login" name="operation">
                         <div class="dynamic-menu-element">
                             <div class="label-field-container">
@@ -449,14 +436,14 @@ require_once("DBActions/DataBaseActions.php");
 
                 </div>
                 <div class="dynamic-menu-group hidden" id="registration-menu">
-                    <button class="dynamic-menu-back-button" id="back-button" onclick="switchContainerView('registration-menu', 'initial-menu')">Back</button>
+                    <button class="dynamic-menu-back-button" id="back-button" onclick="switchContainerView('registration-menu', 'initial-menu'); toggleErrorMessage('');">Back</button>
                      <div class="dynamic-menu-element" style="padding: 5px">Sign up</div>
-                    <form id="registration-form">
-                        <input type="hidden" id="operation1" value="register" name="operation">
+                    <form id="login-register-form" onsubmit="handleSubmit(event);">
+                        <input type="hidden" id="operation1" value="registration" name="operation">
                         <div class="dynamic-menu-element">
                             <div class="label-field-container">
                                 <div class="label-container">
-                                    <label style="padding-left: 0" for="login">Login:</label>
+                                    <label style="padding-left: 0" for="login1">Login:</label>
                                 </div>
                                 <div class="input-container">
                                     <input type="text" id="login1" name="login">
@@ -466,7 +453,7 @@ require_once("DBActions/DataBaseActions.php");
                         <div class="dynamic-menu-element">
                             <div class="label-field-container">
                                 <div class="label-container">
-                                    <label style="padding-left: 0" for="password">Password:</label>
+                                    <label style="padding-left: 0" for="password1">Password:</label>
                                 </div>
                                 <div class="input-container">
                                     <input type="password" id="password1" name="password">
@@ -482,36 +469,6 @@ require_once("DBActions/DataBaseActions.php");
 
 
             </div>
-
-
-            <!--
-            <div class="menu-container">
-                <div class="dropdown">
-                    <button onclick="myFunction1()" class="dropbtn">Play</button>
-                    <div id="myDropdown" class="dropdown-content">
-                        <a href="#home">Play</a>
-                        <a href="#about">Computer</a>
-                        <a href="#contact">Practice</a>
-                    </div>
-                </div>
-                <div class="dropdown">
-                    <button onclick="myFunction2()" class="dropbtn">Puzzles</button>
-                    <div id="myDropdown2" class="dropdown-content">
-                        <a href="#home">Puzzles</a>
-                        <a href="#about">Daily Puzzle</a>
-                        <a href="#contact">Previous Puzzles</a>
-                    </div>
-                </div>
-                <div class="dropdown">
-                    <button onclick="myFunction3()" class="dropbtn">Custom</button>
-                    <div id="myDropdown3" class="dropdown-content">
-                        <a href="#home">Create</a>
-                        <a href="#about">Watch</a>
-
-                    </div>
-                </div>
-            </div>
--->
         </div>
         <div class="rightmost-column">
         </div>
@@ -568,60 +525,88 @@ require_once("DBActions/DataBaseActions.php");
                 }
             }
         }
-         $(document).ready(function() {
-            $('#login-form').on('submit', function(e) {
-                e.preventDefault();
-                const login = $('#login').val();
-                const password = $('#password').val();
 
-                $.ajax({
-                    url: 'DBActions/login_register.php',
-                    method: 'POST',
-                    data: {
-                        login: login,
-                        password: password,
-                        operation: 'login'
-                    },
-                    success: function(response) {
-                        if (isNaN(response)) {
-                            $('.error-message').text(response).show();
-                        } else {
-                            window.location.href = 'board.php?id='+response;
-                        }
-                    },
-                    error: function(xhr, status, error) {
-                        console.error("AJAX request error:", error);
-                    }
-                });
-            });
-        });
-        $(document).ready(function() {
-            $('#login-register-form').on('submit', function(e) {
-                e.preventDefault();
-                const login = $('#login').val();
-                const password = $('#password').val();
-                const operation = $('#operation').val();
-                $.ajax({
-                    url: 'DBActions/login_register.php',
-                    method: 'POST',
-                    data: {
-                        login: login,
-                        password: password,
-                        operation: operation
-                    },
-                    success: function(response) {
-                        if (isNaN(response)) {
-                            $('.error-message').text(response).show();
-                        } else {
-                            window.location.href = 'board.php?id='+response;
-                        }
-                    },
-                    error: function(xhr, status, error) {
-                        console.error("AJAX request error:", error);
-                    }
-                });
-            });
-        });
+
+
+function handleSubmit(event) {
+    event.preventDefault();
+    const form = event.target;
+
+    const login = form.elements["login"].value;
+    const password = form.elements["password"].value;
+    const operation = form.elements["operation"].value;
+
+    const url = `DBActions/login_register.php?operation=${encodeURIComponent(operation)}&login=${encodeURIComponent(login)}&password=${encodeURIComponent(password)}`;
+
+    fetch(url, {
+        method: "GET",
+        headers: {
+            "Accept": "application/json"
+        }
+    })
+    .then(response => response.text())
+    .then(text => {
+
+        // Process the response data
+        if (!isNaN(text)) {
+            toggleErrorMessage(''); // Hide the error message
+            console.log("Successful login. ID = " + text);
+            document.getElementById("player-id").innerHTML = text;
+            switchContainerView(operation + '-menu', 'initial-menu');
+            //show player's name
+            document.getElementById("player-name").innerHTML = login;
+            //replace "login" and "sign up" buttons with "sign out"
+            document.getElementById("sigh-out-button").classList.remove('hidden');
+            document.getElementById("login-button").classList.add('hidden');
+            document.getElementById("sign-up-button").classList.add('hidden');
+
+        } else {
+            console.log(text);
+            toggleErrorMessage(text);
+
+        }
+    }).catch(error => {
+        console.error("Error:", error);
+    });
+}
+function toggleErrorMessage(message) {
+    const errorMessageElement = document.querySelector('.error-message');
+
+    if (message) {
+        // Show the error message
+        errorMessageElement.innerHTML = message;
+        errorMessageElement.style.display = 'block';
+    } else {
+        // Hide the error message
+        errorMessageElement.innerHTML = '';
+        errorMessageElement.style.display = 'none';
+    }
+}
+
+function switchContainerView(hideID, showID) {
+    document.getElementById(hideID).classList.add('hidden');
+    document.getElementById(showID).classList.remove('hidden');
+
+    // Hide/show login/registration container between scenes
+    if (hideID === "initial-menu") {
+        $(".login-register-button").css("visibility", "hidden");
+    }
+    if (showID === "initial-menu") {
+        $(".login-register-button").css("visibility", "visible");
+    }
+}
+        function signOut(){
+            //change player's name
+            document.getElementById("player-name").innerHTML = "Guest";
+            //replace "login" and "sign up" buttons with "sign out"
+            document.getElementById("sigh-out-button").classList.add('hidden');
+            document.getElementById("login-button").classList.remove('hidden');
+            document.getElementById("sign-up-button").classList.remove('hidden');
+            document.getElementById("player-id").innerHTML = Math.floor(Math.random() * 1000) + 105;
+            console.log("Signed Out; New Guest ID =" + document.getElementById("player-id").innerHTML);
+        }
+
+
 
 
 

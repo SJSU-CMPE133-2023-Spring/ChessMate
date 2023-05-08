@@ -76,8 +76,10 @@ if (boardMode === BOARD_MODE_SANDBOX){
 let opponent = "id of an opponent / or AI id (if we have multiple: simple/medium/pro)";
 function initOnlineGame(newGameID, newPlayerColor){
     console.log("Started new game: gameID = "+newGameID+"; playerColor = "+newPlayerColor);
+    initializeTimers();
     gameID = newGameID;
     playerColor = newPlayerColor;
+    turn = (playerColor===WHITE);
     loadPosition(gameID).then(response=>{
         currentPosition = response;
         board = setBoard(currentPosition.split(' ')[0]);
@@ -85,13 +87,14 @@ function initOnlineGame(newGameID, newPlayerColor){
         // flip ids of the html board to blacks perspective if black
         if (playerColor === BLACK) flipHTMLBoard(false);
         fillHTMLBoard(board, playerColor);
-        turn = (playerColor===WHITE);
+
     });
     if (playerColor===BLACK){
         //wait for whites first move
         writeToDB(gameID, currentPosition, "")
         .then(response => {
             console.log("received response: " + response);
+            toggleTimers();
             oppFen = response.split('&')[0];
             oppMove = response.split('&')[1];
             globalMoveUpdate(oppMove);
@@ -145,6 +148,7 @@ async function legalMoveClicked(element) {
 
     //save for the ajax call:
     let lastMove = squareSelected+element.parentElement.id;
+    toggleTimers();
     globalMoveUpdate(lastMove);
 
     if (boardMode!==BOARD_MODE_SANDBOX){
@@ -154,12 +158,14 @@ async function legalMoveClicked(element) {
         writeToDB(gameID, currentPosition, lastMove)
         .then(response => {
             console.log("received response: " + response);
+            toggleTimers();
             oppFen = response.split('&')[0];
             oppMove = response.split('&')[1];
             globalMoveUpdate(oppMove);
             // for updating board if opp did a promotion, then globalMoveUpdate is not enough
             board = setBoard(oppFen.split(' ')[0]);
             fillHTMLBoard(board);
+
         })
         .catch(error => {
             console.error(error);
@@ -181,8 +187,9 @@ function globalMoveUpdate(move) {
 
     // TODO: display state of game on screen, maybe as a header - states include whose turn it is and mates
     if (boardMode!==BOARD_MODE_SANDBOX){
-        const end = checkEndMates(board, getOppColor(playerColor));
+        let end = checkEndMates(board, getOppColor(playerColor));
         if (end) {
+            stopTimers();
             console.log(end +' caused by ' + getOppColor(playerColor));
             if (getOppColor(playerColor)===BLACK) {
                 displaySuperscript(getPieceSquare("k"), SUBSCRIPT_WIN);
@@ -190,6 +197,18 @@ function globalMoveUpdate(move) {
             } else {
                 displaySuperscript(getPieceSquare("K"), SUBSCRIPT_WIN);
                 displaySuperscript(getPieceSquare("k"), SUBSCRIPT_CHECKMATE);
+            }
+        }
+        end = checkEndMates(board, playerColor);
+        if (end) {
+            stopTimers();
+            console.log(end +' caused by ' + playerColor);
+            if (getOppColor(playerColor)===BLACK) {
+                displaySuperscript(getPieceSquare("K"), SUBSCRIPT_WIN);
+                displaySuperscript(getPieceSquare("k"), SUBSCRIPT_CHECKMATE);
+            } else {
+                displaySuperscript(getPieceSquare("k"), SUBSCRIPT_WIN);
+                displaySuperscript(getPieceSquare("K"), SUBSCRIPT_CHECKMATE);
             }
         }
     }
@@ -1083,27 +1102,95 @@ async function startGameButtonOnClick(gameType) {
     }
 }
 
-function startGame(gameID, newPlayerColor) {
+
+async function startGame(gameID, newPlayerColor) {
+    //make ajax call to get match data from DB
+    const response = await fetch(`DBActions/getOnStartData.php?id=${gameID}`);
+    const status = await response.text();
+    const [whiteName, whiteRating, whiteIcon, blackName, blackRating, blackIcon] = status.split('&');
+    console.log("Response from getOnStartData:", status);
+    //setup fields name:
+    document.getElementById("white-name").innerHTML = whiteName+" ("+whiteRating+")";
+    document.getElementById("white-icon").innerHTML = `<img class="img-responsive" alt="white player profile" src="icons/${whiteIcon}">`;
+    document.getElementById("white-captured").innerHTML = "";
+    document.getElementById("white-captured").innerHTML = "";
+
+    document.getElementById("black-icon").innerHTML = `<img class="img-responsive" alt="black player profile" src="icons/${blackIcon}">`;
+    document.getElementById("black-name").innerHTML = blackName+" ("+blackRating+")";
+    document.getElementById("black-captured").innerHTML = "";
+
     boardMode = BOARD_MODE_ONLINE;
     initOnlineGame(gameID, newPlayerColor);
     switchContainerView("waiting-game-menu", "online-game-menu");
+
+
     console.log("start game!!!");
+
 }
 
-function switchContainerView(hideID, showID) {
-    document.getElementById(hideID).classList.add('hidden');
-    document.getElementById(showID).classList.remove('hidden');
 
-    //hide/show login/registration container between scenes
-    if (hideID === "initial-menu"){
-        $(document).ready(function() {
-            $(".login-register-button").css("visibility", "hidden");
-        });
+//Timer logic
+let timerWhite, timerBlack;
+let whiteTime, blackTime;
+let whiteInterval, blackInterval;
+let whiteRunning = false;
+let blackRunning = false;
+
+function initializeTimers() {
+    whiteTime = 5 * 60;
+    blackTime = 5 * 60;
+    updateTimers();
+    toggleTimers();
+}
+
+function updateTimers() {
+    document.getElementById('white-time').textContent = formatTime(whiteTime);
+    document.getElementById('black-time').textContent = formatTime(blackTime);
+}
+
+function formatTime(timeInSeconds) {
+    const minutes = Math.floor(timeInSeconds / 60);
+    const seconds = timeInSeconds % 60;
+    return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+}
+
+function toggleTimers() {
+    if (whiteRunning) {
+        clearInterval(whiteInterval);
+        blackInterval = setInterval(decrementBlackTimer, 1000);
+    } else {
+        clearInterval(blackInterval);
+        whiteInterval = setInterval(decrementWhiteTimer, 1000);
     }
-    if (showID === "initial-menu"){
-        $(document).ready(function() {
-            $(".login-register-button").css("visibility", "visible");
-        });
+    whiteRunning = !whiteRunning;
+    blackRunning = !blackRunning;
+}
+
+function stopTimers(){
+    clearInterval(whiteInterval);
+    clearInterval(blackInterval);
+}
+
+function decrementWhiteTimer() {
+    whiteTime--;
+    updateTimers();
+    if (whiteTime === 0) {
+        clearInterval(whiteInterval);
+        console.log('White player ran out of time.');
     }
 }
+
+function decrementBlackTimer() {
+    blackTime--;
+    updateTimers();
+    if (blackTime === 0) {
+        clearInterval(blackInterval);
+        console.log('Black player ran out of time.');
+    }
+}
+
+
+
+
+
 

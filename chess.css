@@ -1,9 +1,17 @@
 body{
-  height:100%;
+  height:95vh;
+  width:100%;
+  overflow: hidden;
+  min-width: 780px;
+
+}
+p{
+  font-size: 3vh;
 }
 
 #game_page{
   background-color:#7e7878;
+  min-width: 125vh;
 
 }
 
@@ -22,7 +30,7 @@ body{
   height:98vh;
 }
 
-.grid-container-enemy-player-panel{
+.grid-container-black-player-panel{
   display:grid;
   grid-template-columns: 15% 60% 25%;
   align-items: center;
@@ -46,39 +54,33 @@ body{
 .profile-pic-c{
   width:90%;
   height:10vh;
-  background-color: lightskyblue;
-  border-style:solid;
-  border-width: 3px;
-  border-color: black;
+
 }
 
 .name-c{
   width:90%;
-  height:4vh;
-  background-color: lightskyblue;
   margin-top:2.5%;
-  border-style:solid;
-  border-width: 3px;
-  border-color: black;
+  font-size: 3vh;
+
 }
 
 .captured-c{
   width:90%;
-  height:4vh;
-  background-color: lightskyblue;
-  margin-top:14.5%;
-  border-style:solid;
-  border-width: 3px;
-  border-color: black;
+
+  margin-top:5vh;
+  font-size: 5vh;
 }
 
 .time-c{
+  display: flex;
   width:90%;
   height:10vh;
-  background-color: lightskyblue;
   border-style:solid;
   border-width: 3px;
   border-color: black;
+  align-items: center;
+  justify-content:center;
+  font-size: 6vh;
 }
 label {
   display: inline-block;
@@ -91,6 +93,8 @@ label {
 input {
   display: inline-block;
   width: 100%;
+  height: 3vh;
+  font-size: 2vh;
 }
 
 .piece-img {
@@ -126,10 +130,15 @@ input {
   margin-top:-2%;
 }
 
-.enemy-panel{
+.black-panel{
   width:100%;
   height:12vh;
   background-color:rgb(216, 211, 211);
+}
+.img-responsive{
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
 
 .player-panel{
@@ -183,6 +192,7 @@ input {
   display: flex;
   justify-content: center;
   align-items: center;
+  width: 80%;
 
 }
 .dynamic-menu-group{
@@ -203,6 +213,9 @@ input {
   padding: 10px;
   box-sizing: border-box;
   text-align: center;
+  width: 100%;
+  height: 8vh;
+  font-size: 2.5vh;
 }
 .dynamic-menu-back-button{
   display: flex;
@@ -211,7 +224,9 @@ input {
   background-color: lightgray;
   border-radius: 5px;
   padding: 5px;
-  width: 60%;
+  width: 10vh;
+  height: 3vh;
+  font-size: 2vh;
   box-sizing: border-box;
   text-align: center;
 }
@@ -321,6 +336,7 @@ input {
   max-width: 100%;
   max-height: 100%;
   display: block;
+  z-index: 9999;
 
 }
 
@@ -335,7 +351,7 @@ input {
   left: 2%;
   top: 2%;
   font-family: Arial, Helvetica, sans-serif;
-  font-size:1.4vw;
+  font-size:3vh;
 
 }
 
@@ -346,7 +362,7 @@ input {
   right: 3%;
   bottom: 2%;
   font-family: Arial, Helvetica, sans-serif;
-  font-size:1.4vw;
+  font-size:3vh;
 
 }
 
@@ -420,7 +436,12 @@ footer{
     background-color: #d6d6d6;
     border-radius: 4px;
 }
-.login-register-button{}
+.login-register-button{
+  font-size: 2vh;
+}
+.sign-out-button{
+  font-size: 2vh;
+}
 
 .label-field-container{
   display: flex;
