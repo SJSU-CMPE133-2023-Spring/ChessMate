@@ -184,6 +184,7 @@ function globalMoveUpdate(move) {
 
     board = changePieceLocationOnBoard(board, oldX, oldY, newX, newY);
     fillHTMLBoard(board);
+    highlightMove(oldX, oldY, newX, newY);
 
     // TODO: display state of game on screen, maybe as a header - states include whose turn it is and mates
     if (boardMode!==BOARD_MODE_SANDBOX){
@@ -393,6 +394,19 @@ function fillHTMLBoard(boardArr) {
             document.getElementById(htmlCoord.square).innerHTML = innerHTML;
         }
     }
+}
+
+// removes any previous highlights and then highlights the two new squares that had activity
+function highlightMove(oldX, oldY, newX, newY) {
+    const oldHighlights = document.querySelectorAll('div.moved');
+    for (hl of oldHighlights) {
+        hl.classList.remove('moved');
+    }
+
+    const oldSqrId = new Coordinate(oldX, oldY).square;
+    const newSqrId = new Coordinate(newX, newY).square;
+    document.getElementById(oldSqrId).parentElement.classList.add('moved');
+    document.getElementById(newSqrId).parentElement.classList.add('moved');
 }
 
 function displaySuperscript(square, superscript){
