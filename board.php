@@ -31,6 +31,7 @@ require_once("DBActions/DataBaseActions.php");
                             <div class="name-c" id="black-name">
                             </div>
                             <div class="captured-c" id="black-captured">
+
                             </div>
                         </div>
                         <div class="time-c" id="black-time">
@@ -338,6 +339,7 @@ require_once("DBActions/DataBaseActions.php");
 
                 </div>
                 <div class="player-panel">
+
                     <div class=" grid-container-black-player-panel">
                         <div class="profile-pic-c" id="white-icon">
                         </div>
@@ -381,6 +383,7 @@ require_once("DBActions/DataBaseActions.php");
                     <button class="dynamic-menu-element" id="start-ranked">Ranked Game</button>
                     <button class="dynamic-menu-element" id="start-engine">vs Computer</button>
                     <button class="dynamic-menu-element">Leaderboard</button>
+
                 </div>
                 <div class="dynamic-menu-group hidden" id="leaderboard-menu">
                     <button class="back-button" onclick="switchContainerView('leaderboard-menu', 'initial-menu')">back</button>

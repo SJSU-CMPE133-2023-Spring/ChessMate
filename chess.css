@@ -57,11 +57,15 @@ p{
 
 }
 
+.player-avatar{
+  width:100%;
+  height:100%;
+}
+
 .name-c{
   width:90%;
   margin-top:2.5%;
   font-size: 3vh;
-
 }
 
 .captured-c{
@@ -151,7 +155,9 @@ input {
 
 
 .menu-column{
+
   display: flex;
+
   background-color:rgb(216, 211, 211);
   flex-grow: 1;
   height:99%;
@@ -454,11 +460,13 @@ footer{
 }
 
 .hidden {
-  display: none;
+  visibility: hidden;
 }
+
 
 .visible {
   display: block;
+
 }
 
 .flex{

@@ -125,7 +125,7 @@ public class StockfishManager {
 
                     String moves = resultSet.getString("move_history")+ " "+bestMove;
                     String newPosition = getFenFromMoves(moves);
-                    //System.out.println("position = "+ newPosition);
+                    System.out.println("position = "+ newPosition);
                     query = "UPDATE matches SET move_history = '"+moves+"', position = '"+ newPosition +"' WHERE id = "+gameID;
                     PreparedStatement preparedStatement2 = mysqlConnect.connect().prepareStatement(query);
                     preparedStatement2.executeUpdate();
