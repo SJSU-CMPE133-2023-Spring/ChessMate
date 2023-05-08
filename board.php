@@ -499,8 +499,7 @@ require_once("DBActions/DataBaseActions.php");
         });
         function toggleContainer() {
             let container = document.getElementById("menu-column");
-
-                container.classList.toggle("flex");
+            
                 container.classList.toggle("hidden");
 
         }

@@ -65,7 +65,7 @@ class DataBaseActions extends Exception
             `type` varchar(255) NOT NULL,
             `position` varchar(255) NOT NULL,
             `captured` varchar(255) NOT NULL,
-            `move_history` varchar(255) NOT NULL, 
+            `move_history` varchar(1255) NOT NULL, 
             `date` varchar(255) NOT NULL) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;";
         $results = mysqli_query($this->conn, $sql);
         $sql = "CREATE TABLE IF NOT EXISTS `stockfish_request` (
