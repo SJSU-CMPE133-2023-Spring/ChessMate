@@ -139,7 +139,6 @@ body{
 
 
 .menu-column{
-  display: none;
   background-color:rgb(216, 211, 211);
   flex-grow: 1;
   height:97vh;
@@ -363,9 +362,9 @@ footer{
 }
 
 .hidden {
-  display: none;
+  visibility: hidden;
 }
 
   .visible {
-  display: block;
+  visibility: visible;
 }
