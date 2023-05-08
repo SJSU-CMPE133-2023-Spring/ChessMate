@@ -382,12 +382,12 @@ require_once("DBActions/DataBaseActions.php");
                     <button class="dynamic-menu-element" id="start-classic">Classic Match</button>
                     <button class="dynamic-menu-element" id="start-ranked">Ranked Game</button>
                     <button class="dynamic-menu-element" id="start-engine">vs Computer</button>
-                    <button class="dynamic-menu-element">Leaderboard</button>
+                    <button class="dynamic-menu-element" onclick="switchContainerView('initial-menu', 'leaderboard-menu')">Leaderboard</button>
 
                 </div>
                 <div class="dynamic-menu-group hidden" id="leaderboard-menu">
-                    <button class="back-button" onclick="switchContainerView('leaderboard-menu', 'initial-menu')">back</button>
-                    <p>Leaderboard</p>
+                    <button class="dynamic-menu-back-button" onclick="switchContainerView('leaderboard-menu', 'initial-menu')">back</button>
+                    <div class=dynamic-menu-element style="font-size: 3vh">Leaderboard</div>
                     <!-- ? Leaderboard somehow: Like a scrollable list in a container -->
                 </div>
                 <div class="dynamic-menu-group hidden" id="online-game-menu">
@@ -404,7 +404,8 @@ require_once("DBActions/DataBaseActions.php");
                 </div>
                 <div class="dynamic-menu-group hidden" id="waiting-game-menu">
                     <button class="dynamic-menu-element" id="cancel-button">Cancel</button>
-                    <!-- animation <img gif>-->
+                    <div class=dynamic-menu-element style="font-size: 3vh">Searching for an opponent</div>
+                    <img src="searching_opponent.gif" class="logo" style="padding-top:0; width:100%" alt="searching for opponent animation">
 
                 </div>
                 <div class="dynamic-menu-group hidden" id="login-menu">
@@ -492,6 +493,7 @@ require_once("DBActions/DataBaseActions.php");
         document.getElementById('start-ranked').addEventListener('click', function(){
             startRankedButtonOnClick();
         });
+
         document.getElementById('start-engine').addEventListener('click', function(){
             startEngineButtonOnClick();
         });
