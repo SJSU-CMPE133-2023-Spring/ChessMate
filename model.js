@@ -221,6 +221,11 @@ function globalMoveUpdate(move) {
 // changes and returns a given board array given a moving piece, also handles promotion, castling, and en passant
 // affectGlobal is false for when I need this method without changing the real board array and HTML
 function changePieceLocationOnBoard(board, oldX, oldY, newX, newY, affectGlobal = true) {
+    // logic for capture
+    if (affectGlobal) capture(board[newY][newX]);
+
+
+    // function start
     let oldBoard = board.map(innerArray => [...innerArray]);
     board[newY][newX] = board[oldY][oldX];
     board[oldY][oldX] = " ";
@@ -293,6 +298,8 @@ function changePieceLocationOnBoard(board, oldX, oldY, newX, newY, affectGlobal 
     if (affectGlobal) currentPosition = generateFen(oldBoard, newBoard, oldX, oldY, newX, newY);
     return board;
 }
+
+
 
 // will display pieces user can pick to promote pawn to and return the letter of that piece
 function promotePrompt(srcId, destId, color) {
@@ -820,6 +827,45 @@ function checkNW(x, y) {
         }
     }
     return output;
+}
+
+//capture logic
+function capture(pieceLetter){
+    let capturedByWhite, capturedByBlack
+
+    if (playerColor === "white"){
+        capturedByWhite = document.getElementById("player-captured").innerHTML;
+        capturedByBlack = document.getElementById("opponent-captured").innerHTML;
+    }
+    if (playerColor === "black"){
+        capturedByBlack = document.getElementById("player-captured").innerHTML;
+        capturedByWhite = document.getElementById("opponent-captured").innerHTML;
+    }
+
+    switch (pieceLetter){
+        case " ": return;
+        case "p": capturedByWhite = capturedByWhite + "♟"; break;
+        case "n": capturedByWhite = capturedByWhite + "♞"; break;
+        case "b": capturedByWhite = capturedByWhite + "♝"; break;
+        case "r": capturedByWhite = capturedByWhite + "♜"; break;
+        case "q": capturedByWhite = capturedByWhite + "♛"; break;
+        case "k": capturedByWhite = capturedByWhite + "♚"; break;
+        case "P": capturedByBlack = capturedByBlack + "♙"; break;
+        case "N": capturedByBlack = capturedByBlack + "♘"; break;
+        case "B": capturedByBlack = capturedByBlack + "♗"; break;
+        case "R": capturedByBlack = capturedByBlack + "♖"; break;
+        case "Q": capturedByBlack = capturedByBlack + "♕"; break;
+        case "K": capturedByBlack = capturedByBlack + "♔"; break;
+    }
+
+    if (playerColor === "white"){
+        document.getElementById("player-captured").innerHTML = capturedByWhite;
+        document.getElementById("opponent-captured").innerHTML = capturedByBlack;
+    }
+    if (playerColor === "black"){
+        document.getElementById("player-captured").innerHTML = capturedByBlack;
+        document.getElementById("opponent-captured").innerHTML = capturedByWhite;
+    }
 }
 
 // returns occupation of the given square(x1,y1) given a starting position, false if not a valid square

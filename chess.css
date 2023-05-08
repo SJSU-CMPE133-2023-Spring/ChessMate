@@ -69,10 +69,11 @@ p{
 }
 
 .captured-c{
-  width:90%;
+  width:97%;
 
   margin-top:5vh;
-  font-size: 5vh;
+  font-size: 4.5vh;
+  letter-spacing: -1.6vh;
 }
 
 .time-c{

@@ -419,17 +419,17 @@ require_once("DBActions/DataBaseActions.php");
                                     <label style="padding-left: 0" for="login">Login:</label>
                                 </div>
                                 <div class="input-container">
-                                    <input type="text" id="login" name="login">
+                                    <input type="text" id="login" name="login" pattern="[A-Za-z0-9]+" required title="Please enter only letters and numbers, no spaces or special characters">
                                 </div>
                             </div>
                         </div>
                         <div class="dynamic-menu-element">
                             <div class="label-field-container">
                                 <div class="label-container">
-                                    <label style="padding-left: 0" for="password">Password:</label>
+                                    <label style="padding-left: 0" for="password" >Password:</label>
                                 </div>
                                 <div class="input-container">
-                                    <input type="password" id="password" name="password">
+                                    <input type="password" id="password" name="password" pattern="[A-Za-z0-9]+" required title="Please enter only letters and numbers, no spaces or special characters">
                                 </div>
                             </div>
                         </div>
@@ -449,7 +449,7 @@ require_once("DBActions/DataBaseActions.php");
                                     <label style="padding-left: 0" for="login1">Login:</label>
                                 </div>
                                 <div class="input-container">
-                                    <input type="text" id="login1" name="login">
+                                    <input type="text" id="login1" name="login" pattern="[A-Za-z0-9]+" required title="Please enter only letters and numbers, no spaces or special characters">
                                 </div>
                             </div>
                         </div>
@@ -459,7 +459,7 @@ require_once("DBActions/DataBaseActions.php");
                                     <label style="padding-left: 0" for="password1">Password:</label>
                                 </div>
                                 <div class="input-container">
-                                    <input type="password" id="password1" name="password">
+                                    <input type="password" id="password1" name="password" pattern="[A-Za-z0-9]+" required title="Please enter only letters and numbers, no spaces or special characters">
                                 </div>
 
                             </div>
