@@ -1104,20 +1104,32 @@ async function startGameButtonOnClick(gameType) {
 
 
 async function startGame(gameID, newPlayerColor) {
+    playerColor = newPlayerColor;
     //make ajax call to get match data from DB
     const response = await fetch(`DBActions/getOnStartData.php?id=${gameID}`);
     const status = await response.text();
     const [whiteName, whiteRating, whiteIcon, blackName, blackRating, blackIcon] = status.split('&');
     console.log("Response from getOnStartData:", status);
     //setup fields name:
-    document.getElementById("white-name").innerHTML = whiteName+" ("+whiteRating+")";
-    document.getElementById("white-icon").innerHTML = `<img class="img-responsive" alt="white player profile" src="icons/${whiteIcon}">`;
-    document.getElementById("white-captured").innerHTML = "";
-    document.getElementById("white-captured").innerHTML = "";
+    if (newPlayerColor === "white") {
+        document.getElementById("player-name").innerHTML = whiteName+" ("+whiteRating+")";
+        document.getElementById("player-icon").innerHTML = `<img class="img-responsive" alt="white player profile" src="icons/${whiteIcon}">`;
+        document.getElementById("player-captured").innerHTML = "";
 
-    document.getElementById("black-icon").innerHTML = `<img class="img-responsive" alt="black player profile" src="icons/${blackIcon}">`;
-    document.getElementById("black-name").innerHTML = blackName+" ("+blackRating+")";
-    document.getElementById("black-captured").innerHTML = "";
+        document.getElementById("opponent-icon").innerHTML = `<img class="img-responsive" alt="black player profile" src="icons/${blackIcon}">`;
+        document.getElementById("opponent-name").innerHTML = blackName+" ("+blackRating+")";
+        document.getElementById("opponent-captured").innerHTML = "";
+    }
+    if (newPlayerColor === "black"){
+
+        document.getElementById("opponent-name").innerHTML = whiteName+" ("+whiteRating+")";
+        document.getElementById("opponent-icon").innerHTML = `<img class="img-responsive" alt="opponent profile" src="icons/${whiteIcon}">`;
+        document.getElementById("opponent-captured").innerHTML = "";
+
+        document.getElementById("player-icon").innerHTML = `<img class="img-responsive" alt="player profile" src="icons/${blackIcon}">`;
+        document.getElementById("player-name").innerHTML = blackName+" ("+blackRating+")";
+        document.getElementById("player-captured").innerHTML = "";
+    }
 
     boardMode = BOARD_MODE_ONLINE;
     initOnlineGame(gameID, newPlayerColor);
@@ -1144,8 +1156,14 @@ function initializeTimers() {
 }
 
 function updateTimers() {
-    document.getElementById('white-time').textContent = formatTime(whiteTime);
-    document.getElementById('black-time').textContent = formatTime(blackTime);
+    if (playerColor ==="white"){
+        document.getElementById('player-time').textContent = formatTime(whiteTime);
+        document.getElementById('opponent-time').textContent = formatTime(blackTime);
+    }
+    if (playerColor ==="black"){
+        document.getElementById('player-time').textContent = formatTime(blackTime);
+        document.getElementById('opponent-time').textContent = formatTime(whiteTime);
+    }
 }
 
 function formatTime(timeInSeconds) {

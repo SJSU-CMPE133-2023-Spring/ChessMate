@@ -134,7 +134,7 @@ input {
   margin-top:-2%;
 }
 
-.black-panel{
+.opponent-panel{
   width:100%;
   height:12vh;
   background-color:rgb(216, 211, 211);
@@ -460,7 +460,7 @@ footer{
 }
 
 .hidden {
-  visibility: hidden;
+  display: none;
 }
 
 

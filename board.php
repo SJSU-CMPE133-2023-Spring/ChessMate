@@ -23,18 +23,18 @@ require_once("DBActions/DataBaseActions.php");
         </div>
         <div class="board-column">
             <div class="grid-container-boardside">
-                <div class="black-panel">
+                <div class="opponent-panel">
                     <div class="grid-container-black-player-panel">
-                        <div class="profile-pic-c" id="black-icon">
+                        <div class="profile-pic-c" id="opponent-icon">
                         </div>
                         <div class="grid-container-name-captured">
-                            <div class="name-c" id="black-name">
+                            <div class="name-c" id="opponent-name">
                             </div>
-                            <div class="captured-c" id="black-captured">
+                            <div class="captured-c" id="opponent-captured">
 
                             </div>
                         </div>
-                        <div class="time-c" id="black-time">
+                        <div class="time-c" id="opponent-time">
                         </div>
                     </div>
                 </div>
@@ -341,15 +341,15 @@ require_once("DBActions/DataBaseActions.php");
                 <div class="player-panel">
 
                     <div class=" grid-container-black-player-panel">
-                        <div class="profile-pic-c" id="white-icon">
+                        <div class="profile-pic-c" id="player-icon">
                         </div>
                         <div class="grid-container-name-captured">
-                            <div class="name-c" id="white-name">
+                            <div class="name-c" id="player-name">
                             </div>
-                            <div class="captured-c" id="white-captured">
+                            <div class="captured-c" id="player-captured">
                             </div>
                         </div>
-                        <div class="time-c" id="white-time">
+                        <div class="time-c" id="player-time">
                         </div>
                     </div>
                 </div>
@@ -369,9 +369,9 @@ require_once("DBActions/DataBaseActions.php");
             <img src="pieces/black-knight.png" alt="n">
         </div>
 
-        <div class="menu-column flex" id="menu-column">
+        <div class="menu-column" id="menu-column">
             <div class="login-container" id="login-container">
-                <p id="player-name">Guest</p>
+                <p id="user-name">Guest</p>
                 <button onclick="switchContainerView('initial-menu', 'login-menu')" id="login-button" class="login-register-button">Log in</button>
                 <button onclick="switchContainerView('initial-menu', 'registration-menu')" id="sign-up-button" class="login-register-button">Sign up</button>
                 <button onclick="signOut()" id="sigh-out-button" class="login-register-button hidden" style="transform: translateX(9vh);">Sign out</button>
@@ -557,7 +557,7 @@ function handleSubmit(event) {
             document.getElementById("player-id").innerHTML = text;
             switchContainerView(operation + '-menu', 'initial-menu');
             //show player's name
-            document.getElementById("player-name").innerHTML = login;
+            document.getElementById("user-name").innerHTML = login;
             //replace "login" and "sign up" buttons with "sign out"
             document.getElementById("sigh-out-button").classList.remove('hidden');
             document.getElementById("login-button").classList.add('hidden');
@@ -600,7 +600,7 @@ function switchContainerView(hideID, showID) {
 }
         function signOut(){
             //change player's name
-            document.getElementById("player-name").innerHTML = "Guest";
+            document.getElementById("user-name").innerHTML = "Guest";
             //replace "login" and "sign up" buttons with "sign out"
             document.getElementById("sigh-out-button").classList.add('hidden');
             document.getElementById("login-button").classList.remove('hidden');
