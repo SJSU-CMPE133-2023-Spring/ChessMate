@@ -11,6 +11,10 @@ class DataBaseActions extends Exception
     public $STATUS_WAITING_OPPONENT = "waiting_opponent";
     public $STATUS_WAITING_ENGINE = "waiting_engine";
 
+    public $PLAYER_STATUS_OFFLINE = "offline";
+    public $PLAYER_STATUS_ONLINE = "online";
+    public $PLAYER_STATUS_PLAYING = "playing";
+    public $WRONG_PASSWORD_MESSAGE = "Wrong login or password! Please check the spelling.";
     public function __construct()
     {
 
@@ -45,9 +49,12 @@ class DataBaseActions extends Exception
         $sql = "CREATE TABLE IF NOT EXISTS `accounts` (
             `id` INT AUTO_INCREMENT PRIMARY KEY, 
             `login` VARCHAR(255) NOT NULL, 
-            `password` VARCHAR(255) NOT NULL, 
+            `password` VARCHAR(255) NOT NULL,
+            `status` VARCHAR(255) NOT NULL,
             `wins` VARCHAR(255) NOT NULL, 
-            `loses` VARCHAR(255) NOT NULL, 
+            `loses` VARCHAR(255) NOT NULL,
+            `rating` VARCHAR(255) NOT NULL,
+            `icon` VARCHAR(255) NOT NULL,
             `friends` VARCHAR(255) NOT NULL) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;";
         $results = mysqli_query($this->conn, $sql);
         $sql = "CREATE TABLE IF NOT EXISTS `matches` (
@@ -55,7 +62,9 @@ class DataBaseActions extends Exception
             `white` varchar(255) NOT NULL,
             `black` varchar(255) NOT NULL,
             `status` varchar(255) NOT NULL,
-            `position` varchar(255) NOT NULL, 
+            `type` varchar(255) NOT NULL,
+            `position` varchar(255) NOT NULL,
+            `captured` varchar(255) NOT NULL,
             `move_history` varchar(255) NOT NULL, 
             `date` varchar(255) NOT NULL) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;";
         $results = mysqli_query($this->conn, $sql);
@@ -79,17 +88,38 @@ class DataBaseActions extends Exception
 
         //Potential way to enter initial data to the table
 
-        $sql = "INSERT INTO `accounts` (`login`, `password`, `wins`,`loses`, `friends` ) VALUES ('Spect', 'pass', '999', '111', '? - list of IDs?');";
+        $sql = "INSERT INTO `accounts` (`login`, `password`, `status`, `wins`,`loses`, `rating`,`icon`, `friends` ) VALUES ('Mike', 'pass','$this->PLAYER_STATUS_OFFLINE', '999', '111', '1000','img-1.png', '? - list of IDs?');";
         $results = mysqli_query($this->conn, $sql);
 
     }
+    public function accountExists($login){
+        $sql = "SELECT * FROM accounts WHERE login='$login'";
+        $result = mysqli_query($this->conn, $sql);
+        $row = mysqli_fetch_object($result);
+        if ($row!=null)return true;
+        else return false;
+    }
+    public function register($login, $password){
+        if($this->accountExists($login)) return false;
+        $sql = "INSERT INTO `accounts` (`login`, `password`, `status`, `wins`,`loses`, `rating`,`icon`, `friends` ) VALUES ('$login', '$password','$this->PLAYER_STATUS_ONLINE', '0', '0', '500','img-2.png', '');";
+        $result = mysqli_query($this->conn, $sql);
+        return true;
+    }
 
-    public function startMatch($player1_id, $player2_id, $gameStatus){
+
+    public function login($login, $password){
+        $sql = "SELECT * FROM accounts WHERE (login='$login' AND password='$password')";
+        $result = mysqli_query($this->conn, $sql);
+        $row = mysqli_fetch_object($result);
+        if ($row!=null)return $row->id;
+        else return $this->WRONG_PASSWORD_MESSAGE;
+    }
+    public function startMatch($player1_id, $player2_id, $gameStatus, $type){
         $date = date("Y-m-d h:i:sa");
 
 
-        $sql = "INSERT INTO `matches` (`white`, `black`, status,`position`, `move_history`, `date`) 
-VALUES ('$player1_id', '$player2_id', '$gameStatus', '$this->INITIAL_POSITION', '', '$date');";
+        $sql = "INSERT INTO `matches` (`white`, `black`, status,`position`, `move_history`, `date`, `captured`,`type`)
+VALUES ('$player1_id', '$player2_id', '$gameStatus', '$this->INITIAL_POSITION', '', '$date','', '$type');";
         $results = mysqli_query($this->conn, $sql);
     }
 
@@ -129,6 +159,12 @@ VALUES ('$player1_id', '$player2_id', '$gameStatus', '$this->INITIAL_POSITION', 
         $row = mysqli_fetch_object($result);
         return $row->position;
     }
+    public function getCaptured($id){
+        $sql = "SELECT * FROM matches WHERE id=$id";
+        $result = mysqli_query($this->conn, $sql);
+        $row = mysqli_fetch_object($result);
+        return $row->captured;
+    }
 
     public function getLastMove($id): string
     {
@@ -141,17 +177,23 @@ VALUES ('$player1_id', '$player2_id', '$gameStatus', '$this->INITIAL_POSITION', 
         return $this->getPosition($id)."&".end($movesArr);
     }
 
-    public function enterOrStartGame($playerID, $opponent){
+
+    public function enterOrStartGame($playerID, $type){
 
         $randBool = (bool) mt_rand(0, 1);
-        if ($opponent == "online"){
-            //online opponent
-            return $this->enterOrStartOnlineGame($playerID);
-        } else {
+        if ($type == "classic"){
+            // online opponent
+            return $this->enterOrStartOnlineGame($playerID, $type);
+        }
+        if ($type == "ranked"){
+            // TODO: make this code make a ranked game
+            return $this->enterOrStartOnlineGame($playerID, $type);
+        }
+        if ($type == "engine"){
             // engine opponent
 
-            if ($randBool) $this->startMatch($playerID, "engine", "waiting_engine");
-            else  $this->startMatch("engine", $playerID, "waiting_engine");
+            if ($randBool) $this->startMatch($playerID, "engine", "waiting_engine", $type);
+            else  $this->startMatch("engine", $playerID, "waiting_engine", $type);
             $sql = "SELECT * FROM matches WHERE status='$this->STATUS_WAITING_ENGINE' AND (white = $playerID OR black = $playerID)";
             $result = mysqli_query($this->conn, $sql);
             $row = mysqli_fetch_object($result);
@@ -159,18 +201,22 @@ VALUES ('$player1_id', '$player2_id', '$gameStatus', '$this->INITIAL_POSITION', 
         }
 
     }
-    public function enterOrStartOnlineGame($playerID){
+    public function enterOrStartOnlineGame($playerID, $type){
         $randBool = (bool) mt_rand(0, 1);
         $sql = "SELECT * FROM matches WHERE status='$this->STATUS_WAITING_OPPONENT'";
         $result = mysqli_query($this->conn, $sql);
         $row = mysqli_fetch_object($result);
         if ($row == null){
             //no waiting lobbies - create one
-            $this->startMatch($playerID, "", $this->STATUS_WAITING_OPPONENT);
+            $this->startMatch($playerID, "", $this->STATUS_WAITING_OPPONENT, $type);
             $result = mysqli_query($this->conn, $sql);
             $row = mysqli_fetch_object($result);
         } else {
             //there is a lobby with one player - join
+            //check if player is not you
+            //if ($this->findLobbyByPlayerID($playerID)!==null) return null;
+
+
             //randomly assign the colors
 
             $player1 = $playerID;
@@ -183,8 +229,27 @@ VALUES ('$player1_id', '$player2_id', '$gameStatus', '$this->INITIAL_POSITION', 
         return $row->id;
     }
 
+    //returns data for the profiles in the following order: White's name&rating&icon and then the same data for black to split in array with (&).
+    public function getGameData($gameID){
+        $sql = "SELECT * FROM matches WHERE id='$gameID'";
+        $result = mysqli_query($this->conn, $sql);
+        $row = mysqli_fetch_object($result);
+        return $this->getPlayerNameRatingIcon($row->white)."&".$this->getPlayerNameRatingIcon($row->black);
+    }
+
+    //returns Players Name, Rating and Icon separated by "&"
+    public function getPlayerNameRatingIcon($playerID){
+        if ($playerID=="engine") return "Stockfish Engine&???&stockfish.png";
+        if ($playerID>100) return "Guest&500&guest.png";
+
+        $sql = "SELECT * FROM accounts WHERE id='$playerID'";
+        $result = mysqli_query($this->conn, $sql);
+        $row = mysqli_fetch_object($result);
+        return $row->login."&".$row->rating."&".$row->icon;
+    }
+
     public function getGameStatus($id){
-        $sql = "SELECT * FROM matches WHERE id=$id";
+        $sql = "SELECT * FROM matches WHERE id='$id'";
         $result = mysqli_query($this->conn, $sql);
         $row = mysqli_fetch_object($result);
         if ($row->status == $this->STATUS_WAITING_OPPONENT or $row->status == $this->STATUS_WAITING_ENGINE) return "waiting";
@@ -197,12 +262,56 @@ VALUES ('$player1_id', '$player2_id', '$gameStatus', '$this->INITIAL_POSITION', 
     }
 
     public function getPlayerColor($id, $playerID){
-        $sql = "SELECT * FROM matches WHERE id=$id";
+        $sql = "SELECT * FROM matches WHERE id='$id'";
         $result = mysqli_query($this->conn, $sql);
         $row = mysqli_fetch_object($result);
         if ($row->white==$playerID) return "white";
         if ($row->black==$playerID) return "black";
         //return -1;
+    }
+
+    public function getPlayerStatus($id){
+        $sql = "SELECT * FROM accounts WHERE id=$id";
+        $result = mysqli_query($this->conn, $sql);
+        $row = mysqli_fetch_object($result);
+        return $row->status;
+    }
+
+    public function findGameByPlayerID($id){
+        $sql = "SELECT * FROM matches WHERE status=$this->STATUS_STARTED AND (black=$id OR white=$id)";
+        $result = mysqli_query($this->conn, $sql);
+        $row = mysqli_fetch_object($result);
+        return $row->id;
+    }
+
+    public function findLobbyByPlayerID($id){
+        $sql = "SELECT * FROM matches WHERE status=$this->STATUS_WAITING_OPPONENT AND (black=$id OR white=$id)";
+        $result = mysqli_query($this->conn, $sql);
+        $row = mysqli_fetch_object($result);
+        return $row->id;
+    }
+
+    public function changePlayerStatus($id, $status){
+        $sql = "UPDATE accounts SET status = $status WHERE id=$id";
+        $result = mysqli_query($this->conn, $sql);
+    }
+
+    public function finishGame($id){
+        $sql = "UPDATE matches SET status = '$this->STATUS_FINISHED' WHERE id=$id";
+        $result = mysqli_query($this->conn, $sql);
+
+        //update players' statuses:
+        $sql = "SELECT * FROM matches WHERE id=$id";
+        $result = mysqli_query($this->conn, $sql);
+        $row = mysqli_fetch_object($result);
+
+        //if($row->white < 100)$this->changePlayerStatus($row->white, $this->PLAYER_STATUS_PLAYING);
+        //if($row->black < 100)$this->changePlayerStatus($row->black, $this->PLAYER_STATUS_PLAYING);
+    }
+
+    public function deleteGame($id){
+        $sql = "DELETE FROM matches WHERE id=$id";
+        $result = mysqli_query($this->conn, $sql);
     }
 
 

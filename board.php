@@ -1,8 +1,5 @@
 <?php
 require_once("DBActions/DataBaseActions.php");
-if ($_GET and $_GET["gameid"] and $_GET["color"])
-    ;
-
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -12,12 +9,7 @@ if ($_GET and $_GET["gameid"] and $_GET["color"])
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chessmate</title>
     <link rel="stylesheet" href="chess.css">
-    <!--
-    <a href="board.php">
-        <img src="Chessmate_logo.PNG" class="logo" alt="chessmate logo">
-    </a>
--->
-
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 </head>
 
 
@@ -26,37 +18,23 @@ if ($_GET and $_GET["gameid"] and $_GET["color"])
     <div class="grid-container-whole">
         <div class="leftmost-column">
             <a href="board.php">
-                <img style="width:4vw; height:6vh;" src="Chessmate_logo.PNG" class="logo" alt="chessmate logo">
+
             </a>
         </div>
-        <!-- TODO: replace the table below with a structure of divs (on a separate branch).
-      Stage 1:
-      * Every div should be a class of "square" or something like that,
-      * they should have fixed sizes or scale
-      * they should display an image of class "piece" in the center, "legal-move" above anything else,
-      * the board coloring should be made with a js function color() that takes 1 boolean argument
-          where 1 is white and 0 is black (something like "boolean drawFromWhitePerspective").
-      (Later at Stage 2: there should be also a way to highlight the square for a hint,
-          and an image of class "comment" must be shown in the right top corner of the square)
-          -->
-
-
         <div class="board-column">
             <div class="grid-container-boardside">
-                <div class="enemy-panel">
-                    <div class="grid-container-enemy-player-panel">
-                        <div class="profile-pic-c">
-                            <img class="player-avatar" src="pieces/white-knight.png" alt="white knight">
+                <div class="black-panel">
+                    <div class="grid-container-black-player-panel">
+                        <div class="profile-pic-c" id="black-icon">
                         </div>
                         <div class="grid-container-name-captured">
-                            <div class="name-c">
-                                The White Knights
+                            <div class="name-c" id="black-name">
                             </div>
-                            <div class="captured-c" id="black-pieces-captured">
-                                
+                            <div class="captured-c" id="black-captured">
+
                             </div>
                         </div>
-                        <div class="time-c">
+                        <div class="time-c" id="black-time">
                         </div>
                     </div>
                 </div>
@@ -361,26 +339,18 @@ if ($_GET and $_GET["gameid"] and $_GET["color"])
 
                 </div>
                 <div class="player-panel">
-                    <div class=" grid-container-enemy-player-panel">
-                        <div class="profile-pic-c">
-                            <img class="player-avatar" src="pieces/black-knight.png" alt="black king">
+
+                    <div class=" grid-container-black-player-panel">
+                        <div class="profile-pic-c" id="white-icon">
                         </div>
                         <div class="grid-container-name-captured">
-                            <div class="name-c">
-                                Dark Knights
+                            <div class="name-c" id="white-name">
                             </div>
-                            <div class="captured-c" id="white-pieces-captured">
+                            <div class="captured-c" id="white-captured">
                             </div>
                         </div>
-                        <div class="time-c">
+                        <div class="time-c" id="white-time">
                         </div>
-
-                        <!-- <?php
-                        if ($_GET) {
-                            echo '<h2>Your color is: <div id="color">' . $_GET["color"] . '</div></h2>
-                        <h2>Game ID: <div id="gameID">' . $_GET["gameid"] . '</div></h2>';
-                        }
-                        ?> -->
                     </div>
                 </div>
             </div>
@@ -399,45 +369,109 @@ if ($_GET and $_GET["gameid"] and $_GET["color"])
             <img src="pieces/black-knight.png" alt="n">
         </div>
 
-        <div class="menu-column">
-                    <!--<div class="grid-container-option-buttons">
-                    <img src="reverse.png" id="rotate-img" class=menu-image alt="menu button rotate the board">
-                </div>-->
-
-            <?php
-                        if ($_GET) {
-                            echo '<h2>Your color is: <div id="color">' . $_GET["color"] . '</div></h2>
-                        <h2>Game ID: <div id="gameID">' . $_GET["gameid"] . '</div></h2>';
-                        }
-                        ?>
-            <!--
-            <div class="menu-container">
-                <div class="dropdown">
-                    <button onclick="myFunction1()" class="dropbtn">Play</button>
-                    <div id="myDropdown" class="dropdown-content">
-                        <a href="#home">Play</a>
-                        <a href="#about">Computer</a>
-                        <a href="#contact">Practice</a>
-                    </div>
-                </div>
-                <div class="dropdown">
-                    <button onclick="myFunction2()" class="dropbtn">Puzzles</button>
-                    <div id="myDropdown2" class="dropdown-content">
-                        <a href="#home">Puzzles</a>
-                        <a href="#about">Daily Puzzle</a>
-                        <a href="#contact">Previous Puzzles</a>
-                    </div>
-                </div>
-                <div class="dropdown">
-                    <button onclick="myFunction3()" class="dropbtn">Custom</button>
-                    <div id="myDropdown3" class="dropdown-content">
-                        <a href="#home">Create</a>
-                        <a href="#about">Watch</a>
-
-                    </div>
-                </div>
+        <div class="menu-column flex" id="menu-column">
+            <div class="login-container" id="login-container">
+                <p id="player-name">Guest</p>
+                <button onclick="switchContainerView('initial-menu', 'login-menu')" id="login-button" class="login-register-button">Log in</button>
+                <button onclick="switchContainerView('initial-menu', 'registration-menu')" id="sign-up-button" class="login-register-button">Sign up</button>
+                <button onclick="signOut()" id="sigh-out-button" class="login-register-button hidden" style="transform: translateX(9vh);">Sign out</button>
             </div>
--->
+            <img src="Chessmate_logo.PNG" class="logo" alt="chessmate logo">
+            <div class="dynamic-menu-container">
+                <div class="dynamic-menu-group" id="initial-menu">
+                    <button class="dynamic-menu-element" id="start-classic">Classic Match</button>
+                    <button class="dynamic-menu-element" id="start-ranked">Ranked Game</button>
+                    <button class="dynamic-menu-element" id="start-engine">vs Computer</button>
+                    <button class="dynamic-menu-element">Leaderboard</button>
+
+                </div>
+                <div class="dynamic-menu-group hidden" id="leaderboard-menu">
+                    <button class="back-button" onclick="switchContainerView('leaderboard-menu', 'initial-menu')">back</button>
+                    <p>Leaderboard</p>
+                    <!-- ? Leaderboard somehow: Like a scrollable list in a container -->
+                </div>
+                <div class="dynamic-menu-group hidden" id="online-game-menu">
+                    <button class="dynamic-menu-element">Resign</button>
+                    <button class="dynamic-menu-element">Offer Draw</button>
+                    <p>Chat</p>
+                    <!-- ? Chat somehow: Like a scrollable list in a container -->
+                </div>
+                <div class="dynamic-menu-group hidden" id="engine-game-menu">
+                    <button class="dynamic-menu-element">Resign</button>
+                    <button class="dynamic-menu-element">Offer Draw</button>
+                    <button class="dynamic-menu-element">Get Hint</button>
+                    <button class="dynamic-menu-element">Change Move</button>
+                </div>
+                <div class="dynamic-menu-group hidden" id="waiting-game-menu">
+                    <button class="dynamic-menu-element" id="cancel-button">Cancel</button>
+                    <!-- animation <img gif>-->
+
+                </div>
+                <div class="dynamic-menu-group hidden" id="login-menu">
+                    <button class="dynamic-menu-back-button" id="back-button" onclick="switchContainerView('login-menu', 'initial-menu'); toggleErrorMessage('');">Back</button>
+
+                    <div class="dynamic-menu-element" style="padding: 5px">Log in</div>
+                    <form id="login-reguster-form" onsubmit="handleSubmit(event);">
+                    <input type="hidden" id="operation" value="login" name="operation">
+                        <div class="dynamic-menu-element">
+                            <div class="label-field-container">
+                                <div class="label-container">
+                                    <label style="padding-left: 0" for="login">Login:</label>
+                                </div>
+                                <div class="input-container">
+                                    <input type="text" id="login" name="login">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="dynamic-menu-element">
+                            <div class="label-field-container">
+                                <div class="label-container">
+                                    <label style="padding-left: 0" for="password">Password:</label>
+                                </div>
+                                <div class="input-container">
+                                    <input type="password" id="password" name="password">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="error-message"></div>
+                        <button type="submit" class="dynamic-menu-element" style="width: 100%">Log in</button>
+                    </form>
+
+                </div>
+                <div class="dynamic-menu-group hidden" id="registration-menu">
+                    <button class="dynamic-menu-back-button" id="back-button" onclick="switchContainerView('registration-menu', 'initial-menu'); toggleErrorMessage('');">Back</button>
+                     <div class="dynamic-menu-element" style="padding: 5px">Sign up</div>
+                    <form id="login-register-form" onsubmit="handleSubmit(event);">
+                        <input type="hidden" id="operation1" value="registration" name="operation">
+                        <div class="dynamic-menu-element">
+                            <div class="label-field-container">
+                                <div class="label-container">
+                                    <label style="padding-left: 0" for="login1">Login:</label>
+                                </div>
+                                <div class="input-container">
+                                    <input type="text" id="login1" name="login">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="dynamic-menu-element">
+                            <div class="label-field-container">
+                                <div class="label-container">
+                                    <label style="padding-left: 0" for="password1">Password:</label>
+                                </div>
+                                <div class="input-container">
+                                    <input type="password" id="password1" name="password">
+                                </div>
+
+                            </div>
+                        </div>
+                        <div class="error-message"></div>
+                        <button type="submit" class="dynamic-menu-element" style="width: 100%">Register</button>
+                    </form>
+
+                </div>
+
+
+            </div>
         </div>
         <div class="rightmost-column">
         </div>
@@ -446,44 +480,153 @@ if ($_GET and $_GET["gameid"] and $_GET["color"])
 
 
         <script>
-            document.getElementById('rotate-img').addEventListener('click', function () {
-                flipHTMLBoard(true);
-            });
-            document.getElementById('show-img').addEventListener('click', function () {
-                var container = document.getElementById("menu-column");
+        document.getElementById('rotate-img').addEventListener('click', function () {
+            flipHTMLBoard(true);
+        });
+        document.getElementById('show-img').addEventListener('click', function () {
+            toggleContainer();
+        });
+        document.getElementById('start-classic').addEventListener('click', function(){
+            startClassicButtonOnClick();
+        });
+        document.getElementById('start-ranked').addEventListener('click', function(){
+            startRankedButtonOnClick();
+        });
+        document.getElementById('start-engine').addEventListener('click', function(){
+            startEngineButtonOnClick();
+        });
+        function toggleContainer() {
+            let container = document.getElementById("menu-column");
+
+                container.classList.toggle("flex");
                 container.classList.toggle("hidden");
-                container.classList.toggle("visible");
-            });
-            function myFunction1() {
-                document.getElementById("myDropdown").classList.toggle("show");
-            };
 
-            function myFunction2() {
-                document.getElementById("myDropdown2").classList.toggle("show");
-            };
+        }
+        function myFunction1() {
+            document.getElementById("myDropdown").classList.toggle("show");
+        }
 
-            function myFunction3() {
-                document.getElementById("myDropdown3").classList.toggle("show");
-            };
+        function myFunction2() {
+            document.getElementById("myDropdown2").classList.toggle("show");
+        };
 
-            // Close the dropdown if the user clicks outside of it
-            window.onclick = function (event) {
-                if (!event.target.matches('.dropbtn')) {
-                    var dropdowns = document.getElementsByClassName("dropdown-content");
-                    var i;
-                    for (i = 0; i < dropdowns.length; i++) {
-                        var openDropdown = dropdowns[i];
-                        if (openDropdown.classList.contains('show')) {
-                            openDropdown.classList.remove('show');
-                        }
+        function myFunction3() {
+            document.getElementById("myDropdown3").classList.toggle("show");
+        };
+
+
+        // Close the dropdown if the user clicks outside of it
+        window.onclick = function (event) {
+            if (!event.target.matches('.dropbtn')) {
+                var dropdowns = document.getElementsByClassName("dropdown-content");
+                var i;
+                for (i = 0; i < dropdowns.length; i++) {
+                    var openDropdown = dropdowns[i];
+                    if (openDropdown.classList.contains('show')) {
+                        openDropdown.classList.remove('show');
                     }
                 }
             }
+        }
+
+
+
+function handleSubmit(event) {
+    event.preventDefault();
+    const form = event.target;
+
+    const login = form.elements["login"].value;
+    const password = form.elements["password"].value;
+    const operation = form.elements["operation"].value;
+
+    const url = `DBActions/login_register.php?operation=${encodeURIComponent(operation)}&login=${encodeURIComponent(login)}&password=${encodeURIComponent(password)}`;
+
+    fetch(url, {
+        method: "GET",
+        headers: {
+            "Accept": "application/json"
+        }
+    })
+    .then(response => response.text())
+    .then(text => {
+
+        // Process the response data
+        if (!isNaN(text)) {
+            toggleErrorMessage(''); // Hide the error message
+            console.log("Successful login. ID = " + text);
+            document.getElementById("player-id").innerHTML = text;
+            switchContainerView(operation + '-menu', 'initial-menu');
+            //show player's name
+            document.getElementById("player-name").innerHTML = login;
+            //replace "login" and "sign up" buttons with "sign out"
+            document.getElementById("sigh-out-button").classList.remove('hidden');
+            document.getElementById("login-button").classList.add('hidden');
+            document.getElementById("sign-up-button").classList.add('hidden');
+
+        } else {
+            console.log(text);
+            toggleErrorMessage(text);
+
+        }
+    }).catch(error => {
+        console.error("Error:", error);
+    });
+}
+function toggleErrorMessage(message) {
+    const errorMessageElement = document.querySelector('.error-message');
+
+    if (message) {
+        // Show the error message
+        errorMessageElement.innerHTML = message;
+        errorMessageElement.style.display = 'block';
+    } else {
+        // Hide the error message
+        errorMessageElement.innerHTML = '';
+        errorMessageElement.style.display = 'none';
+    }
+}
+
+function switchContainerView(hideID, showID) {
+    document.getElementById(hideID).classList.add('hidden');
+    document.getElementById(showID).classList.remove('hidden');
+
+    // Hide/show login/registration container between scenes
+    if (hideID === "initial-menu") {
+        $(".login-register-button").css("visibility", "hidden");
+    }
+    if (showID === "initial-menu") {
+        $(".login-register-button").css("visibility", "visible");
+    }
+}
+        function signOut(){
+            //change player's name
+            document.getElementById("player-name").innerHTML = "Guest";
+            //replace "login" and "sign up" buttons with "sign out"
+            document.getElementById("sigh-out-button").classList.add('hidden');
+            document.getElementById("login-button").classList.remove('hidden');
+            document.getElementById("sign-up-button").classList.remove('hidden');
+            document.getElementById("player-id").innerHTML = Math.floor(Math.random() * 1000) + 105;
+            console.log("Signed Out; New Guest ID =" + document.getElementById("player-id").innerHTML);
+        }
+
+
+
+
+
+
         </script>
         <script src="model.js">
         </script>
     </div>
-
+<div class="hidden" id="player-id">
+    <?php
+    if ($_GET){
+        echo $_GET['id'];
+    } else echo rand();?>
+</div>
+<div class="hidden" id="queue-status">
+    <?php echo "none";   ?>
+</div>
 </body>
 
 </html>

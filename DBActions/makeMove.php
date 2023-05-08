@@ -13,7 +13,7 @@ if($_GET){
 
     while($lastMove == $db->getLastMove($gameID)) usleep(500);
 
-//     echo $db->getLastMove($gameID);
+//     echo $db->getPositionAndLastMoveAndCaptured($gameID);
     echo $db->getLastPositionAndMove($gameID);
     
 } else echo "error";
