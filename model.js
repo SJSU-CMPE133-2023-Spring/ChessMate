@@ -647,8 +647,8 @@ function getPawnMoves(x, y, onlyAttacks = false) {
             arrayId = new Coordinate(undefined, undefined, fenPassant);
             fenX = arrayId.x;
             fenY = arrayId.y;
-            if (x == fenX - 1 && y == fenY + 1) output.push(new Coordinate(fenX, fenY));
-            if (x == fenX + 1 && y == fenY + 1) output.push(new Coordinate(fenX, fenY));
+            if (x == fenX - 1 && y == fenY + 1 && confirmSqr(x, y, fenX, y) === ENEMY) output.push(new Coordinate(fenX, fenY));
+            if (x == fenX + 1 && y == fenY + 1 && confirmSqr(x, y, fenX, y) === ENEMY) output.push(new Coordinate(fenX, fenY));
         }
     }
 
@@ -668,8 +668,8 @@ function getPawnMoves(x, y, onlyAttacks = false) {
             arrayId = new Coordinate(undefined, undefined, fenPassant);
             fenX = arrayId.x;
             fenY = arrayId.y;
-            if (x == fenX - 1 && y == fenY - 1) output.push(new Coordinate(fenX, fenY));
-            if (x == fenX + 1 && y == fenY - 1) output.push(new Coordinate(fenX, fenY));
+            if (x == fenX - 1 && y == fenY - 1 && confirmSqr(x, y, fenX, y) === ENEMY) output.push(new Coordinate(fenX, fenY));
+            if (x == fenX + 1 && y == fenY - 1 && confirmSqr(x, y, fenX, y) === ENEMY) output.push(new Coordinate(fenX, fenY));
         }
     }
     return output;
