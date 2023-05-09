@@ -240,7 +240,7 @@ VALUES ('$player1_id', '$player2_id', '$gameStatus', '$this->INITIAL_POSITION', 
     //returns Players Name, Rating and Icon separated by "&"
     public function getPlayerNameRatingIcon($playerID){
         if ($playerID=="engine") return "Stockfish Engine&???&stockfish.png";
-        if ($playerID>100) return "Guest&500&guest.png";
+        if ($playerID>100) return "Guest&500&emote.png";
 
         $sql = "SELECT * FROM accounts WHERE id='$playerID'";
         $result = mysqli_query($this->conn, $sql);
