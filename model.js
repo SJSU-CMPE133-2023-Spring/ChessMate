@@ -405,15 +405,18 @@ function fillHTMLBoard(boardArr) {
 
 // removes any previous highlights and then highlights the two new squares that had activity
 function highlightMove(oldX, oldY, newX, newY) {
-    const oldHighlights = document.querySelectorAll('div.moved');
-    for (hl of oldHighlights) {
-        hl.classList.remove('moved');
-    }
+    hideHighlightedMoves();
 
     const oldSqrId = new Coordinate(oldX, oldY).square;
     const newSqrId = new Coordinate(newX, newY).square;
     document.getElementById(oldSqrId).parentElement.classList.add('moved');
     document.getElementById(newSqrId).parentElement.classList.add('moved');
+}
+function hideHighlightedMoves(){
+    const oldHighlights = document.querySelectorAll('div.moved');
+    for (hl of oldHighlights) {
+        hl.classList.remove('moved');
+    }
 }
 
 function displaySuperscript(square, superscript){
@@ -1194,7 +1197,7 @@ async function startGame(gameID, newPlayerColor) {
     boardMode = BOARD_MODE_ONLINE;
     initOnlineGame(gameID, newPlayerColor);
     switchContainerView("waiting-game-menu", "online-game-menu");
-
+    hideHighlightedMoves();
 
     console.log("start game!!!");
 

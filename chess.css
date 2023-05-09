@@ -5,8 +5,34 @@ body{
   min-width: 780px;
 
 }
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+        th, td {
+
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+  font-size: 2.4vh;
+}
+
+        img.icon {
+  width: 3vw;
+  height: 3vw;
+  object-fit: cover;
+  margin-right: 8px;
+}
+
+        .table-container {
+  max-height: 39vh; /* Adjust the value as needed */
+            overflow-y: auto;
+}
 p{
   font-size: 3vh;
+}
+span{
+  font-size: 2.4vh;
 }
 
 #game_page{

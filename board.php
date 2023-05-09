@@ -382,13 +382,24 @@ require_once("DBActions/DataBaseActions.php");
                     <button class="dynamic-menu-element" id="start-classic">Classic Match</button>
                     <button class="dynamic-menu-element" id="start-ranked">Ranked Game</button>
                     <button class="dynamic-menu-element" id="start-engine">vs Computer</button>
-                    <button class="dynamic-menu-element" onclick="switchContainerView('initial-menu', 'leaderboard-menu')">Leaderboard</button>
+                    <button class="dynamic-menu-element" onclick="switchContainerView('initial-menu', 'leaderboard-menu'); updatePlayersTable();">Leaderboard</button>
 
                 </div>
                 <div class="dynamic-menu-group hidden" id="leaderboard-menu">
                     <button class="dynamic-menu-back-button" onclick="switchContainerView('leaderboard-menu', 'initial-menu')">back</button>
                     <div class=dynamic-menu-element style="font-size: 3vh">Leaderboard</div>
-                    <!-- ? Leaderboard somehow: Like a scrollable list in a container -->
+                    <div class="table-container">
+                        <table id="playersTable">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Rating</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
                 <div class="dynamic-menu-group hidden" id="online-game-menu">
                     <button class="dynamic-menu-element">Resign</button>
@@ -609,6 +620,45 @@ function switchContainerView(hideID, showID) {
             document.getElementById("player-id").innerHTML = Math.floor(Math.random() * 1000) + 105;
             console.log("Signed Out; New Guest ID =" + document.getElementById("player-id").innerHTML);
         }
+async function updatePlayersTable() {
+    //ajax call
+    const response = await fetch(`DBActions/getLeaderboard.php`);
+    const status = await response.text();
+    const playersData = JSON.parse(status);
+    console.log("response: "+response+"; status: "+status);
+
+    //main function
+    const playersTable = document.getElementById('playersTable');
+    const tbody = playersTable.getElementsByTagName('tbody')[0];
+    tbody.innerHTML = '';
+
+    const currentUserName = document.getElementById('user-name').innerText;
+    playersData.forEach(player => {
+        const newRow = tbody.insertRow();
+
+        const nameCell = newRow.insertCell();
+        const iconImage = document.createElement('img');
+        iconImage.src = "icons/"+player.icon;
+        iconImage.classList.add('icon');
+        nameCell.appendChild(iconImage);
+
+        const nameSpan = document.createElement('span');
+        nameSpan.innerText = player.login;
+        if (player.login === currentUserName) {
+            nameSpan.innerText += ' (you)';
+        }
+        nameCell.appendChild(nameSpan);
+
+        const ratingCell = newRow.insertCell();
+        ratingCell.innerText = player.rating;
+    });
+}
+
+// Example usage
+ajaxCall('your_php_method_name', {}, (response) => {
+    const playersData = JSON.parse(response);
+    updatePlayersTable(playersData);
+});
 
 
 

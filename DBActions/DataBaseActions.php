@@ -313,6 +313,23 @@ VALUES ('$player1_id', '$player2_id', '$gameStatus', '$this->INITIAL_POSITION', 
         $sql = "DELETE FROM matches WHERE id=$id";
         $result = mysqli_query($this->conn, $sql);
     }
+    // For leaderboard table
+    public function getPlayersSortedByRating() {
+        $sql = "SELECT * FROM accounts ORDER BY rating ASC";
+        $result = mysqli_query($this->conn, $sql);
+        $players = [];
+
+        while ($row = mysqli_fetch_assoc($result)) {
+            $players[] = [
+                'id' => $row['id'],
+            'icon' => $row['icon'],
+            'login' => $row['login'],
+            'rating' => $row['rating']
+        ];
+        }
+
+    return json_encode($players);
+    }
 
 
 }
