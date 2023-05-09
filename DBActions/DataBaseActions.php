@@ -64,7 +64,7 @@ class DataBaseActions extends Exception
             `status` varchar(255) NOT NULL,
             `type` varchar(255) NOT NULL,
             `position` varchar(255) NOT NULL,
-            `captured` varchar(255) NOT NULL,
+            `result` varchar(255) NOT NULL,
             `move_history` varchar(1255) NOT NULL, 
             `date` varchar(255) NOT NULL) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;";
         $results = mysqli_query($this->conn, $sql);
@@ -118,7 +118,7 @@ class DataBaseActions extends Exception
         $date = date("Y-m-d h:i:sa");
 
 
-        $sql = "INSERT INTO `matches` (`white`, `black`, status,`position`, `move_history`, `date`, `captured`,`type`)
+        $sql = "INSERT INTO `matches` (`white`, `black`, status,`position`, `move_history`, `date`, `result`,`type`)
 VALUES ('$player1_id', '$player2_id', '$gameStatus', '$this->INITIAL_POSITION', '', '$date','', '$type');";
         $results = mysqli_query($this->conn, $sql);
     }
@@ -159,12 +159,6 @@ VALUES ('$player1_id', '$player2_id', '$gameStatus', '$this->INITIAL_POSITION', 
         $row = mysqli_fetch_object($result);
         return $row->position;
     }
-    public function getCaptured($id){
-        $sql = "SELECT * FROM matches WHERE id=$id";
-        $result = mysqli_query($this->conn, $sql);
-        $row = mysqli_fetch_object($result);
-        return $row->captured;
-    }
 
     public function getLastMove($id): string
     {
@@ -203,7 +197,7 @@ VALUES ('$player1_id', '$player2_id', '$gameStatus', '$this->INITIAL_POSITION', 
     }
     public function enterOrStartOnlineGame($playerID, $type){
         $randBool = (bool) mt_rand(0, 1);
-        $sql = "SELECT * FROM matches WHERE status='$this->STATUS_WAITING_OPPONENT'";
+        $sql = "SELECT * FROM matches WHERE status='$this->STATUS_WAITING_OPPONENT' AND type='$type'";
         $result = mysqli_query($this->conn, $sql);
         $row = mysqli_fetch_object($result);
         if ($row == null){
@@ -312,6 +306,22 @@ VALUES ('$player1_id', '$player2_id', '$gameStatus', '$this->INITIAL_POSITION', 
     public function deleteGame($id){
         $sql = "DELETE FROM matches WHERE id=$id";
         $result = mysqli_query($this->conn, $sql);
+    }
+    public function offerDraw($color, $gameID){
+        $sql = "SELECT * FROM matches WHERE id=$gameID";
+        $result = mysqli_query($this->conn, $sql);
+        $row = mysqli_fetch_object($result);
+        if (($color ==="white" AND $row->result==="draw offer from black")
+        OR ($color==="black" AND $row->result==="draw offer from white")){
+            $sql = "UPDATE matches SET result = 'draw' WHERE id=$gameID";
+            $result = mysqli_query($this->conn, $sql);
+            return "draw";
+        }
+        if ($row->result ==="draw") return "draw";
+        if ($row->result === "" AND $color==="white") $sql = "UPDATE matches SET result = 'draw offer from white' WHERE id=$gameID";
+        if ($row->result === "" AND $color==="black") $sql = "UPDATE matches SET result = 'draw offer from black' WHERE id=$gameID";
+        $result = mysqli_query($this->conn, $sql);
+        return "-";
     }
 
 

@@ -239,10 +239,12 @@ function changePieceLocationOnBoard(board, oldX, oldY, newX, newY, affectGlobal 
         if (oldBoard[oldY][oldX] == 'P' && newX == fenX && newY == fenY) {
             board[newY+1][newX] = ' ';
             const nothingPersonalKid = new Coordinate(newX, oldY);
+            if (affectGlobal) capture("p");
         }
         if (oldBoard[oldY][oldX] == 'p' && newX == fenX && newY == fenY) {
             board[newY-1][newX] = ' ';
             const nothingPersonalKid = new Coordinate(newX, oldY);
+            if (affectGlobal) capture("P");
         }
     }
 
@@ -1185,6 +1187,24 @@ async function startGame(gameID, newPlayerColor) {
     console.log("start game!!!");
 
 }
+//Draw logic
+function offerDraw() {
+    document.getElementById("offer-draw-button").classList.add("hidden");
+    let drawCheckInterval;
+
+    const checkDrawLoop = async function loop() {
+        const response = await fetch(`DBActions/offerDraw.php?id=${gameID}&color=${playerColor}`);
+        const status = await response.text();
+        console.log("here. Response = "+status);
+        if (status === "draw") {
+            clearInterval(drawCheckInterval);
+            finishGame(0.5);
+        }
+    };
+
+    drawCheckInterval = setInterval(checkDrawLoop, 1000);
+}
+
 
 
 //Timer logic
@@ -1195,8 +1215,8 @@ let whiteRunning = false;
 let blackRunning = false;
 
 function initializeTimers() {
-    whiteTime = 5 * 60;
-    blackTime = 5 * 60;
+    whiteTime = 1 * 60;
+    blackTime = 1 * 60;
     updateTimers();
     toggleTimers();
 }
@@ -1253,6 +1273,10 @@ function decrementBlackTimer() {
     }
 }
 
+
+function finishGame(result){
+    console.log("Game finished with a tie");
+}
 
 
 

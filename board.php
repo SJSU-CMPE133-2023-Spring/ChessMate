@@ -388,19 +388,17 @@ require_once("DBActions/DataBaseActions.php");
                 <div class="dynamic-menu-group hidden" id="leaderboard-menu">
                     <button class="dynamic-menu-back-button" onclick="switchContainerView('leaderboard-menu', 'initial-menu')">back</button>
                     <div class=dynamic-menu-element style="font-size: 3vh">Leaderboard</div>
-                    <!-- ? Leaderboard somehow: Like a scrollable list in a container -->
+
                 </div>
                 <div class="dynamic-menu-group hidden" id="online-game-menu">
                     <button class="dynamic-menu-element">Resign</button>
-                    <button class="dynamic-menu-element">Offer Draw</button>
-                    <p>Chat</p>
-                    <!-- ? Chat somehow: Like a scrollable list in a container -->
+                    <button class="dynamic-menu-element" onclick="offerDraw()" id="offer-draw-button">Offer Draw</button>
+
                 </div>
                 <div class="dynamic-menu-group hidden" id="engine-game-menu">
                     <button class="dynamic-menu-element">Resign</button>
                     <button class="dynamic-menu-element">Offer Draw</button>
                     <button class="dynamic-menu-element">Get Hint</button>
-                    <button class="dynamic-menu-element">Change Move</button>
                 </div>
                 <div class="dynamic-menu-group hidden" id="waiting-game-menu">
                     <button class="dynamic-menu-element" id="cancel-button">Cancel</button>
