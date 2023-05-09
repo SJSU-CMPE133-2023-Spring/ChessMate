@@ -197,7 +197,7 @@ function globalMoveUpdate(move) {
     // TODO: display state of game on screen, maybe as a header - states include whose turn it is and mates
     if (boardMode!==BOARD_MODE_SANDBOX){
         let end = checkEndMates(board, getOppColor(playerColor));
-        if (end == "checkmate") {
+        if (end) {
             stopTimers();
             console.log(end +' caused by ' + getOppColor(playerColor));
 
@@ -210,19 +210,13 @@ function globalMoveUpdate(move) {
             }
             finishGame(0, "Lose by Checkmate" );
         }
-        if (end == "stalemate") {
-            finishGame(0.5, "Draw by Stalemate")
-        }
         end = checkEndMates(board, playerColor);
-        if (end == "checkmate") {
+        if (end) {
             stopTimers();
             console.log(end +' caused by ' + playerColor);
 
 
             finishGame(1, "Victory by Checkmate" );
-        }
-        if (end == "stalemate") {
-            finishGame(0.5, "Draw by Stalemate")
         }
     }
 
