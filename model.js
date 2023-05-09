@@ -195,6 +195,7 @@ function globalMoveUpdate(move) {
         if (end) {
             stopTimers();
             console.log(end +' caused by ' + getOppColor(playerColor));
+            finishGame(0, "Lose by Checkmate" );
             if (getOppColor(playerColor)===BLACK) {
                 displaySuperscript(getPieceSquare("k"), SUBSCRIPT_WIN);
                 displaySuperscript(getPieceSquare("K"), SUBSCRIPT_CHECKMATE);
@@ -207,6 +208,7 @@ function globalMoveUpdate(move) {
         if (end) {
             stopTimers();
             console.log(end +' caused by ' + playerColor);
+            finishGame(1, "Victory by Checkmate" );
             if (getOppColor(playerColor)===BLACK) {
                 displaySuperscript(getPieceSquare("K"), SUBSCRIPT_WIN);
                 displaySuperscript(getPieceSquare("k"), SUBSCRIPT_CHECKMATE);
