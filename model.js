@@ -195,7 +195,7 @@ function globalMoveUpdate(move) {
         if (end) {
             stopTimers();
             console.log(end +' caused by ' + getOppColor(playerColor));
-            finishGame(0, "Lose by Checkmate" );
+
             if (getOppColor(playerColor)===BLACK) {
                 displaySuperscript(getPieceSquare("k"), SUBSCRIPT_WIN);
                 displaySuperscript(getPieceSquare("K"), SUBSCRIPT_CHECKMATE);
@@ -203,19 +203,15 @@ function globalMoveUpdate(move) {
                 displaySuperscript(getPieceSquare("K"), SUBSCRIPT_WIN);
                 displaySuperscript(getPieceSquare("k"), SUBSCRIPT_CHECKMATE);
             }
+            finishGame(0, "Lose by Checkmate" );
         }
         end = checkEndMates(board, playerColor);
         if (end) {
             stopTimers();
             console.log(end +' caused by ' + playerColor);
+
+
             finishGame(1, "Victory by Checkmate" );
-            if (getOppColor(playerColor)===BLACK) {
-                displaySuperscript(getPieceSquare("K"), SUBSCRIPT_WIN);
-                displaySuperscript(getPieceSquare("k"), SUBSCRIPT_CHECKMATE);
-            } else {
-                displaySuperscript(getPieceSquare("k"), SUBSCRIPT_WIN);
-                displaySuperscript(getPieceSquare("K"), SUBSCRIPT_CHECKMATE);
-            }
         }
     }
 
@@ -431,10 +427,10 @@ function displaySuperscript(square, superscript){
 }
 
 function hideSuperscripts(){
-    const images = document.querySelectorAll('img.subscript-img');
+    const superscriptImages = document.querySelectorAll('.superscript-img');
 
-    images.forEach(img => {
-        img.parentNode.removeChild(img);
+    superscriptImages.forEach(img => {
+        img.parentElement.removeChild(img);
     });
 }
 
@@ -1330,6 +1326,24 @@ function startGameStatusUpdates() {
 }
 async function finishGame(result, message){
     if (gameFinished) return;
+
+    if ((result == 1 && playerColor=="white")||(result == 0 && playerColor=="black")) {
+        displaySuperscript(getPieceSquare("K"), SUBSCRIPT_WIN);
+        displaySuperscript(getPieceSquare("k"), SUBSCRIPT_CHECKMATE);
+    }
+    if ((result == 1 && playerColor=="black")||(result == 0 && playerColor=="white")){
+        displaySuperscript(getPieceSquare("k"), SUBSCRIPT_WIN);
+        displaySuperscript(getPieceSquare("K"), SUBSCRIPT_CHECKMATE);
+    }
+    if (result == 0.5){
+        displaySuperscript(getPieceSquare("k"), SUBSCRIPT_DRAW);
+        displaySuperscript(getPieceSquare("K"), SUBSCRIPT_DRAW);
+    }
+
+
+
+
+
     gameFinished = true;
     const response = await fetch(`DBActions/getRatingChange.php?id=${gameID}&color=${playerColor}&result=${result}`);
     const ratingChange = await response.text();
@@ -1378,6 +1392,7 @@ function initMainMenu(){
     turn = true;
     if (playerColor ==="black") flipHTMLBoard(true);
     hideSuperscripts();
+    console.log("hiding");
     hideHighlightedMoves();
     document.getElementById("player-captured").innerHTML = "";
     document.getElementById("opponent-captured").innerHTML = "";
