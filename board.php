@@ -402,13 +402,14 @@ require_once("DBActions/DataBaseActions.php");
                     </div>
                 </div>
                 <div class="dynamic-menu-group hidden" id="online-game-menu">
-                    <button class="dynamic-menu-element">Resign</button>
+                    <button class="dynamic-menu-element" id="quit-button" onclick="quitGameOnclick()">Resign</button>
+                    <div class="dynamic-menu-element hidden" style="font-size: 2.5vh" id="draw-offer-message">Opponent offered a draw</div>
                     <button class="dynamic-menu-element" onclick="offerDraw()" id="offer-draw-button">Offer Draw</button>
 
                 </div>
                 <div class="dynamic-menu-group hidden" id="engine-game-menu">
-                    <button class="dynamic-menu-element">Resign</button>
-                    <button class="dynamic-menu-element">Offer Draw</button>
+                    <button class="dynamic-menu-element" onclick="quitGameOnclick()">Resign</button>
+                    <button class="dynamic-menu-element" onclick="offerDraw()">Offer Draw</button>
                     <button class="dynamic-menu-element">Get Hint</button>
                 </div>
                 <div class="dynamic-menu-group hidden" id="waiting-game-menu">
@@ -652,11 +653,6 @@ async function updatePlayersTable() {
     });
 }
 
-// Example usage
-ajaxCall('your_php_method_name', {}, (response) => {
-    const playersData = JSON.parse(response);
-    updatePlayersTable(playersData);
-});
 
 
 

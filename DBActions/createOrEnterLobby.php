@@ -12,7 +12,7 @@ if($_GET){
         echo "error";
         return;
     }
-    $gameStatus = $db->getGameStatus($gameID);
+    $gameStatus = $db->getLobbyStatus($gameID);
     if ($gameStatus==="waiting") echo $gameID."&waiting";
     else if ($gameStatus==="ready") echo $gameID."&ready&".$db->getPlayerColor($gameID, $playerID);
 

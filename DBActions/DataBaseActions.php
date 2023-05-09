@@ -64,8 +64,8 @@ class DataBaseActions extends Exception
             `status` varchar(255) NOT NULL,
             `type` varchar(255) NOT NULL,
             `position` varchar(255) NOT NULL,
-            `result` varchar(255) NOT NULL,
             `move_history` varchar(1255) NOT NULL,
+
             `date` varchar(255) NOT NULL) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;";
         $results = mysqli_query($this->conn, $sql);
         $sql = "CREATE TABLE IF NOT EXISTS `stockfish_request` (
@@ -118,8 +118,8 @@ class DataBaseActions extends Exception
         $date = date("Y-m-d h:i:sa");
 
 
-        $sql = "INSERT INTO `matches` (`white`, `black`, status,`position`, `move_history`, `date`, `result`,`type`)
-VALUES ('$player1_id', '$player2_id', '$gameStatus', '$this->INITIAL_POSITION', '', '$date','', '$type');";
+        $sql = "INSERT INTO `matches` (`white`, `black`, status,`position`, `move_history`, `date`,`type`)
+VALUES ('$player1_id', '$player2_id', '$gameStatus', '$this->INITIAL_POSITION', '', '$date', '$type');";
         $results = mysqli_query($this->conn, $sql);
     }
 
@@ -242,7 +242,7 @@ VALUES ('$player1_id', '$player2_id', '$gameStatus', '$this->INITIAL_POSITION', 
         return $row->login."&".$row->rating."&".$row->icon;
     }
 
-    public function getGameStatus($id){
+    public function getLobbyStatus($id){
         $sql = "SELECT * FROM matches WHERE id='$id'";
         $result = mysqli_query($this->conn, $sql);
         $row = mysqli_fetch_object($result);
@@ -312,24 +312,23 @@ VALUES ('$player1_id', '$player2_id', '$gameStatus', '$this->INITIAL_POSITION', 
         $sql = "SELECT * FROM matches WHERE id=$gameID";
         $result = mysqli_query($this->conn, $sql);
         $row = mysqli_fetch_object($result);
-        if (($color ==="white" AND $row->result==="draw offer from black")
-        OR ($color==="black" AND $row->result==="draw offer from white")){
-            $sql = "UPDATE matches SET result = 'draw' WHERE id=$gameID";
+        if (($color ==="white" AND $row->status==="draw offer from black")
+        OR ($color==="black" AND $row->status==="draw offer from white")){
+            $sql = "UPDATE matches SET status = 'draw' WHERE id=$gameID";
             $result = mysqli_query($this->conn, $sql);
             return "draw";
         }
-        if ($row->result ==="draw") return "draw";
-        if ($row->result === "" AND $color==="white") $sql = "UPDATE matches SET result = 'draw offer from white' WHERE id=$gameID";
-        if ($row->result === "" AND $color==="black") $sql = "UPDATE matches SET result = 'draw offer from black' WHERE id=$gameID";
+        if ($row->status ==="draw") return "draw";
+        if ($row->status === "started" AND $color==="white") $sql = "UPDATE matches SET status = 'draw offer from white' WHERE id=$gameID";
+        if ($row->status === "started" AND $color==="black") $sql = "UPDATE matches SET status = 'draw offer from black' WHERE id=$gameID";
         $result = mysqli_query($this->conn, $sql);
         return "-";
-}
+    }
     // For leaderboard table
     public function getPlayersSortedByRating() {
-        $sql = "SELECT * FROM accounts ORDER BY rating ASC";
+        $sql = "SELECT * FROM accounts ORDER BY rating DESC";
         $result = mysqli_query($this->conn, $sql);
         $players = [];
-
         while ($row = mysqli_fetch_assoc($result)) {
             $players[] = [
                 'id' => $row['id'],
@@ -338,7 +337,77 @@ VALUES ('$player1_id', '$player2_id', '$gameStatus', '$this->INITIAL_POSITION', 
             'rating' => $row['rating']
         ];
         }
+        return json_encode($players);
 
-    return json_encode($players);
+    }
+
+    public function getGameStatus($gameID){
+        $sql = "SELECT * FROM matches WHERE id=$gameID";
+        $result = mysqli_query($this->conn, $sql);
+        $row = mysqli_fetch_object($result);
+        return $row->status;
+    }
+
+    //the output is positive if white won, and negative if black won.
+    public function getRatingChange($gameID, $matchResult, $color){
+        $kFactor = 30;
+        if ($matchResult ===0.5) $kFactor = 15;
+
+        $sql = "SELECT * FROM matches WHERE id=$gameID";
+        $result = mysqli_query($this->conn, $sql);
+        $row = mysqli_fetch_object($result);
+
+        if ($row->type!=="ranked") return 0;
+
+        $whiteRating = $this->getPlayerRating($row->white);
+        $blackRating = $this->getPlayerRating($row->black);
+        if ($color==="white") $expectedScore = 1 / (1 + pow(10, ($blackRating - $whiteRating) / 400));
+        if ($color==="black") $expectedScore = 1 / (1 + pow(10, ($whiteRating - $blackRating) / 400));
+        $applied = "false";
+            // Calculate rating change based on result and expected score
+        $ratingChange = round($kFactor * ($matchResult - $expectedScore));
+
+        //the winner updates the actual rating
+        if ($matchResult == 1){
+            if ($color ==="white"){
+                $this->setPlayerRating($row->white, $whiteRating+$ratingChange);
+                $this->setPlayerRating($row->black, $blackRating-$ratingChange);
+            } else {
+                $this->setPlayerRating($row->white, $whiteRating-$ratingChange);
+                $this->setPlayerRating($row->black, $blackRating+$ratingChange);
+            }
+            $applied = "true";
+        }
+        if ($matchResult == 0.5){
+            if ($color ==="white"){
+                $this->setPlayerRating($row->white, $whiteRating+$ratingChange);
+                $this->setPlayerRating($row->black, $blackRating-$ratingChange);
+                $applied = "true";
+            }
+        }
+        return $ratingChange.". Applied = ".$applied;
+    }
+
+    public function getPlayerRating($playerID){
+        if ($playerID>100) return 500;
+        $sql = "SELECT * FROM accounts WHERE id=$playerID";
+        $result = mysqli_query($this->conn, $sql);
+        $row = mysqli_fetch_object($result);
+        return intval($row->rating);
+    }
+
+    public function setGameStatus($gameID, $status){
+        $sql = "UPDATE matches SET status = '$status' WHERE id=$gameID";
+        mysqli_query($this->conn, $sql);
+    }
+
+    public function setPlayerRating($playerID, $newRating){
+        if ($playerID>100) return;
+        $sql = "UPDATE accounts SET rating = '$newRating' WHERE id=$playerID";
+        mysqli_query($this->conn, $sql);
+
+    }
+
 
 }
+
