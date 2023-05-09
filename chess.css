@@ -5,8 +5,34 @@ body{
   min-width: 780px;
 
 }
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+        th, td {
+
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+  font-size: 2.4vh;
+}
+
+        img.icon {
+  width: 3vw;
+  height: 3vw;
+  object-fit: cover;
+  margin-right: 8px;
+}
+
+        .table-container {
+  max-height: 39vh; /* Adjust the value as needed */
+            overflow-y: auto;
+}
 p{
   font-size: 3vh;
+}
+span{
+  font-size: 2.4vh;
 }
 
 #game_page{
@@ -313,6 +339,10 @@ input {
     background-color: #a6a2a2;
 }
 
+.moved{
+    box-shadow: inset 0 0 30px rgba(255, 0, 0, 0.5);
+}
+
 .pieceholder{
   position: absolute;
   box-sizing: border-box;
@@ -428,8 +458,8 @@ footer{
     flex-direction: row;
     justify-content: space-evenly;
     align-items: center;
-    left: -150%;
-    top: -100%;
+    left: -170%;
+    top: -117%;
     width: 40vh;
     height: 10vh;
     background-color: #736f6f;

@@ -184,6 +184,7 @@ function globalMoveUpdate(move) {
 
     board = changePieceLocationOnBoard(board, oldX, oldY, newX, newY);
     fillHTMLBoard(board);
+    highlightMove(oldX, oldY, newX, newY);
 
     // TODO: display state of game on screen, maybe as a header - states include whose turn it is and mates
     if (boardMode!==BOARD_MODE_SANDBOX){
@@ -401,6 +402,22 @@ function fillHTMLBoard(boardArr) {
             const htmlCoord = new Coordinate(file, rank);
             document.getElementById(htmlCoord.square).innerHTML = innerHTML;
         }
+    }
+}
+
+// removes any previous highlights and then highlights the two new squares that had activity
+function highlightMove(oldX, oldY, newX, newY) {
+    hideHighlightedMoves();
+
+    const oldSqrId = new Coordinate(oldX, oldY).square;
+    const newSqrId = new Coordinate(newX, newY).square;
+    document.getElementById(oldSqrId).parentElement.classList.add('moved');
+    document.getElementById(newSqrId).parentElement.classList.add('moved');
+}
+function hideHighlightedMoves(){
+    const oldHighlights = document.querySelectorAll('div.moved');
+    for (hl of oldHighlights) {
+        hl.classList.remove('moved');
     }
 }
 
@@ -632,8 +649,8 @@ function getPawnMoves(x, y, onlyAttacks = false) {
             arrayId = new Coordinate(undefined, undefined, fenPassant);
             fenX = arrayId.x;
             fenY = arrayId.y;
-            if (x == fenX - 1 && y == fenY + 1) output.push(new Coordinate(fenX, fenY));
-            if (x == fenX + 1 && y == fenY + 1) output.push(new Coordinate(fenX, fenY));
+            if (x == fenX - 1 && y == fenY + 1 && confirmSqr(x, y, fenX, y) === ENEMY) output.push(new Coordinate(fenX, fenY));
+            if (x == fenX + 1 && y == fenY + 1 && confirmSqr(x, y, fenX, y) === ENEMY) output.push(new Coordinate(fenX, fenY));
         }
     }
 
@@ -653,8 +670,8 @@ function getPawnMoves(x, y, onlyAttacks = false) {
             arrayId = new Coordinate(undefined, undefined, fenPassant);
             fenX = arrayId.x;
             fenY = arrayId.y;
-            if (x == fenX - 1 && y == fenY - 1) output.push(new Coordinate(fenX, fenY));
-            if (x == fenX + 1 && y == fenY - 1) output.push(new Coordinate(fenX, fenY));
+            if (x == fenX - 1 && y == fenY - 1 && confirmSqr(x, y, fenX, y) === ENEMY) output.push(new Coordinate(fenX, fenY));
+            if (x == fenX + 1 && y == fenY - 1 && confirmSqr(x, y, fenX, y) === ENEMY) output.push(new Coordinate(fenX, fenY));
         }
     }
     return output;
@@ -1182,7 +1199,7 @@ async function startGame(gameID, newPlayerColor) {
     boardMode = BOARD_MODE_ONLINE;
     initOnlineGame(gameID, newPlayerColor);
     switchContainerView("waiting-game-menu", "online-game-menu");
-
+    hideHighlightedMoves();
 
     console.log("start game!!!");
 

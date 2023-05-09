@@ -47,11 +47,11 @@ class DataBaseActions extends Exception
         mysqli_query($this->conn,"CREATE DATABASE ". DatabaseActions::$dbname);
         $this->conn = mysqli_connect("localhost", "root", "", DataBaseActions::$dbname);
         $sql = "CREATE TABLE IF NOT EXISTS `accounts` (
-            `id` INT AUTO_INCREMENT PRIMARY KEY, 
-            `login` VARCHAR(255) NOT NULL, 
+            `id` INT AUTO_INCREMENT PRIMARY KEY,
+            `login` VARCHAR(255) NOT NULL,
             `password` VARCHAR(255) NOT NULL,
             `status` VARCHAR(255) NOT NULL,
-            `wins` VARCHAR(255) NOT NULL, 
+            `wins` VARCHAR(255) NOT NULL,
             `loses` VARCHAR(255) NOT NULL,
             `rating` VARCHAR(255) NOT NULL,
             `icon` VARCHAR(255) NOT NULL,
@@ -65,7 +65,7 @@ class DataBaseActions extends Exception
             `type` varchar(255) NOT NULL,
             `position` varchar(255) NOT NULL,
             `result` varchar(255) NOT NULL,
-            `move_history` varchar(1255) NOT NULL, 
+            `move_history` varchar(1255) NOT NULL,
             `date` varchar(255) NOT NULL) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;";
         $results = mysqli_query($this->conn, $sql);
         $sql = "CREATE TABLE IF NOT EXISTS `stockfish_request` (
@@ -73,7 +73,7 @@ class DataBaseActions extends Exception
             `type` varchar(255) NOT NULL,
             `data` varchar(255) NOT NULL,
             `status` varchar(255) NOT NULL,
-            `response` varchar(255) NOT NULL, 
+            `response` varchar(255) NOT NULL,
             `match_id` varchar(255) NOT NULL,
             `comments` varchar(255) NOT NULL) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;";
         $results = mysqli_query($this->conn, $sql);
@@ -82,7 +82,7 @@ class DataBaseActions extends Exception
             `date` varchar(255) NOT NULL,
             `match_id` varchar(255) NOT NULL,
             `sender` varchar(255) NOT NULL,
-            `receiver` varchar(255) NOT NULL, 
+            `receiver` varchar(255) NOT NULL,
             `content` varchar(255) NOT NULL) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;";
         $results = mysqli_query($this->conn, $sql);
 
@@ -234,7 +234,7 @@ VALUES ('$player1_id', '$player2_id', '$gameStatus', '$this->INITIAL_POSITION', 
     //returns Players Name, Rating and Icon separated by "&"
     public function getPlayerNameRatingIcon($playerID){
         if ($playerID=="engine") return "Stockfish Engine&???&stockfish.png";
-        if ($playerID>100) return "Guest&500&guest.png";
+        if ($playerID>100) return "Guest&500&emote.png";
 
         $sql = "SELECT * FROM accounts WHERE id='$playerID'";
         $result = mysqli_query($this->conn, $sql);
@@ -307,6 +307,7 @@ VALUES ('$player1_id', '$player2_id', '$gameStatus', '$this->INITIAL_POSITION', 
         $sql = "DELETE FROM matches WHERE id=$id";
         $result = mysqli_query($this->conn, $sql);
     }
+
     public function offerDraw($color, $gameID){
         $sql = "SELECT * FROM matches WHERE id=$gameID";
         $result = mysqli_query($this->conn, $sql);
@@ -322,7 +323,22 @@ VALUES ('$player1_id', '$player2_id', '$gameStatus', '$this->INITIAL_POSITION', 
         if ($row->result === "" AND $color==="black") $sql = "UPDATE matches SET result = 'draw offer from black' WHERE id=$gameID";
         $result = mysqli_query($this->conn, $sql);
         return "-";
-    }
+}
+    // For leaderboard table
+    public function getPlayersSortedByRating() {
+        $sql = "SELECT * FROM accounts ORDER BY rating ASC";
+        $result = mysqli_query($this->conn, $sql);
+        $players = [];
 
+        while ($row = mysqli_fetch_assoc($result)) {
+            $players[] = [
+                'id' => $row['id'],
+            'icon' => $row['icon'],
+            'login' => $row['login'],
+            'rating' => $row['rating']
+        ];
+        }
+
+    return json_encode($players);
 
 }
