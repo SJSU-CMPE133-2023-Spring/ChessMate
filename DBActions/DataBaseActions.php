@@ -91,6 +91,8 @@ class DataBaseActions extends Exception
         $sql = "INSERT INTO `accounts` (`login`, `password`, `status`, `wins`,`loses`, `rating`,`icon`, `friends` ) VALUES ('Mike', 'pass','$this->PLAYER_STATUS_OFFLINE', '999', '111', '1000','img-1.png', '? - list of IDs?');";
         $results = mysqli_query($this->conn, $sql);
 
+        $sql = "INSERT INTO `accounts` (`login`, `password`, `status`, `wins`,`loses`, `rating`,`icon`, `friends` ) VALUES ('Kevin', 'pass','$this->PLAYER_STATUS_OFFLINE', '999', '111', '1500','emote.png', '? - list of IDs?');";
+        $results = mysqli_query($this->conn, $sql);
     }
     public function accountExists($login){
         $sql = "SELECT * FROM accounts WHERE login='$login'";
@@ -234,7 +236,7 @@ VALUES ('$player1_id', '$player2_id', '$gameStatus', '$this->INITIAL_POSITION', 
     //returns Players Name, Rating and Icon separated by "&"
     public function getPlayerNameRatingIcon($playerID){
         if ($playerID=="engine") return "Stockfish Engine&???&stockfish.png";
-        if ($playerID>100) return "Guest&500&emote.png";
+        if ($playerID>100) return "Guest&500&guest.png";
 
         $sql = "SELECT * FROM accounts WHERE id='$playerID'";
         $result = mysqli_query($this->conn, $sql);
@@ -350,7 +352,7 @@ VALUES ('$player1_id', '$player2_id', '$gameStatus', '$this->INITIAL_POSITION', 
 
     //the output is positive if white won, and negative if black won.
     public function getRatingChange($gameID, $matchResult, $color){
-        $kFactor = 30;
+        $kFactor = 28;
         if ($matchResult ===0.5) $kFactor = 15;
 
         $sql = "SELECT * FROM matches WHERE id=$gameID";
@@ -385,7 +387,7 @@ VALUES ('$player1_id', '$player2_id', '$gameStatus', '$this->INITIAL_POSITION', 
                 $applied = "true";
             }
         }
-        return $ratingChange.". Applied = ".$applied;
+        return $ratingChange;
     }
 
     public function getPlayerRating($playerID){

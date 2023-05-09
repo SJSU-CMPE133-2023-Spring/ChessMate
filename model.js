@@ -49,6 +49,7 @@ let playerColor;
 let gameID;
 let statusUpdateInterval;
 let gameFinished = false;
+let oldRating;
 
 // IMPORTANT: if player is in an active game - when he enters this piece of code - it should set
 // this board to player's current board, if player is not in an active game - this board should become
@@ -1172,6 +1173,7 @@ async function startGameButtonOnClick(gameType) {
 
 async function startGame(gameID, newPlayerColor) {
     playerColor = newPlayerColor;
+
     //make ajax call to get match data from DB
     const response = await fetch(`DBActions/getOnStartData.php?id=${gameID}`);
     const status = await response.text();
@@ -1186,6 +1188,8 @@ async function startGame(gameID, newPlayerColor) {
         document.getElementById("opponent-icon").innerHTML = `<img class="img-responsive" alt="black player profile" src="icons/${blackIcon}">`;
         document.getElementById("opponent-name").innerHTML = blackName+" ("+blackRating+")";
         document.getElementById("opponent-captured").innerHTML = "";
+
+        oldRating = whiteRating;
     }
     if (newPlayerColor === "black"){
 
@@ -1196,6 +1200,7 @@ async function startGame(gameID, newPlayerColor) {
         document.getElementById("player-icon").innerHTML = `<img class="img-responsive" alt="player profile" src="icons/${blackIcon}">`;
         document.getElementById("player-name").innerHTML = blackName+" ("+blackRating+")";
         document.getElementById("player-captured").innerHTML = "";
+        oldRating = blackRating;
     }
 
     boardMode = BOARD_MODE_ONLINE;
@@ -1337,6 +1342,11 @@ async function finishGame(result, message){
 
 
     console.log("Game finished: "+message);
+    let ratingChanges = "";
+    if (ratingChange!=0) ratingChanges = "Rating change: "+oldRating+" > "+(parseInt(oldRating)+parseInt(ratingChange))
+    document.getElementById("rating-changes-text").innerText = ratingChanges;
+    showDialog(message);
+
 }
 
 // resign or quit game

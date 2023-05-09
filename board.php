@@ -13,7 +13,14 @@ require_once("DBActions/DataBaseActions.php");
 </head>
 
 
+<dialog>
+    <div class="dialog-message">
+        <p id="dialog-message"></p>
+        <p id="rating-changes-text"></p>
+        <button style="bottom: 2vh; width: 80%" class="dynamic-menu-element" onclick="const dialog = document.querySelector('dialog'); dialog.close();">Look at the board</button>
+    </div>
 
+</dialog>
 <body id="game_page">
     <div class="grid-container-whole">
         <div class="leftmost-column">
@@ -652,6 +659,12 @@ async function updatePlayersTable() {
         ratingCell.innerText = player.rating;
     });
 }
+
+        function showDialog(message){
+            const dialog = document.querySelector("dialog");
+            document.getElementById('dialog-message').innerText = message;
+            dialog.showModal();
+        }
 
 
 

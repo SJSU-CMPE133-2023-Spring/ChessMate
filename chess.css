@@ -309,7 +309,15 @@ input {
   text-decoration: none;
   display: block;
 }
-
+.dialog-message{
+  display: flex;
+  width: 45vh;
+  height: 40vh;
+  font-size: 6vh;
+  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+}
 .dropdown a:hover {
   background-color: #ddd;
 }
