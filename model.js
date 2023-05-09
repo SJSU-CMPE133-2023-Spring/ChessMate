@@ -109,6 +109,11 @@ function initOnlineGame(newGameID, newPlayerColor){
             console.error(error);
             // handle the error
         });
+        setTimeout(() => {
+            if (document.getElementById("opponent-name").innerText==="Stockfish Engine (???)")
+                document.getElementById("player-captured").innerText="";
+            }, 500);
+
     }
 }
 // Controller Methods
@@ -1379,11 +1384,7 @@ async function finishGame(result, message){
 // resign or quit game
 function quitGameOnclick(){
     if (gameFinished) {
-        if (document.getElementById("opponent-name").innerText==="Stockfish Engine (???)"){
-            switchContainerView("engine-game-menu", "initial-menu");
-        } else {
-            switchContainerView("online-game-menu", "initial-menu");
-        }
+        switchContainerView("online-game-menu", "initial-menu");
         setGameStatus("finished");
         initMainMenu();
 
