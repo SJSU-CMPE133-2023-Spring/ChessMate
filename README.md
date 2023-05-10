@@ -19,11 +19,16 @@ ChessMate is a web-based application that lets you play chess locally with your 
 
 ## About the Project
 
-We plan to build a web platform for people pationate interested in Chess to have fun and become better. We have ranking online system, friendly communication and challenges, puzzles, ability to play against different levels of AI (from a begginner to a above-pro) and much more.
+ChessMate is a web based application for people passionate in or interested in the highly strategical game of chess and want to improve their chess skills. We offer the ability to play chess against friends casually, a ranked and ranking system, and ability to test your limits by playing against different levels of AI (from a begginner to a above-pro) and much more.
 
 ### Built With
 
+- HTML/CSS
+- JavaScript
+- PHP
 - [Stockfish](https://stockfishchess.org/)
+- Apache
+- MySQL
 
 ## Getting Started
 
@@ -62,8 +67,6 @@ Step-by-step instructions on how to install the project.
 
 ### Usage
 
-This section should provide examples or instructions on how to use the project. Provide any information that the user may need to know before getting started, such as expected inputs and outputs, important features or limitations, and so on.
-
 ChessMate Features:
 - Sign up/Login
 - Sandbox mode in main menu
@@ -83,11 +86,7 @@ Limitations:
 Expected Outputs:
 The output of the game is the current state of the board and the current player's turn. The user can make a move by selecting a piece and then selecting the square they want to move to. The game will validate the move and update the board accordingly. If a piece is captured within the last turn, the captured piece will be added to the captured pieces display under the player's name. When the game ends, the user will see a message indicating they won/loss by checkmate, by time, by resignation, or by a draw when offered and accepted. If playing a ranked game, both users will see a message of how much their rating fluctuated at the end of the game, which is updated and viewable through the leaderboard.
 
-ChessMate is a great way to improve your chess skills by playing against your friends locally, against yourself, or to test your limits against and advanced Chess AI.
-
 ### Roadmap
-
-Here you can outline any future plans or improvements for the project. This can include bug fixes, new features, or any other changes that are planned.
 
 These improvements can make ChessMate more engaging, improving the overall experience for players. Currently ChessMate only allows users to play chess against friends or AI, but the addition of these features will add more depth and weight to the game.
 
@@ -123,10 +122,10 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ### Contact
 
-Mikhail Fedosenko: https://github.com/SpectRotation
-Kevin Knapp: https://github.com/knappkevin
-Vinh Nguyen: https://github.com/cousinvinny
-Larry Shields: https://github.com/lwshield
+- Mikhail Fedosenko: https://github.com/SpectRotation
+- Kevin Knapp: https://github.com/knappkevin
+- Vinh Nguyen: https://github.com/cousinvinny
+- Larry Shields: https://github.com/lwshield
 
 ### Acknowledgements
 
