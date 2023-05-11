@@ -75,7 +75,10 @@ ChessMate Features:
 - View skill ratings leaderboard
 
 Expected Inputs:
-The user will need to know how to play chess, which involves understanding the basic legal chess rules and how to move the pieces. They will need to use a desktop computer or laptop to be able to run start the XAMPP server and establish connection to the database. The user must also have a browser in order to open localhost and browse the project files. To play against Stockfish AI, it is required to open the StockfishManager project folder inside of any IDE and run main to start the engine.
+- The user will need to know how to play chess, which involves understanding the basic legal chess rules and how to move the pieces. 
+- They will need to use a desktop computer or laptop to be able to run start the XAMPP server and establish connection to the database. 
+- The user must also have a browser in order to open localhost and browse the project files. 
+- To play against Stockfish AI, it is required to open the StockfishManager project folder inside of any IDE and run main to start the engine.
 
 Limitations:
 
@@ -84,26 +87,29 @@ Limitations:
 - Playing against Stockfish AI is dependent on having an IDE to start the engine
 
 Expected Outputs:
-The output of the game is the current state of the board and the current player's turn. The user can make a move by selecting a piece and then selecting the square they want to move to. The game will validate the move and update the board accordingly. If a piece is captured within the last turn, the captured piece will be added to the captured pieces display under the player's name. When the game ends, the user will see a message indicating they won/loss by checkmate, by time, by resignation, or by a draw when offered and accepted. If playing a ranked game, both users will see a message of how much their rating fluctuated at the end of the game, which is updated and viewable through the leaderboard.
+- The output of the game is the display of the board, which is the same if playing from two tabs. 
+- The user can make a move by selecting a piece and then selecting the square they want to move to. ChessMate provides all the moves available for a piece, so no illegal moves can be made. 
+- If a piece is captured within the last turn, the captured piece will be added to the captured pieces display under the player's name. 
+- When the game ends, the user will see a message indicating they won/loss by checkmate, by time, by resignation, or by a draw when offered and accepted. 
+- If playing a ranked game, both users will see a message of how much their rating fluctuated at the end of the game, which is updated and viewable through the leaderboard.
 
 ### Roadmap
 
 These improvements can make ChessMate more engaging, improving the overall experience for players. Currently ChessMate only allows users to play chess against friends or AI, but the addition of these features will add more depth and weight to the game.
 
-1. Adding various difficulty levels for the engine: Currently, ChessMate offers one difficulty level for the engine. The level of the Stockfish AI is   
-extremely calculating with its moves, not suitable at all for a new player to go up against. Adding multiple levels can cater to players with different skill levels, from beginners to advanced and even above-pro levels.
+1. Adding various difficulty levels for the chess engine: Currently, ChessMate offers one difficulty level for the engine. The level of the Stockfish AI is extremely calculating with its moves, not suitable at all for a new player to go up against. Adding multiple levels can cater to players with different skill levels, from beginners to advanced and even above-pro levels.
 
-2. Hint feature: This feature can provide helpful hints or tips to players who are stuck or need some guidance during the game. This would utilize the Stockfish AI engine to provide the user with a move that the engine would make if it were playing.
+2. Hint feature: A small tooltip will appear on each square that has a piece that provides helpful hints or tips to players who are stuck or need some guidance on their next move. This would utilize the Stockfish AI engine to provide the user with a move that the engine would make if it were playing.
 
-3. Chat and friends mechanics: Adding a chat feature can help players communicate with each other during the game if they were not playing nearby (available in a future version). Additionally, adding a friends list feature can enable players to connect with their friends and challenge them to games. We wanted to make the game fully online, but playing matches against other people is restricted to opening multiple tabs on the same computer.
+3. Chat and friends mechanics: Adding a chat feature helps players communicate with each other if they were not playing nearby eachother (available in a future version). Additionally, adding a friends list feature can enable players to connect with their friends and challenge them to games. We wanted to make the game fully online, but playing matches against other people is restricted to opening multiple tabs on the same computer.
 
-4. Game history: ChessMate can save and display the history of completed games for players to review and analyze their gameplay. In addition, players would be able to choose to play at a particular point in a match against the Stockfish AI that matches the other player's rating at the time. This option would be viewable after the end of a recently completed game, or through the main menu.
+4. Game history: ChessMate can save the history of completed games for players to review their gameplay. In addition, players would be able to choose to play at a particular point in a match against the Stockfish AI that matches the other player's rating at the time. This option would be viewable after the end of a recently completed game, or through the main menu.
 
-5. Analytics: ChessMate can include analytics that provides insights into players' performance, including win/loss records, real-time player evaluation, average time per move, and other useful statistics. 
+5. Analytics: ChessMate can provide analytics through StockFish engine that provides insights into players' performance, including win/loss records, real-time player evaluation, average time per move, and other useful statistics. 
 
-6. Review matches: Players can watch previous matches to improve their gameplay and learn from their mistakes.
+6. Review matches: Players can watch previous matches to improve their gameplay and learn from their mistakes at any playback speed.
 
-7. Sounds and effects: Adding sounds and visual effects to enhance the gaming experience and make ChessMate more immersive and engaging.
+7. Sounds and effects: Add sounds, visual effects, music to enhance the gaming experience and make ChessMate more immersive and engaging.
 
 ### Contributing
 
