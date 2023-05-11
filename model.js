@@ -45,8 +45,11 @@ let boardMode;
 let board;
 let currentPosition;
 let turn = true;
-let playerColor
-let gameID
+let playerColor;
+let gameID;
+let statusUpdateInterval;
+let gameFinished = false;
+let oldRating;
 
 // IMPORTANT: if player is in an active game - when he enters this piece of code - it should set
 // this board to player's current board, if player is not in an active game - this board should become
@@ -73,7 +76,6 @@ if (boardMode === BOARD_MODE_SANDBOX){
     fillHTMLBoard(board, WHITE);
 }
 
-let opponent = "id of an opponent / or AI id (if we have multiple: simple/medium/pro)";
 function initOnlineGame(newGameID, newPlayerColor){
     console.log("Started new game: gameID = "+newGameID+"; playerColor = "+newPlayerColor);
     initializeTimers();
@@ -89,6 +91,7 @@ function initOnlineGame(newGameID, newPlayerColor){
         fillHTMLBoard(board, playerColor);
 
     });
+    startGameStatusUpdates();
     if (playerColor===BLACK){
         //wait for whites first move
         writeToDB(gameID, currentPosition, "")
@@ -106,6 +109,11 @@ function initOnlineGame(newGameID, newPlayerColor){
             console.error(error);
             // handle the error
         });
+        setTimeout(() => {
+            if (document.getElementById("opponent-name").innerText==="Stockfish Engine (???)")
+                document.getElementById("player-captured").innerText="";
+            }, 500);
+
     }
 }
 // Controller Methods
@@ -192,6 +200,7 @@ function globalMoveUpdate(move) {
         if (end) {
             stopTimers();
             console.log(end +' caused by ' + getOppColor(playerColor));
+
             if (getOppColor(playerColor)===BLACK) {
                 displaySuperscript(getPieceSquare("k"), SUBSCRIPT_WIN);
                 displaySuperscript(getPieceSquare("K"), SUBSCRIPT_CHECKMATE);
@@ -199,18 +208,15 @@ function globalMoveUpdate(move) {
                 displaySuperscript(getPieceSquare("K"), SUBSCRIPT_WIN);
                 displaySuperscript(getPieceSquare("k"), SUBSCRIPT_CHECKMATE);
             }
+            finishGame(0, "Lose by Checkmate" );
         }
         end = checkEndMates(board, playerColor);
         if (end) {
             stopTimers();
             console.log(end +' caused by ' + playerColor);
-            if (getOppColor(playerColor)===BLACK) {
-                displaySuperscript(getPieceSquare("K"), SUBSCRIPT_WIN);
-                displaySuperscript(getPieceSquare("k"), SUBSCRIPT_CHECKMATE);
-            } else {
-                displaySuperscript(getPieceSquare("k"), SUBSCRIPT_WIN);
-                displaySuperscript(getPieceSquare("K"), SUBSCRIPT_CHECKMATE);
-            }
+
+
+            finishGame(1, "Victory by Checkmate" );
         }
     }
 
@@ -426,10 +432,10 @@ function displaySuperscript(square, superscript){
 }
 
 function hideSuperscripts(){
-    const images = document.querySelectorAll('img.subscript-img');
+    const superscriptImages = document.querySelectorAll('.superscript-img');
 
-    images.forEach(img => {
-        img.parentNode.removeChild(img);
+    superscriptImages.forEach(img => {
+        img.parentElement.removeChild(img);
     });
 }
 
@@ -1170,6 +1176,7 @@ async function startGameButtonOnClick(gameType) {
 
 async function startGame(gameID, newPlayerColor) {
     playerColor = newPlayerColor;
+
     //make ajax call to get match data from DB
     const response = await fetch(`DBActions/getOnStartData.php?id=${gameID}`);
     const status = await response.text();
@@ -1184,6 +1191,8 @@ async function startGame(gameID, newPlayerColor) {
         document.getElementById("opponent-icon").innerHTML = `<img class="img-responsive" alt="black player profile" src="icons/${blackIcon}">`;
         document.getElementById("opponent-name").innerHTML = blackName+" ("+blackRating+")";
         document.getElementById("opponent-captured").innerHTML = "";
+
+        oldRating = whiteRating;
     }
     if (newPlayerColor === "black"){
 
@@ -1194,6 +1203,7 @@ async function startGame(gameID, newPlayerColor) {
         document.getElementById("player-icon").innerHTML = `<img class="img-responsive" alt="player profile" src="icons/${blackIcon}">`;
         document.getElementById("player-name").innerHTML = blackName+" ("+blackRating+")";
         document.getElementById("player-captured").innerHTML = "";
+        oldRating = blackRating;
     }
 
     boardMode = BOARD_MODE_ONLINE;
@@ -1205,21 +1215,16 @@ async function startGame(gameID, newPlayerColor) {
 
 }
 //Draw logic
-function offerDraw() {
+async function offerDraw() {
     document.getElementById("offer-draw-button").classList.add("hidden");
-    let drawCheckInterval;
 
-    const checkDrawLoop = async function loop() {
-        const response = await fetch(`DBActions/offerDraw.php?id=${gameID}&color=${playerColor}`);
-        const status = await response.text();
-        console.log("here. Response = "+status);
-        if (status === "draw") {
-            clearInterval(drawCheckInterval);
-            finishGame(0.5);
-        }
-    };
 
-    drawCheckInterval = setInterval(checkDrawLoop, 1000);
+    const response = await fetch(`DBActions/offerDraw.php?id=${gameID}&color=${playerColor}`);
+    const status = await response.text();
+
+    if (status === "draw") {
+        finishGame(0.5, "Draw by agreement");
+    }
 }
 
 
@@ -1270,6 +1275,9 @@ function toggleTimers() {
 function stopTimers(){
     clearInterval(whiteInterval);
     clearInterval(blackInterval);
+    whiteRunning = false;
+    blackRunning = false;
+
 }
 
 function decrementWhiteTimer() {
@@ -1278,6 +1286,9 @@ function decrementWhiteTimer() {
     if (whiteTime === 0) {
         clearInterval(whiteInterval);
         console.log('White player ran out of time.');
+        if(playerColor == "white") finishGame(0, "You lost on time");
+        if(playerColor == "black") finishGame(1, "You won on time");
+
     }
 }
 
@@ -1287,15 +1298,125 @@ function decrementBlackTimer() {
     if (blackTime === 0) {
         clearInterval(blackInterval);
         console.log('Black player ran out of time.');
+        if(playerColor == "black") finishGame(0, "You lost on time");
+        if(playerColor == "white") finishGame(1, "You won on time");
     }
 }
 
+function startGameStatusUpdates() {
+    gameFinished = false;
+    const checkStatusLoop = async function loop() {
+        const response = await fetch(`DBActions/getGameStatus.php?id=${gameID}`);
+        const status = await response.text();
+        console.log("status = "+status);
+        if (status === "draw") {
+            finishGame(0.5, "Draw");
+        }
+        if (status === "white won") {
+            if (playerColor === "white") finishGame(1, "The Victory is yours!");
+            if (playerColor === "black") finishGame(0, "You lost!");
+        }
+        if (status === "black won") {
+            if (playerColor === "black") finishGame(1, "The Victory is yours!");
+            if (playerColor === "white") finishGame(0, "You lost!");
+        }
+        if ((status === "draw offer from white" && playerColor === "black") ||
+        (status === "draw offer from black" && playerColor === "white")){
+            document.getElementById("offer-draw-button").innerText = "Accept Draw";
+            document.getElementById("draw-offer-message").classList.remove('hidden');
+        }
+        if ((status === "black resigned" && playerColor ==="white")||
+        (status === "white resigned" && playerColor === "black"))
+        {
+            finishGame(1, "Opponent resigned!");
+        }
+    };
 
-function finishGame(result){
-    console.log("Game finished with a tie");
+    statusUpdateInterval = setInterval(checkStatusLoop, 500);
+}
+async function finishGame(result, message){
+    if (gameFinished) return;
+
+    if ((result == 1 && playerColor=="white")||(result == 0 && playerColor=="black")) {
+        displaySuperscript(getPieceSquare("K"), SUBSCRIPT_WIN);
+        displaySuperscript(getPieceSquare("k"), SUBSCRIPT_CHECKMATE);
+    }
+    if ((result == 1 && playerColor=="black")||(result == 0 && playerColor=="white")){
+        displaySuperscript(getPieceSquare("k"), SUBSCRIPT_WIN);
+        displaySuperscript(getPieceSquare("K"), SUBSCRIPT_CHECKMATE);
+    }
+    if (result == 0.5){
+        displaySuperscript(getPieceSquare("k"), SUBSCRIPT_DRAW);
+        displaySuperscript(getPieceSquare("K"), SUBSCRIPT_DRAW);
+    }
+
+
+
+
+
+    gameFinished = true;
+    const response = await fetch(`DBActions/getRatingChange.php?id=${gameID}&color=${playerColor}&result=${result}`);
+    const ratingChange = await response.text();
+    if (ratingChange!==0) console.log("rating change = " + ratingChange);
+
+    document.getElementById("draw-offer-message").classList.add('hidden');
+    turn = false;
+    clearInterval(statusUpdateInterval);
+    stopTimers();
+    document.getElementById("offer-draw-button").classList.add("hidden");
+    document.getElementById("quit-button").innerText = "Back to Main Menu";
+
+
+    console.log("Game finished: "+message);
+    let ratingChanges = "";
+    if (ratingChange!=0) ratingChanges = "Rating change: "+oldRating+" > "+(parseInt(oldRating)+parseInt(ratingChange))
+    document.getElementById("rating-changes-text").innerText = ratingChanges;
+    showDialog(message);
+
 }
 
+// resign or quit game
+function quitGameOnclick(){
+    if (gameFinished) {
+        switchContainerView("online-game-menu", "initial-menu");
+        setGameStatus("finished");
+        initMainMenu();
 
+    } else {
+        setGameStatus(playerColor+" resigned")
+        finishGame(0, "You resigned");
+    }
+}
 
+function initMainMenu(){
+
+    boardMode = BOARD_MODE_SANDBOX;
+    currentPosition = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 0";
+    board = setBoard(currentPosition.split(' ')[0]);
+    logBoard(board);
+    fillHTMLBoard(board, WHITE);
+    turn = true;
+    if (playerColor ==="black") flipHTMLBoard(true);
+    hideSuperscripts();
+    console.log("hiding");
+    hideHighlightedMoves();
+    document.getElementById("player-captured").innerHTML = "";
+    document.getElementById("opponent-captured").innerHTML = "";
+    document.getElementById("offer-draw-button").classList.remove("hidden");
+    document.getElementById("offer-draw-button").innerText = "Offer Draw";
+    document.getElementById("quit-button").innerText = "Resign";
+
+    document.getElementById("player-name").innerHTML = "";
+    document.getElementById("opponent-name").innerHTML = "";
+    document.getElementById("player-icon").innerHTML = "";
+    document.getElementById("opponent-icon").innerHTML = "";
+    document.getElementById("opponent-time").innerHTML = "";
+    document.getElementById("player-time").innerHTML = "";
+
+}
+
+function setGameStatus(status){
+    const response = fetch(`DBActions/setGameStatus.php?id=${gameID}&status=${status}`);
+}
 
 

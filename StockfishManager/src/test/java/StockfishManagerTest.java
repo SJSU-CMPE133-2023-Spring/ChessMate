@@ -23,7 +23,11 @@ class StockfishManagerTest {
         StockfishManager manager = new StockfishManager();
         manager.getLegalMoves(fen);
     }
-
+    @Test void testDBConnection(){
+        MysqlConnect mysqlConnect = new MysqlConnect();
+        assertNotNull(mysqlConnect.connect());
+    }
+    /*
     @Test
     public void testMakeReport(){
         StockfishManager manager = new StockfishManager();
@@ -34,5 +38,5 @@ class StockfishManagerTest {
             System.out.println("Evaluation: " + moveAnalysis[2]);
             System.out.println("-----------------------");
         }
-    }
+    }*/
 }
