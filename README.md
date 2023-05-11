@@ -37,8 +37,8 @@ ChessMate is a web based application for people passionate in or interested in t
 We plan to make our platform available from any device that can open web-pages, but it is in progress. In the current version, you will to locally install the software listed below:
 
 - [Xampp](https://www.apachefriends.org/download.html) version 8.0.5 or higher
-- [Stockfish](https://stockfishchess.org/download/) version 15.1 or higher
-- [IntelliJ](https://www.jetbrains.com/idea/download/#section=windows) version 2023.1 or higher (we are working on at least making an .exe file instead, so keep in touch with our updates)
+- (For Mac or Linux users) [Stockfish](https://stockfishchess.org/download/) last version for Mac or Linux
+- [IntelliJ](https://www.jetbrains.com/idea/download/#section=windows) version 2023.1 or higher
 
 
 ### Installation
@@ -55,8 +55,19 @@ Step-by-step instructions on how to install the project.
 
 - Install and run Xampp.
   - Inside the app click on "Start" for Apache and MySQL modules.
-- Install Stockfish and add the archive to the folder called "Stockfish".
-  - Run import StockfishManager folder as a new project in IntelliJ IDEA and run it.
+
+- Initialize MySQL server structre. To do this - go to ChessMate/DBActions/initDB.php the page should display the success message
+- Install (if not already) and Run IntelliJ (or any other IDE, but not tested)
+  - Open StockfishManager folder as a project and build it with Maven
+  - Make sure the Maven dependencies have been automatically installed (mySQL driver and Windows Stockfish client)  
+- If not on Windows: 
+  - Install Stockfish from the link above
+  - Place the executable inside ChessMate/StockfishManager/src/main/resources/ with the one that your system can run.
+  - Inside IntelliJ go to StockfishManager/src/main/java/StockfishManager.java and replace the file name with the one that you use.
+```java
+String exeResourcePath = "/stockfish-windows-2022-x86-64-avx2.exe";
+```
+- Run the StockfishManager
 
 3. Setting Up
 
@@ -64,6 +75,9 @@ Step-by-step instructions on how to install the project.
 - Inside XAMMP app, click on admin button under the Apache module which opens a tab to localhost in your browser
 - Inside the localhost tab, go to [localhost](localhost/)/ChessMate folder and click on board.php
 - You will see the fully functional main screen
+  - from there you can register or login (all test accounts have password "pass" and the names can be seen in the Leaderboard)
+  - you can also start a new game as a registered user (or as a guest). To play, you actually need to open the game from at least 2 tabs. If you duplicate the page, please refresh one of the pages or login on one of the pages, since there is a known issue when 2 duplicated guest pages having the same id and confusing the server (both play white).
+  - if you managed to run the Stockfish in IDE - you can start a game against the engine - it should automatically find your queue and start the game. 
 
 ### Usage
 
@@ -131,7 +145,6 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 - Mikhail Fedosenko: https://github.com/SpectRotation
 - Kevin Knapp: https://github.com/knappkevin
 - Vinh Nguyen: https://github.com/cousinvinny
-- Larry Shields: https://github.com/lwshield
 
 ### Acknowledgements
 
