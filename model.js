@@ -218,6 +218,10 @@ function globalMoveUpdate(move) {
 
             finishGame(1, "Victory by Checkmate" );
         }
+        // TODO: ideally should give both players option to claim draw instead of automatically drawing
+        if (checkDraws(currentPosition) == 'draw by 50') {
+            finishGame(0.5, "Draw by 50 move rule")
+        }
     }
 
 
@@ -513,6 +517,13 @@ function checkEndMates(board, movedColor) {
     }
     // supposed victim can still make a move
     return ''; // Boolean('') evaluates false
+}
+
+// TODO: only supports 50 move draw but not 3 fold repetition draw
+function checkDraws(fen) {
+    const halfClk = parseInt(fen.split(' ')[4]);
+    if (halfClk >= 100) return 'draw by 50';
+    return '';
 }
 
 //returns boolean whether a targetSqr (a coordinate) is covered by a given colors attack, needs to know the color that could attack that square
@@ -921,9 +932,7 @@ function confirmSqr(x0, y0, x1, y1) {
 }
 
 // returns a fen given the changes from the old board to the new board array
-// NOTE: enpassant part is stored as 'x,y' ranging from 0-7, otherwise '-'
 function generateFen(oldBoard, newBoard, oldX, oldY, newX, newY){
-    // https://gbud.in/blog/game/chess/chess-fen-forsyth-edwards-notation.html#halfmove-clock
     // constants are old values
     const fenArr = currentPosition.split(" ");
     const color = fenArr[1]
@@ -936,7 +945,7 @@ function generateFen(oldBoard, newBoard, oldX, oldY, newX, newY){
     //begin new fen
     let newFen = genFenPieces(newBoard);
     // active color
-    if (color == 'w') newFen += ' b ';
+    if (getPieceColor(pieceMoved) == WHITE) newFen += ' b ';
     else newFen += ' w ';
 
     // castle (does color matter or previous fen for castle?
@@ -944,20 +953,29 @@ function generateFen(oldBoard, newBoard, oldX, oldY, newX, newY){
     let blackCastle = castle.match(/[a-z]/g);
     let newCastle = '';
     if (castle == '-') newCastle += '-';
-    else if (color == 'w') {
+    else if (getPieceColor(pieceMoved) == WHITE) {
         if (pieceMoved == 'K') newCastle += '';
+        // a rook moved
         else if (pieceMoved == 'R' && oldX == 0 && oldY == 7 && whiteCastle != null) newCastle += whiteCastle.filter(letter => letter !== 'Q').join('');
         else if (pieceMoved == 'R' && oldX == 7 && oldY == 7 && whiteCastle != null) newCastle += whiteCastle.filter(letter => letter !== 'K').join('');
+        //keep it as it is for white
         else if (whiteCastle != null) newCastle += whiteCastle.join('');
+        // add rooks
         if (blackCastle != null) newCastle += blackCastle.join('');
     }
-    else if (color == 'b') {
+    else if (getPieceColor(pieceMoved) == BLACK) {
         if (whiteCastle != null) newCastle += whiteCastle.join('');
         if (pieceMoved == 'k') newCastle += '';
         else if (pieceMoved == 'r' && oldX == 0 && oldY == 0 && blackCastle != null) newCastle += blackCastle.filter(letter => letter !== 'q').join('');
         else if (pieceMoved == 'r' && oldX == 7 && oldY == 0 && blackCastle != null) newCastle += blackCastle.filter(letter => letter !== 'k').join('');
         else if (blackCastle != null) newCastle += blackCastle.join('');
     }
+    // if a rook was captured, it cannot castle
+    if (oldBoard[newY][newX] == 'R' && newX == 0 && newY == 7 && newCastle != null) newCastle = newCastle.replace('Q', '');
+    else if (oldBoard[newY][newX] == 'R' && newX == 7 && newY == 7 && newCastle != null) newCastle = newCastle.replace('K', '');
+    else if (oldBoard[newY][newX] == 'r' && newX == 0 && newY == 0 && newCastle != null) newCastle = newCastle.replace('q', '');
+    else if (oldBoard[newY][newX] == 'r' && newX == 7 && newY == 0 && newCastle != null) newCastle = newCastle.replace('k', '');
+    // if no castles left
     if (newCastle == '') newCastle = '-';
     newFen += newCastle;
 
@@ -971,7 +989,7 @@ function generateFen(oldBoard, newBoard, oldX, oldY, newX, newY){
     else newFen += ' ' + (parseInt(halfClk) + 1);
 
     // full move number
-    if (color == 'b') newFen += ' ' + (parseInt(movNum) + 1);
+    if (color == 'b' && getPieceColor(pieceMoved) == BLACK) newFen += ' ' + (parseInt(movNum) + 1);
     else newFen += ' ' + movNum;
 
     return newFen;
@@ -1003,7 +1021,7 @@ function genFenPieces(arr) {
     return boardFen;
 }
 
-//given a string (ex: 'r', 'P', 'q', or 'B') returns 'white' or 'black'
+//given a string (ex: 'r', 'P', 'q', or 'B', including 'W''w''B''b') returns 'white' or 'black'
 function getPieceColor(pieceType) {
     if (pieceType == ' ') {
         color = EMPTY;
@@ -1334,6 +1352,7 @@ function startGameStatusUpdates() {
 
     statusUpdateInterval = setInterval(checkStatusLoop, 500);
 }
+
 async function finishGame(result, message){
     if (gameFinished) return;
 
@@ -1367,7 +1386,7 @@ async function finishGame(result, message){
     document.getElementById("quit-button").innerText = "Back to Main Menu";
 
 
-    console.log("Game finished: "+message);
+    console.log("Game finished: " + message);
     let ratingChanges = "";
     if (ratingChange!=0) ratingChanges = "Rating change: "+oldRating+" > "+(parseInt(oldRating)+parseInt(ratingChange))
     document.getElementById("rating-changes-text").innerText = ratingChanges;
