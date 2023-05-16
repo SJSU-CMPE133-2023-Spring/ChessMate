@@ -218,6 +218,10 @@ function globalMoveUpdate(move) {
 
             finishGame(1, "Victory by Checkmate" );
         }
+        // TODO: ideally should give both players option to claim draw instead of automatically drawing
+        if (checkDraws(currentPosition) == 'draw by 50') {
+            finishGame(0.5, "Draw by 50 move rule")
+        }
     }
 
 
@@ -513,6 +517,13 @@ function checkEndMates(board, movedColor) {
     }
     // supposed victim can still make a move
     return ''; // Boolean('') evaluates false
+}
+
+// TODO: only supports 50 move draw but not 3 fold repetition draw
+function checkDraws(fen) {
+    const halfClk = parseInt(fen.split(' ')[4]);
+    if (halfClk >= 100) return 'draw by 50';
+    return '';
 }
 
 //returns boolean whether a targetSqr (a coordinate) is covered by a given colors attack, needs to know the color that could attack that square
@@ -1341,6 +1352,7 @@ function startGameStatusUpdates() {
 
     statusUpdateInterval = setInterval(checkStatusLoop, 500);
 }
+
 async function finishGame(result, message){
     if (gameFinished) return;
 
@@ -1374,7 +1386,7 @@ async function finishGame(result, message){
     document.getElementById("quit-button").innerText = "Back to Main Menu";
 
 
-    console.log("Game finished: "+message);
+    console.log("Game finished: " + message);
     let ratingChanges = "";
     if (ratingChange!=0) ratingChanges = "Rating change: "+oldRating+" > "+(parseInt(oldRating)+parseInt(ratingChange))
     document.getElementById("rating-changes-text").innerText = ratingChanges;
